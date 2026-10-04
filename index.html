@@ -180,6 +180,17 @@ body.home #game, body.home .modal-back{filter:blur(7px) saturate(.85)}
 .feedback li.bad::before{content:'FIX';color:var(--bad);font-size:13px;top:8px;left:4px}
 .feedback li.info::before{content:'i';color:var(--warn)}
 .feedback li.warn::before{content:'!';color:var(--warn)}
+/* phones and touch-only tablets: a friendly note instead of a game they can't really play */
+.phone-note{position:fixed;inset:0;z-index:999;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:16px;overflow:auto}
+.phone-note[hidden]{display:none}
+.pn-card{width:min(440px,100%);text-align:center;background:var(--panel);border:3px solid var(--edge);box-shadow:4px 4px 0 #000;padding:26px 20px}
+.pn-logo{font-family:var(--logo);font-size:34px;line-height:1.05;color:var(--cream);text-shadow:3px 3px 0 #000;margin-bottom:14px}
+.pn-card h2{font-family:var(--pixel);font-weight:800;letter-spacing:.08em;font-size:24px;margin:0 0 10px;color:var(--accent)}
+.pn-card p{margin:0 0 10px;line-height:1.5;color:var(--cream-dim);font-size:15px}
+.pn-url{font-family:var(--pixel);font-weight:700;font-size:19px;letter-spacing:.03em;color:var(--cream);background:#1d1e1b;border:2px solid var(--edge);padding:10px;margin:4px 0 16px;word-break:break-all}
+.pn-btn{display:block;width:100%;height:52px;margin-top:10px;font-family:var(--pixel);font-weight:800;letter-spacing:.08em;font-size:18px;background:#2b2c29;color:var(--cream);border:3px solid var(--cream);cursor:pointer}
+.pn-btn.primary{background:var(--accent);color:#1a1209;border-color:#1a1209}
+.pn-small{margin-top:12px !important;font-size:13px !important}
 .exam-modal{max-width:640px}
 .ex-q{font-size:18px;font-weight:700;line-height:1.35;margin:6px 0 14px}
 .ex-progress{height:6px;background:#2a2b28;border:1px solid #0d0d0c;margin:4px 0 12px}
@@ -268,6 +279,18 @@ body.home #game, body.home .modal-back{filter:blur(7px) saturate(.85)}
 <body>
 
 <!-- ================= TITLE ================= -->
+<div id="phoneNote" class="phone-note" hidden role="dialog" aria-modal="true" aria-labelledby="pnTitle">
+  <div class="pn-card">
+    <div class="pn-logo">TRUCK<br>PACKER</div>
+    <h2 id="pnTitle">BUILT FOR A COMPUTER</h2>
+    <p>Truck Packer needs a keyboard and mouse (rotate, tip, load bars and straps) and a bigger screen than a phone.</p>
+    <p>Open it on a laptop or desktop:</p>
+    <div class="pn-url">games.aveducate.com/truck-packer</div>
+    <button class="pn-btn primary" id="pnShare">SEND ME THE LINK</button>
+    <button class="pn-btn" id="pnPlay">PLAY ANYWAY</button>
+    <p class="pn-small" id="pnMsg">&nbsp;</p>
+  </div>
+</div>
 <section id="title" class="home-overlay" aria-label="Home">
   <div class="home-panel" id="homePanel">
     <div class="presents">AV EDUCATE PRESENTS</div>
@@ -3892,6 +3915,21 @@ window.addEventListener('resize', () => layout());
 if (window.ResizeObserver){ let rw = 0, rh = 0; new ResizeObserver(([en]) => { const {width, height} = en.contentRect; if (Math.abs(width - rw) > 1 || Math.abs(height - rh) > 1){ rw = width; rh = height; if (G.level) layout(); } }).observe($('stage')); }
 
 enterHome();
+// Touch-only devices (no mouse or trackpad) and very narrow screens get the phone note; PLAY ANYWAY dismisses it for this visit.
+(function phoneNote(){
+  const touchOnly = !matchMedia('(any-pointer: fine)').matches, narrow = Math.min(innerWidth, screen.width) < 760;
+  let seen = false; try { seen = sessionStorage.getItem('truckPacker.playAnyway') === '1'; } catch(e){}
+  if ((!touchOnly && !narrow) || seen) return;
+  const url = 'https://games.aveducate.com/truck-packer/';
+  $('phoneNote').hidden = false;
+  $('pnPlay').onclick = () => { try { sessionStorage.setItem('truckPacker.playAnyway', '1'); } catch(e){} $('phoneNote').hidden = true; };
+  $('pnShare').onclick = async () => {
+    try {
+      if (navigator.share){ await navigator.share({title:'Truck Packer', text:'Truck Packer: the free AV truck-packing game from AV Educate. Play it on a computer:', url}); return; }
+      await navigator.clipboard.writeText(url); $('pnMsg').textContent = 'Link copied. Paste it into a message or email to yourself.';
+    } catch(e){ $('pnMsg').textContent = 'Type this into your computer\'s browser: ' + url; }
+  };
+})();
 if (document.fonts && document.fonts.load) Promise.all([document.fonts.load('700 16px Silkscreen'), document.fonts.load("800 16px 'Barlow Condensed'"), document.fonts.load("600 16px Barlow")]).then(() => { if (G.level){ layout(); render(); } }).catch(() => {});
 </script>
 </body>
