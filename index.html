@@ -132,6 +132,7 @@ body.home #game, body.home .modal-back{filter:blur(7px) saturate(.85)}
 .controls .btn kbd, .controls .btn .lock{display:block;margin:0;font-size:11px;opacity:.75;letter-spacing:.04em}
 .controls .btn.primary{width:244px}
 .controls .btn[hidden]{display:none}
+.modal .btn[hidden]{display:none}
 #coachText{flex:1 1 auto;min-width:0} /* the crew-lead message uses the whole bottom row (keys live in HELP) */
 /* fixed-height crew-lead bar so the play area (and the truck) never changes size mid-level */
 #coachText{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
@@ -193,6 +194,27 @@ body.crew-quiet:not(.phone) .coach::before{content:'';position:absolute;top:5px;
 .cat .pts{font-family:var(--pixel);font-weight:800;font-size:16px;text-align:right}
 .cat.off{opacity:.35}
 .badges{display:flex;flex-wrap:wrap;gap:6px;margin:12px 0}
+/* bonus stars: three per level, shown before, during and after */
+.bonus-list{list-style:none;margin:0 0 10px;padding:0;font-size:12.5px;line-height:1.45}
+.bonus-list li{padding-left:19px;text-indent:-19px}
+.bonus-list li::before{content:'☆';color:var(--warn);font-size:14px;display:inline-block;width:19px;text-indent:0}
+.bonus-list li.met::before{content:'★'} .bonus-list li.met{color:var(--cream)} .bonus-list li.miss{color:var(--cream-dim)}
+.bonus-list .reh{color:var(--cream-dim);font-size:11.5px}
+/* achievements shelf: equal tiles */
+.ach-modal{width:min(820px,100%)}
+.ach-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:10px;margin:8px 0 16px}
+.ach{background:var(--panel2);border:2px solid #0d0d0c;padding:10px;min-height:96px;display:flex;flex-direction:column;gap:6px}
+.ach .badge{align-self:flex-start;font-size:13px}
+.ach small{color:var(--cream-dim);font-size:12px;line-height:1.35}
+.ach .cnt{margin-top:auto;font-family:var(--pixel);font-weight:800;color:var(--accent);font-size:13px;letter-spacing:.04em}
+.ach.locked{opacity:.45} .ach.locked .badge{background:#77786f}
+/* the better-pack view: a bar over the truck with the way back */
+.better-bar{position:fixed;left:50%;bottom:16px;transform:translateX(-50%);z-index:30;display:flex;gap:14px;align-items:center;background:var(--panel);border:3px solid var(--edge);box-shadow:4px 4px 0 #000;padding:10px 14px;width:min(620px,calc(100% - 20px))}
+.better-bar[hidden]{display:none}
+.better-bar b{display:block;font-family:var(--pixel);font-weight:800;color:var(--good);letter-spacing:.06em}
+.better-bar span{font-size:13px;color:var(--cream)}
+.better-bar .btn{flex:0 0 auto}
+body.phone .better-bar{bottom:10px;flex-direction:column;align-items:stretch;gap:8px}
 .badge{font-family:var(--pixel);font-weight:800;letter-spacing:.04em;font-size:14px;background:var(--cream);color:#111;border:2px solid #0d0d0c;padding:4px 8px;box-shadow:3px 3px 0 #000}
 .feedback{list-style:none;margin:8px 0 0;padding:0}
 .feedback li{font-size:13.5px;line-height:1.45;padding:7px 10px 7px 34px;position:relative;border-bottom:1px solid #3c3d39}
@@ -342,6 +364,7 @@ body.phone .modal-back{padding:10px}
 @media print{body *{visibility:hidden}#certSheet,#certSheet *{visibility:visible}#certSheet{position:fixed;left:0;top:0;width:100%;height:auto;margin:0;border-width:12px}.no-print{display:none}}
 .levels-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}
 .lvl{height:136px;overflow:hidden;background:var(--panel2);border:2px solid #0d0d0c;font-family:var(--pixel);display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;padding:4px;text-align:center}
+.lvl.boss{border-color:var(--bad);box-shadow:inset 0 0 0 2px rgba(232,96,74,.35)} .lvl.boss .tag{color:var(--bad)} /* every tenth level: a bigger, maxed-out load */
 .lvl b{font-size:34px;font-weight:800}
 .lvl small{font-size:12px;font-weight:700;color:var(--cream-dim);line-height:1.2;height:2.4em;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .lvl .tag{font-size:10px;font-weight:800;letter-spacing:.12em;color:var(--accent);height:14px;line-height:14px}
@@ -517,6 +540,7 @@ body.phone .home-btn kbd, body.phone .link-btn kbd{display:none}
   <h2 id="rsTitle"></h2>
   <div id="rsBody"></div>
   <div class="row">
+    <button class="btn" id="rsBetter">SEE A BETTER PACK</button>
     <button class="btn" id="rsBack">BACK TO THE TRUCK</button>
     <button class="btn" id="rsRetry">RETRY LEVEL</button>
     <button class="btn primary" id="rsNext">NEXT LEVEL</button>
@@ -543,6 +567,7 @@ body.phone .home-btn kbd, body.phone .link-btn kbd{display:none}
   <div id="levelsGrid"></div>
   <p style="margin-top:14px;font-size:13px;color:var(--cream-dim)">Every lesson is followed by a practice level that tests it a different way. Earn 3 stars (or 95%+) on all 100 levels to unlock the final exam and your AV Educate certificate.</p>
   <div class="save-codes">
+    <button class="btn" id="lvAch">ACHIEVEMENTS</button>
     <button class="btn" id="lvSaveCode">SAVE CODE</button>
     <button class="btn" id="lvLoadCode">LOAD CODE</button>
     <span id="saveCodeOut" class="save-code-out">Back up your progress: SAVE CODE copies a code you can paste back in with LOAD CODE, on any browser or computer.</span>
@@ -550,6 +575,17 @@ body.phone .home-btn kbd, body.phone .link-btn kbd{display:none}
   <div class="row"><button class="btn" id="lvHelp">HELP</button><button class="btn" id="lvTitleBtn">TITLE SCREEN</button><button class="btn primary" id="lvClose">CLOSE</button></div>
 </div></div>
 
+<div class="modal-back" id="achievements"><div class="modal ach-modal" role="dialog" aria-modal="true" aria-labelledby="achTitle">
+  <h3>AV EDUCATE · TRUCK PACKOLOGY</h3>
+  <h2 id="achTitle">ACHIEVEMENTS</h2>
+  <p id="achSum"></p>
+  <div class="section-label">BADGES · EARNED ON PASSED RUNS</div>
+  <div class="ach-grid" id="achBadges"></div>
+  <div class="section-label">MILESTONES</div>
+  <div class="ach-grid" id="achMiles"></div>
+  <div class="row"><button class="btn primary" id="achClose">BACK TO LEVELS</button></div>
+</div></div>
+<div class="better-bar" id="betterBar" hidden><div><b>A BETTER PACK</b><span>One strong way to load these same cases. Compare it with yours.</span></div><button class="btn primary" id="betterBack">BACK TO MY RESULTS</button></div>
 <div class="modal-back" id="help"><div class="modal help-modal" role="dialog" aria-modal="true" aria-labelledby="hpTitle">
   <h3>AV EDUCATE · HOW TO PLAY</h3>
   <h2 id="hpTitle">WHAT IS TRUCK PACKOLOGY?</h2>
@@ -869,13 +905,18 @@ const PRACTICE_LEVELS = [
     solution:[['audio_rack',0,0],['audio_rack',4,0],['audio_rack',8,0],['audio_rack',12,0],['mic_case',0,5,1],['mic_case',4,5,1],['mic_case',8,5,1],['mic_case',12,5,1],['lx_parts',0,8,1],['lx_parts',4,8,1],['lx_parts',8,8,1],['lx_parts',12,8,1],['big_trunk',0,11],['big_trunk',8,11]]
   },
   {
-    after:5, title:'Opening Act', focus:'unload', truck:{name:'Box truck · 12½ ft bay', width:96, depth:150},
-    cases:[{type:'speaker_cart', count:2},{type:'audio_rack', count:4},{type:'distro', count:4},{type:'motor', count:2},{type:'hardware_trunk', count:1}],
+    after:5, boss:true, title:'Opening Act', focus:'unload', truck:{name:'Box truck · 16 ft', width:96, depth:192},
+    cases:[{type:'speaker_cart', count:2},{type:'audio_rack', count:8},{type:'distro', count:6},{type:'feeder_trunk', count:1},{type:'motor', count:2},{type:'hardware_trunk', count:1}],
     unloadSequence:['RIGGING','POWER','AUDIO'], rules:{heavyBase:false}, availableLoadBars:0, availableStraps:0, timer:null,
-    lesson:'An audio-only show this time. Rigging still comes off first so the PA can fly, then power, then the audio gear.',
-    objectives:['Load all 13 cases', 'Rigging → Power → Audio', 'Nothing buried'],
-    hint:'Speaker carts and audio racks at the nose, power distros in the middle, motors and the hardware trunk by the doors.',
-    solution:[['speaker_cart',0,0],['speaker_cart',8,0],['audio_rack',0,5],['audio_rack',4,5],['audio_rack',8,5],['audio_rack',12,5],['distro',0,10],['distro',4,10],['distro',8,10],['distro',12,10],['motor',0,15],['motor',4,15],['hardware_trunk',8,15]]
+    lesson:'Boss load: the full PA package in a 16-footer. Same order as before, rigging first so the PA can fly, then power, then audio, just twice the gear.',
+    objectives:['Load all 20 cases', 'Rigging → Power → Audio', 'Full-width rows, nothing buried'],
+    hint:'Speaker carts across the nose, then two rows of amp racks. Two rows of power: four distros, then two distros and the feeder trunk. Motors and the hardware trunk by the doors.',
+    solution:[['speaker_cart',0,0],['speaker_cart',8,0],
+              ['audio_rack',0,5],['audio_rack',4,5],['audio_rack',8,5],['audio_rack',12,5],
+              ['audio_rack',0,10],['audio_rack',4,10],['audio_rack',8,10],['audio_rack',12,10],
+              ['distro',0,15],['distro',4,15],['distro',8,15],['distro',12,15],
+              ['distro',0,20],['distro',4,20],['feeder_trunk',8,20],
+              ['motor',0,25],['motor',4,25],['hardware_trunk',8,25]]
   },
   {
     after:6, title:'Bar Down', focus:'securement', truck:{name:'Box truck · 12½ ft bay', width:96, depth:150},
@@ -914,13 +955,18 @@ const PRACTICE_LEVELS = [
     solution:[['mover',0,0],['mover',8,0],['bar',5],['audio_rack',0,5],['audio_rack',4,5],['audio_rack',8,5],['audio_rack',12,5],['strap',10],['screen_case',0,10],['monitor',4,10],['monitor',8,10],['switcher',12,10],['switcher',12,15],['switcher',12,20],['projector',4,20],['strap',25]]
   },
   {
-    after:10, title:'Rigging Call', focus:'unload', truck:{name:'Box truck · 20 ft', width:96, depth:240},
-    cases:[{type:'video_rack', count:4},{type:'mover', count:2},{type:'lx_parts', count:2},{type:'lx_console', count:1},{type:'truss_cart', count:2},{type:'motor', count:6}],
-    unloadSequence:['RIGGING','LIGHTING','VIDEO'], rules:{heavyBase:false}, availableLoadBars:1, availableStraps:4, timer:null,
-    lesson:'The console gap again, mirrored: this time the thin case goes against the <b>left</b> wall. Truss and motors still ride by the doors.',
-    objectives:['Load all 17 cases', 'Rigging → Lighting → Video', 'Thin console in the 18" gap'],
-    hint:'Video racks + bar. Then the console against the left wall, a mover turned 90° beside it, and a mover across the right side with the parts cases under it. Truss carts lengthwise on the right, six motors on the left.',
-    solution:[['video_rack',0,0],['video_rack',4,0],['video_rack',8,0],['video_rack',12,0],['bar',5],['lx_console',0,5],['mover',3,5,1],['mover',8,5],['lx_parts',8,10,1],['lx_parts',12,10,1],['strap',13],['truss_cart',8,13],['truss_cart',12,13],['motor',0,13],['motor',4,13],['motor',0,18],['motor',4,18],['motor',0,23],['motor',4,23],['strap',28]]
+    after:10, boss:true, title:'Rigging Call', focus:'unload', truck:{name:'Box truck · 24 ft', width:96, depth:288},
+    cases:[{type:'video_rack', count:8},{type:'mover', count:2},{type:'lx_parts', count:2},{type:'lx_console', count:1},{type:'fixture', count:4},{type:'truss_cart', count:2},{type:'motor', count:6},{type:'hardware_trunk', count:2}],
+    unloadSequence:['RIGGING','LIGHTING','VIDEO'], rules:{heavyBase:false}, availableLoadBars:1, availableStraps:6, timer:null,
+    lesson:'Boss load: a full rigging call in a 24-footer. Two rows of video in the nose, the console gap on the left wall, and every piece of rigging riding by the doors.',
+    objectives:['Load all 27 cases', 'Rigging → Lighting → Video', 'Thin console in the 18" gap'],
+    hint:'Two rows of video racks (bar behind the first). Console against the left wall, a mover turned 90° beside it, a mover across the right with the parts cases under it. Fixture cases next. Truss carts lengthwise on the right, six motors on the left, hardware trunks at the doors.',
+    solution:[['video_rack',0,0],['video_rack',4,0],['video_rack',8,0],['video_rack',12,0],['bar',5],
+              ['video_rack',0,5],['video_rack',4,5],['video_rack',8,5],['video_rack',12,5],['strap',10],
+              ['lx_console',0,10],['mover',3,10,1],['mover',8,10],['lx_parts',8,15,1],['lx_parts',12,15,1],['strap',18],
+              ['fixture',0,18],['fixture',4,18],['fixture',8,18],['fixture',12,18],['strap',23],
+              ['truss_cart',8,23],['truss_cart',12,23],['motor',0,23],['motor',4,23],['motor',0,28],['motor',4,28],['motor',0,33],['motor',4,33],['strap',38],
+              ['hardware_trunk',0,38],['hardware_trunk',8,38],['strap',43]]
   },
   {
     after:11, title:'Pelican Pile', focus:'stability', truck:{name:'Box truck · 16 ft', width:96, depth:192},
@@ -959,13 +1005,18 @@ const PRACTICE_LEVELS = [
     solution:[['speaker_cart',0,0],['mic_case',0,5,1],['mic_case',4,5,1],['speaker_cart',8,0,1],['audio_console',13,0],['bar',8],['video_rack',0,8],['video_rack',4,8],['video_rack',8,8],['video_rack',12,8],['strap',13],['mover',0,13],['mover',8,13],['strap',18],['fixture',0,18],['fixture',4,18],['fixture',8,18],['fixture',12,18],['strap',23]]
   },
   {
-    after:15, title:'The Bigger Pack', focus:'all', truck:{name:'Box truck · 24 ft', width:96, depth:288},
-    cases:[{type:'speaker_cart', count:2},{type:'mic_case', count:2},{type:'audio_console', count:1},{type:'screen_case', count:1},{type:'monitor', count:2},{type:'switcher', count:3},{type:'projector', count:1},{type:'led_cart', count:4},{type:'mover', count:2},{type:'distro', count:2},{type:'feeder_trunk', count:1},{type:'motor', count:4}],
+    after:15, boss:true, title:'The Bigger Pack', focus:'all', truck:{name:'Box truck · 24 ft', width:96, depth:288},
+    cases:[{type:'speaker_cart', count:2},{type:'mic_case', count:2},{type:'audio_console', count:1},{type:'screen_case', count:1},{type:'monitor', count:2},{type:'switcher', count:3},{type:'projector', count:1},{type:'led_cart', count:2},{type:'led_proc', count:4},{type:'fixture', count:4},{type:'distro', count:4},{type:'motor', count:4}],
     unloadSequence:['RIGGING','POWER','LIGHTING','LED','VIDEO','AUDIO'], rules:{heavyBase:false}, availableLoadBars:2, availableStraps:4, timer:null,
-    lesson:'One more final exam, built differently: the console gap, a lengthwise screen case, six departments, and a truck that is <b>exactly</b> full nose to doors.',
-    objectives:['Load all 25 cases (the truck fills nose to doors)', 'Six departments in order', 'Every tier tied in, including the one on the doors'],
-    hint:'Audio block at the nose (speaker across, mics under it, speaker turned 90°, console in the gap). Video: screen case lengthwise on the left, monitors beside it, projector behind them, switchers down the right. Then LED, lighting, power, rigging.',
-    solution:[['speaker_cart',0,0],['mic_case',0,5,1],['mic_case',4,5,1],['speaker_cart',8,0,1],['audio_console',13,0],['bar',8],['screen_case',0,8],['monitor',4,8],['monitor',8,8],['switcher',12,8],['switcher',12,13],['switcher',12,18],['projector',4,18],['strap',23],['led_cart',0,23],['led_cart',4,23],['led_cart',8,23],['led_cart',12,23],['bar',33],['mover',0,33],['mover',8,33],['strap',38],['distro',0,38],['distro',4,38],['feeder_trunk',8,38],['strap',43],['motor',0,43],['motor',4,43],['motor',8,43],['motor',12,43],['strap',48]]
+    lesson:'Boss load: the 24-footer is already full nose to doors, so this one packs more cases into the same floor. Smaller cases, same six departments, not an inch left over.',
+    objectives:['Load all 30 cases (the truck fills nose to doors)', 'Six departments in order', 'Every tier tied in, including the one on the doors'],
+    hint:'Audio block at the nose (speaker across, mics under it, speaker turned 90°, console in the gap). Video: screen case lengthwise on the left, monitors beside it, projector behind them, switchers down the right. LED carts on the left with processors two deep on the right. Then fixtures, four distros, and motors.',
+    solution:[['speaker_cart',0,0],['mic_case',0,5,1],['mic_case',4,5,1],['speaker_cart',8,0,1],['audio_console',13,0],['bar',8],
+              ['screen_case',0,8],['monitor',4,8],['monitor',8,8],['switcher',12,8],['switcher',12,13],['switcher',12,18],['projector',4,18],['strap',23],
+              ['led_cart',0,23],['led_cart',4,23],['led_proc',8,23],['led_proc',12,23],['led_proc',8,28],['led_proc',12,28],['bar',33],
+              ['fixture',0,33],['fixture',4,33],['fixture',8,33],['fixture',12,33],['strap',38],
+              ['distro',0,38],['distro',4,38],['distro',8,38],['distro',12,38],['strap',43],
+              ['motor',0,43],['motor',4,43],['motor',8,43],['motor',12,43],['strap',48]]
   }
 ];
 
@@ -1083,13 +1134,15 @@ const STACK_LEVELS = [
               ['big_trunk',0,5],['big_trunk',8,5],['camera',0,5],['camera',4,5],['camera',8,5],['camera',12,5],['strap',10],['strap',10,'high']]
   },
   {
-    title:'Glass on Top', stacked:true, practice:true, focus:'fragile', truck:STACK_TRUCK(120, 'Box truck · 10 ft bay · 96" tall inside'),
-    cases:[{type:'cable_trunk', count:2},{type:'feeder_trunk', count:2},{type:'monitor', count:4}],
-    unloadSequence:null, rules:{heavyBase:false}, availableLoadBars:1, availableStraps:2, timer:null,
-    lesson:'Monitor cases are fragile and long. Build a flat, heavy floor of cable trunks first, then lay the monitors across both rows.',
-    objectives:['Load all 8 cases', 'Monitors ride on top', 'Every top case sits flat'],
-    hint:'Two cable trunks against the nose, two feeder trunks right behind them (all 30" tall). Then four monitor cases on top, each spanning both rows.',
-    solution:[['cable_trunk',0,0],['cable_trunk',8,0],['bar',5],['feeder_trunk',0,5],['feeder_trunk',8,5],['monitor',0,0],['monitor',4,0],['monitor',8,0],['monitor',12,0],['strap',10],['strap',10,'high']]
+    title:'Glass on Top', stacked:true, practice:true, boss:true, focus:'fragile', truck:STACK_TRUCK(192, 'Box truck · 16 ft · 96" tall inside'),
+    cases:[{type:'cable_trunk', count:6},{type:'feeder_trunk', count:6},{type:'monitor', count:12}],
+    unloadSequence:null, rules:{heavyBase:false}, availableLoadBars:1, availableStraps:6, timer:null,
+    lesson:'Boss load: a whole video package of monitor cases. Three blocks, each a flat heavy floor two rows deep with four monitors lying across it. Glass always rides on top.',
+    objectives:['Load all 24 cases', 'Monitors ride on top', 'Every top case sits flat'],
+    hint:'Each block: two cable trunks, two feeder trunks right behind them, four monitors lying across both rows, strap low and high. Bar behind the first cable trunks. Do it three times.',
+    solution:[['cable_trunk',0,0],['cable_trunk',8,0],['bar',5],['feeder_trunk',0,5],['feeder_trunk',8,5],['monitor',0,0],['monitor',4,0],['monitor',8,0],['monitor',12,0],['strap',10],['strap',10,'high'],
+              ['cable_trunk',0,10],['cable_trunk',8,10],['feeder_trunk',0,15],['feeder_trunk',8,15],['monitor',0,10],['monitor',4,10],['monitor',8,10],['monitor',12,10],['strap',20],['strap',20,'high'],
+              ['cable_trunk',0,20],['cable_trunk',8,20],['feeder_trunk',0,25],['feeder_trunk',8,25],['monitor',0,20],['monitor',4,20],['monitor',8,20],['monitor',12,20],['strap',30],['strap',30,'high']]
   },
   // ---- levels 41-60 ----
   {
@@ -1187,14 +1240,16 @@ const STACK_LEVELS = [
               ['big_trunk',0,5],['big_trunk',8,5],['utility_trunk',0,5],['utility_trunk',4,5],['utility_trunk',8,5],['utility_trunk',12,5],['comms',0,5],['comms',4,5],['comms',8,5],['comms',12,5],['strap',10],['strap',10,'high']]
   },
   {
-    title:'Ceiling Check', stacked:true, practice:true, focus:'space', truck:STACK_TRUCK(120, 'Box truck · 10 ft bay · 96" tall inside'),
-    cases:[{type:'video_rack', count:4},{type:'comms', count:12},{type:'speaker_cart', count:2},{type:'switcher', count:4}],
-    unloadSequence:null, rules:{heavyBase:false}, availableLoadBars:1, availableStraps:3, timer:null,
-    lesson:'48" + 24" + 24" = 96": not an inch to spare. Add up the heights before you lift.',
-    objectives:['Load all 22 cases', 'Every stack exactly 96"', 'Light cases on top'],
-    hint:'Video racks with two layers of comms cases on top. Speaker carts with switchers, then comms cases on top.',
+    title:'Ceiling Check', stacked:true, practice:true, boss:true, focus:'space', truck:STACK_TRUCK(120, 'Box truck · 10 ft bay · 96" tall inside'),
+    cases:[{type:'video_rack', count:8},{type:'comms', count:24},{type:'speaker_cart', count:4},{type:'switcher', count:8}],
+    unloadSequence:null, rules:{heavyBase:false}, availableLoadBars:1, availableStraps:7, timer:null,
+    lesson:'Boss load: four tiers, nose to doors, and every stack exactly 96". 48" + 24" + 24": add up the heights before you lift.',
+    objectives:['Load all 44 cases', 'Every stack exactly 96"', 'Light cases on top, every tier tied in'],
+    hint:'Video racks with two layers of comms cases on top. Speaker carts with switchers, then comms cases on top. Then the same two tiers again, all the way to the doors.',
     solution:[['video_rack',0,0],['video_rack',4,0],['video_rack',8,0],['video_rack',12,0],['bar',5],['comms',0,0],['comms',4,0],['comms',8,0],['comms',12,0],['comms',0,0],['comms',4,0],['comms',8,0],['comms',12,0],['strap',5,'high'],
-              ['speaker_cart',0,5],['speaker_cart',8,5],['switcher',0,5],['switcher',4,5],['switcher',8,5],['switcher',12,5],['comms',0,5],['comms',4,5],['comms',8,5],['comms',12,5],['strap',10],['strap',10,'high']]
+              ['speaker_cart',0,5],['speaker_cart',8,5],['switcher',0,5],['switcher',4,5],['switcher',8,5],['switcher',12,5],['comms',0,5],['comms',4,5],['comms',8,5],['comms',12,5],['strap',10],['strap',10,'high'],
+              ['video_rack',0,10],['video_rack',4,10],['video_rack',8,10],['video_rack',12,10],['comms',0,10],['comms',4,10],['comms',8,10],['comms',12,10],['comms',0,10],['comms',4,10],['comms',8,10],['comms',12,10],['strap',15],['strap',15,'high'],
+              ['speaker_cart',0,15],['speaker_cart',8,15],['switcher',0,15],['switcher',4,15],['switcher',8,15],['switcher',12,15],['comms',0,15],['comms',4,15],['comms',8,15],['comms',12,15],['strap',20],['strap',20,'high']]
   },
   {
     title:'Department Stacks', stacked:true, focus:'unload', truck:STACK_TRUCK(240, 'Box truck · 20 ft · 96" tall inside'),
@@ -1301,16 +1356,19 @@ const STACK_LEVELS = [
               ['hardware_trunk',0,33],['hardware_trunk',8,33],['motor',0,33],['motor',4,33],['motor',8,33],['motor',12,33],['motor',0,33],['motor',4,33],['motor',8,33],['motor',12,33],['strap',38],['strap',38,'high']]
   },
   {
-    title:'Final Walkthrough', stacked:true, practice:true, focus:'all', truck:STACK_TRUCK(240, 'Box truck · 20 ft · 96" tall inside'),
-    cases:[{type:'projector', count:2},{type:'switcher', count:4},{type:'video_rack', count:4},{type:'playback', count:4},{type:'mover', count:4},{type:'hardware_trunk', count:2},{type:'motor', count:4}],
-    unloadSequence:['RIGGING','LIGHTING','VIDEO'], rules:{heavyBase:false}, availableLoadBars:1, availableStraps:7, timer:null,
-    lesson:'Last practice before the Expert levels. Projectors are heavy <b>and</b> fragile: only light or medium cases ride on them.',
-    objectives:['Load all 24 cases', 'Rigging → Lighting → Video', 'Clean stacks, every tier tied in'],
-    hint:'Projectors in the nose with switchers on top. Video racks + playback racks. Movers two high. Hardware trunks + motors at the doors.',
+    title:'Final Walkthrough', stacked:true, practice:true, boss:true, focus:'all', truck:STACK_TRUCK(240, 'Box truck · 20 ft · 96" tall inside'),
+    cases:[{type:'projector', count:2},{type:'switcher', count:4},{type:'video_rack', count:8},{type:'playback', count:8},{type:'mover', count:6},{type:'fixture', count:4},{type:'hardware_trunk', count:2},{type:'motor', count:12}],
+    unloadSequence:['RIGGING','LIGHTING','VIDEO'], rules:{heavyBase:false}, availableLoadBars:1, availableStraps:13, timer:null,
+    lesson:'Boss load: seven tiers before the Expert levels. Projectors are heavy <b>and</b> fragile, so only light or medium cases ride on them, and every tier is tied in low and high.',
+    objectives:['Load all 46 cases', 'Rigging → Lighting → Video', 'Clean stacks, every tier tied in'],
+    hint:'Projectors with switchers on top in the nose. Two tiers of video racks with playback racks on top. Movers two high, then movers with fixture cases on top. Hardware trunks with motors, then motors two high at the doors.',
     solution:[['projector',0,0],['projector',8,0],['bar',5],['switcher',0,0],['switcher',4,0],['switcher',8,0],['switcher',12,0],['strap',5,'high'],
               ['video_rack',0,5],['video_rack',4,5],['video_rack',8,5],['video_rack',12,5],['playback',0,5],['playback',4,5],['playback',8,5],['playback',12,5],['strap',10],['strap',10,'high'],
-              ['mover',0,10],['mover',8,10],['mover',0,10],['mover',8,10],['strap',15],['strap',15,'high'],
-              ['hardware_trunk',0,15],['hardware_trunk',8,15],['motor',0,15],['motor',4,15],['motor',8,15],['motor',12,15],['strap',20],['strap',20,'high']]
+              ['video_rack',0,10],['video_rack',4,10],['video_rack',8,10],['video_rack',12,10],['playback',0,10],['playback',4,10],['playback',8,10],['playback',12,10],['strap',15],['strap',15,'high'],
+              ['mover',0,15],['mover',8,15],['mover',0,15],['mover',8,15],['strap',20],['strap',20,'high'],
+              ['mover',0,20],['mover',8,20],['fixture',0,20],['fixture',4,20],['fixture',8,20],['fixture',12,20],['strap',25],['strap',25,'high'],
+              ['hardware_trunk',0,25],['hardware_trunk',8,25],['motor',0,25],['motor',4,25],['motor',8,25],['motor',12,25],['strap',30],['strap',30,'high'],
+              ['motor',0,30],['motor',4,30],['motor',8,30],['motor',12,30],['motor',0,30],['motor',4,30],['motor',8,30],['motor',12,30],['strap',35],['strap',35,'high']]
   }
 ];
 for (const lv of STACK_LEVELS) LEVELS.push(lv);
@@ -1423,14 +1481,15 @@ const EXPERT_LEVELS = [
               ...TIER(15, B2('big_trunk'), [A4('utility_trunk')])]
   }),
   EX({
-    title:'Two Pockets', practice:true, focus:'pocket', truck:STACK_TRUCK(192, 'Box truck · 16 ft · 96" tall inside'),
-    cases:[{type:'comms', count:8},{type:'hard_l', count:8},{type:'distro', count:8},{type:'utility_trunk', count:8}],
-    availableStraps:5,
-    lesson:'Two pockets, two closing rows. Every pocket needs its own row behind it.',
-    objectives:['Load all 32 cases', 'Two pockets, both closed', 'Every tier tied in'],
-    hint:'Comms + hard cases, distros + utility trunks, then the same again.',
+    title:'Two Pockets', practice:true, boss:true, focus:'pocket', truck:STACK_TRUCK(192, 'Box truck · 16 ft · 96" tall inside'),
+    cases:[{type:'comms', count:8},{type:'hard_l', count:8},{type:'distro', count:16},{type:'utility_trunk', count:16}],
+    availableStraps:9,
+    lesson:'Boss load: two pockets, then the truck keeps going. Every pocket needs its own row behind it, and every tier after that is tied in low and high, right up to the doors.',
+    objectives:['Load all 48 cases', 'Two pockets, both closed', 'Every tier tied in'],
+    hint:'Comms + hard cases, distros + utility trunks, then the same again. Two more tiers of distros + utility trunks fill it to the doors.',
     solution:[...NOSE(A4('comms'), [A4('hard_l')], false), ...TIER(5, A4('distro'), [A4('utility_trunk')]),
-              ...TIER(10, A4('comms'), [A4('hard_l')], false), ...TIER(15, A4('distro'), [A4('utility_trunk')])]
+              ...TIER(10, A4('comms'), [A4('hard_l')], false), ...TIER(15, A4('distro'), [A4('utility_trunk')]),
+              ...TIER(20, A4('distro'), [A4('utility_trunk')]), ...TIER(25, A4('distro'), [A4('utility_trunk')])]
   }),
   EX({
     title:'Tip Into the Pocket', focus:'pocket', truck:STACK_TRUCK(120, 'Box truck · 10 ft bay · 96" tall inside'),
@@ -1517,13 +1576,14 @@ const EXPERT_LEVELS = [
               ...ROW(10, A4('distro')), ...ROW(15, A4('distro')), ...ROW(10, A4('monitor')), ...TIE(20)]
   }),
   EX({
-    title:'Long Pin', practice:true, focus:'securement', pinTiers:true, truck:STACK_TRUCK(120, 'Box truck · 10 ft bay · 96" tall inside'),
-    cases:[{type:'distro', count:12},{type:'screen_case', count:4}],
-    availableStraps:2,
-    lesson:'A 90" screen case lying across three tiers pins all three together. Two straps at the end hold the lot.',
-    objectives:['Load all 16 cases', 'Screen cases across three tiers', 'Every tier face tied in with only 2 straps'],
-    hint:'Three rows of distros (bar behind the first), then four screen cases lying on top across all three rows. Strap low and high at the end.',
-    solution:[...ROW(0, A4('distro')), ['bar', 5], ...ROW(5, A4('distro')), ...ROW(10, A4('distro')), ...ROW(0, A4('screen_case')), ...TIE(15)]
+    title:'Long Pin', practice:true, boss:true, focus:'securement', pinTiers:true, truck:STACK_TRUCK(192, 'Box truck · 16 ft · 96" tall inside'),
+    cases:[{type:'distro', count:24},{type:'screen_case', count:8}],
+    availableStraps:4,
+    lesson:'Boss load: two pinned blocks. Each set of 90" screen cases lying across three tiers pins them together, so four straps hold six tier faces.',
+    objectives:['Load all 32 cases', 'Screen cases across three tiers, twice', 'Every tier face tied in with only 4 straps'],
+    hint:'Three rows of distros (bar behind the first), four screen cases across all three, strap low and high. Then three more rows of distros, four more screen cases, strap low and high.',
+    solution:[...ROW(0, A4('distro')), ['bar', 5], ...ROW(5, A4('distro')), ...ROW(10, A4('distro')), ...ROW(0, A4('screen_case')), ...TIE(15),
+              ...ROW(15, A4('distro')), ...ROW(20, A4('distro')), ...ROW(25, A4('distro')), ...ROW(15, A4('screen_case')), ...TIE(30)]
   }),
   EX({
     title:'Twenty-Foot Pocket', focus:'all', truck:STACK_TRUCK(240, 'Box truck · 20 ft · 96" tall inside'),
@@ -1616,14 +1676,15 @@ const EXPERT_LEVELS = [
               ...TIER(15, [['big_trunk', 0], ['utility_trunk', 8, 2], ['hard_l', 13, 2]], [[['utility_trunk', 0], ['utility_trunk', 4], ['hard_l', 8], ['hard_l', 12]]]), ...TIER(20, B2('mover'), [A4('fixture')]), ...TIER(25, B2('feeder_trunk'), [A4('distro')]), ...TIER(30, B2('hardware_trunk'), [A4('motor')])]
   }),
   EX({
-    title:'Last Practice', practice:true, focus:'all', truck:STACK_TRUCK(240, 'Box truck · 20 ft · 96" tall inside'),
-    cases:[{type:'big_trunk', count:5},{type:'utility_trunk', count:11},{type:'hard_l', count:7},{type:'comms', count:4},{type:'distro', count:8}],
-    availableStraps:8,
-    lesson:'Last practice before Offloading: an odd row with two tips, two pockets, and every tier tied in.',
-    objectives:['Load all 35 cases', 'Tip only two cases', 'Every hard case trapped, every tier tied in'],
-    hint:'Big trunks + utility trunks. The odd row with its pocket. Big trunks + utility trunks close it. Comms + hard cases. Distros two high.',
+    title:'Last Practice', practice:true, boss:true, focus:'all', truck:STACK_TRUCK(240, 'Box truck · 20 ft · 96" tall inside'),
+    cases:[{type:'big_trunk', count:5},{type:'utility_trunk', count:11},{type:'hard_l', count:11},{type:'comms', count:8},{type:'distro', count:16}],
+    availableStraps:11,
+    lesson:'Boss load: last practice before Offloading. An odd row with two tips, three pockets, and every tier tied in, seven tiers deep.',
+    objectives:['Load all 51 cases', 'Tip only two cases', 'Every hard case trapped, every tier tied in'],
+    hint:'Big trunks + utility trunks. The odd row with its pocket. Big trunks + utility trunks close it. Comms + hard cases, distros two high. Then comms + hard cases and distros two high again.',
     solution:[...NOSE(B2('big_trunk'), [A4('utility_trunk')]), ...TIER(5, [['big_trunk', 0], ['utility_trunk', 8, 2], ['hard_l', 13, 2]], [[['utility_trunk', 0], ['utility_trunk', 4], ['hard_l', 8], ['hard_l', 12]]]), ...TIER(10, B2('big_trunk'), [A4('utility_trunk')]),
-              ...TIER(15, A4('comms'), [A4('hard_l')], false), ...TIER(20, A4('distro'), [A4('distro')])]
+              ...TIER(15, A4('comms'), [A4('hard_l')], false), ...TIER(20, A4('distro'), [A4('distro')]),
+              ...TIER(25, A4('comms'), [A4('hard_l')], false), ...TIER(30, A4('distro'), [A4('distro')])]
   }),
 ];
 for (const lv of EXPERT_LEVELS) LEVELS.push(lv);
@@ -1678,10 +1739,17 @@ const OFFLOAD_LEVELS = [
     lesson:'The Expert Final, arriving at the venue: seven departments, an odd row with a pocket, and every tier strapped at two heights. Empty it in order.',
     objectives:['Empty the truck', 'Seven departments in order', 'Straps out as you reach them'],
     hint:'Work from the doors: rigging, power, lighting, the hard cases and the odd row, comms, video, then audio at the nose.'}),
-  OFF(EXPERT_LEVELS[24], {title:'Last Truck Out', practice:true,
-    lesson:'The last truck of the tour. Everything you\'ve learned, in reverse.',
+  OFF({truck:STACK_TRUCK(288, 'Box truck · 24 ft · 96" tall inside'), availableLoadBars:1, availableStraps:14,
+       unloadSequence:['RIGGING','POWER','LED','VIDEO','GENERAL','COMMS','AUDIO'],
+       cases:[{type:'speaker_cart', count:2},{type:'audio_rack', count:12},{type:'comms', count:4},{type:'hard_l', count:4},{type:'video_rack', count:4},{type:'switcher', count:4},
+              {type:'led_cart', count:4},{type:'led_proc', count:8},{type:'distro', count:8},{type:'hardware_trunk', count:2},{type:'motor', count:12}],
+       solution:[...NOSE(B2('speaker_cart'), [A4('audio_rack')]), ...TIER(5, A4('audio_rack'), [A4('audio_rack')]), ...TIER(10, A4('comms'), [A4('hard_l')], false), ...TIER(15, A4('video_rack'), [A4('switcher')]),
+                 ...ROW(20, A4('led_cart')), ['strap', 30], ...ROW(20, A4('led_proc')), ...ROW(25, A4('led_proc')), ['strap', 30, 'high'],
+                 ...TIER(30, A4('distro'), [A4('distro')]), ...TIER(35, B2('hardware_trunk'), [A4('motor')]), ...TIER(40, A4('motor'), [A4('motor')])]},
+    {title:'Last Truck Out', practice:true, boss:true,
+    lesson:'Boss load: the last truck of the tour, packed to the doors. Everything you\'ve learned, in reverse, nine tiers deep.',
     objectives:['Empty the truck', 'Seven departments in order', 'Straps out as you reach them'],
-    hint:'Rigging, power, the LED tier, video, the hard cases, comms, then audio at the nose.'})
+    hint:'Two rigging tiers, power, the LED tier, video, the hard cases, comms, then two tiers of audio at the nose.'})
 ];
 for (const lv of OFFLOAD_LEVELS) LEVELS.push(lv);
 // ---------------- LEVEL 101: the final exam (30 questions → name → AV Educate certificate) ----------------
@@ -2163,8 +2231,9 @@ const Engine = (() => {
     return {active:true, score01, accelHeld, rolled:transit.rolled, doorLoose, loose, noseBar, lines:slots, secured, tierTie, devices, upperLoose, want};
   }
 
-  function calculateFinalScore(state, level, placements){
+  function calculateFinalScore(state, level, placements, extra){
     placements = placements || state.placements;
+    const reh = extra && extra.rehandles != null ? extra.rehandles : 0, handled = !level.loop && !level.timer; // rehandles: cases taken back out after loading
     const transit = simulateTransit(state, placements);
     const space = calculateSpaceEfficiency(state, placements);
     if (level.loop) space.score01 = Math.min(1, space.usedPct / LOOP_FILL); // Endless Tour: fill the truck, not just a short load
@@ -2176,7 +2245,7 @@ const Engine = (() => {
       {key:'stability', label:'Stability', max:25, s:stab.score01, active:true},
       {key:'unload', label:'Unload Order', max:20, s:unload ? unload.score01 : 0, active:!!unload},
       {key:'securement', label:'Securement', max:15, s:secure.active ? secure.score01 : 0, active:secure.active},
-      {key:'handling', label:'Handling / Time', max:10, s:0, active:!!level.timer}
+      {key:'handling', label:level.timer ? 'Handling / Time' : 'Handling', max:10, s:level.timer ? 0 : Math.max(0, 1 - reh / 10), active:!!level.timer || handled}
     ];
     let got = 0, max = 0;
     for (const c of cats){ c.pts = Math.round(c.max * c.s * 10) / 10; if (c.active){ got += c.pts; max += c.max; } }
@@ -2258,6 +2327,11 @@ const Engine = (() => {
       else if (secure.lines.length) fb.push(['good', 'Every tier you could reach is tied in.']);
       if (secure.score01 >= .95) badges.push('LOCKED IN');
     }
+    // handling: every case that comes back out of the truck is a rehandle (wasted time on a real load-out)
+    if (handled){
+      if (!reh){ badges.push('CLEAN LOAD'); fb.push(['good', 'Clean load: every case went in once and stayed there. No rehandles.']); }
+      else fb.push(['bad', `${reh} rehandle${reh > 1 ? 's' : ''}: ${reh > 1 ? 'cases were' : 'a case was'} pulled back out after loading. On a real load-out that's time and backs. Plan the row before you load it.`]);
+    }
     // Lesson check: each level teaches one thing. Ignore it and the truck isn't road ready.
     const LESSON = {
       space:     {pass:space.score01 >= .75, label:'pack across the width before building toward the doors'},
@@ -2275,8 +2349,8 @@ const Engine = (() => {
       final = Math.min(total, 59);
       fb.unshift(['bad', `<b>Lesson check:</b> this level is about learning to ${LESSON.label}. The truck fits, but it isn't road ready yet.`]);
     }
-    if (final >= 90 && !transit.shifted.size && !(unload && unload.outOfOrder) && !stab.violations.length && !(stab.stackIssues || []).length && (!secure.active || secure.score01 >= .9)) badges.push('TOUR READY');
-    return {total:final, rawTotal:total, lessonPassed:!LESSON || LESSON.pass, cats, badges, feedback:fb, space, stab, unload, secure, transit};
+    if (final >= 90 && !(handled && reh) && !transit.shifted.size && !(unload && unload.outOfOrder) && !stab.violations.length && !(stab.stackIssues || []).length && (!secure.active || secure.score01 >= .9)) badges.push('TOUR READY');
+    return {total:final, rawTotal:total, lessonPassed:!LESSON || LESSON.pass, cats, badges, feedback:fb, space, stab, unload, secure, transit, rehandles:reh};
   }
 
   // A legal spot can still be a bad idea; explain why before the player commits.
@@ -2678,8 +2752,8 @@ G.progress = loadProgress();
 const levelState = (lv, items, placements, bars) => ({truck:lv.truck, items, placements, bars, accel:Engine.secureActive(lv),
   stacked:!!lv.stacked, H:(lv.truck.height || 96) / IN, parRatio:lv._par, noseBarRule:!!lv.stacked && (lv.availableLoadBars || 0) > 0});
 const state = () => levelState(G.level, G.items, G.placements, G.bars);
-const snap = () => ({p:clone(G.placements), b:clone(G.bars), s:clone(G.staging), m:(G.offMistakes || []).slice()});
-function restore(sn){ G.placements = clone(sn.p); G.bars = clone(sn.b); G.staging = clone(sn.s || []); G.offMistakes = (sn.m || []).slice(); }
+const snap = () => ({p:clone(G.placements), b:clone(G.bars), s:clone(G.staging), m:(G.offMistakes || []).slice(), r:G.rehandles || 0});
+function restore(sn){ G.placements = clone(sn.p); G.bars = clone(sn.b); G.staging = clone(sn.s || []); G.offMistakes = (sn.m || []).slice(); G.rehandles = sn.r || 0; }
 const devicesLeft = kind => ((kind === 'strap' ? G.level.availableStraps : G.level.availableLoadBars) || 0) - G.bars.filter(b => b.kind === kind).length;
 const itemOf = uid => G.items.get(uid);
 const placedSet = () => new Set(G.placements.map(p => p.uid));
@@ -2697,7 +2771,7 @@ function closeModals(){ for (const m of document.querySelectorAll('.modal-back')
 /* ---------- level lifecycle ---------- */
 function loadLevel(idx){  const lv = LEVELS[idx]; if (lv && lv.exam){ if (examReady(G.progress)) openExam(); else openLevels(); return; } loadLevelObj(lv, idx); }
 function loadLevelObj(lv, idx){
-  G.crewOff = false; G.warnSeen = {}; G.coachPeek = 0; // the crew comes back on every new level
+  G.crewOff = false; G.warnSeen = {}; G.coachPeek = 0; G.rehandles = 0; G.lastPlaced = null; // the crew comes back on every new level
   G.levelIdx = idx; G.level = lv;
   G.items = new Map(); let n = 0;
   for (const c of G.level.cases) for (let i = 0; i < c.count; i++){ const uid = 'c' + (++n); G.items.set(uid, {uid, type:c.type, def:CASES[c.type]}); }
@@ -2715,12 +2789,12 @@ function loadLevelObj(lv, idx){
 }
 function showBriefing(){
   const lv = G.level;
-  $('brKicker').textContent = lv.demo ? 'PRACTICE BAY · NO SCORE · NOTHING SAVED' : `LEVEL ${lv.id} OF 101 · ${tierOf(lv.id).name} · ${lv.practice ? 'PRACTICE' : lv.stacked ? 'STACKED LOAD' : 'FLOOR LOAD'}`;
+  $('brKicker').textContent = lv.demo ? 'PRACTICE BAY · NO SCORE · NOTHING SAVED' : `LEVEL ${lv.id} OF 101 · ${tierOf(lv.id).name} · ${lv.boss ? 'BOSS LOAD' : lv.practice ? 'PRACTICE' : lv.stacked ? 'STACKED LOAD' : 'FLOOR LOAD'}`;
   $('brTitle').textContent = lv.title;
   let h = `<p>${lv.lesson}</p>`;
   h += `<div class="truck-spec">TRUCK: ${lv.truck.name.toUpperCase()} · ${lv.truck.width}" WIDE × ${lv.truck.depth}" DEEP (${fmtLen(lv.truck.depth)})</div>`;
   if (lv.unloadSequence) h += `<p><b>Venue load-in order:</b> ${lv.unloadSequence.map((d, i) => `${i + 1}. ${title(d)}`).join(' → ')}</p>`;
-  h += `<ul class="goal-list">${lv.objectives.map(o => `<li>${o}</li>`).join('')}</ul>`;
+  h += `<ul class="goal-list">${lv.objectives.map(o => `<li>${o}</li>`).join('')}</ul>` + bonusHtml(lv);
   if (Engine.secureActive(lv)) h += `<div class="truck-spec">ON THE TRUCK: ${lv.availableLoadBars || 0} LOAD BAR${lv.availableLoadBars === 1 ? '' : 'S'} · ${lv.availableStraps || 0} STRAP${lv.availableStraps === 1 ? '' : 'S'}</div>`;
   if (lv.securementHowTo) h += `<div class="howto">
       <kbd>LOAD BAR · B</kbd><span>Pick up a load bar, then click right behind a finished tier. It wedges wall to wall in the E-track.</span>
@@ -2789,6 +2863,64 @@ function phoneHowTo(h){
   ];
   for (const [a, b] of rows) h = h.replace(a, b);
   return h;
+}
+/* ---------- bonus stars: three objectives per level; stars count only on a passed run ---------- */
+function bonusGoals(lv){
+  if (!lv || lv.loop || lv.demo || lv.exam) return null;
+  if (lv.offload) return [
+    {label:'Score 75 or better', test:r => r.total >= 75},
+    {label:'Score 90 or better', test:r => r.total >= 90},
+    {label:'SMART UNLOAD: no order mistakes', test:r => r.badges.includes('SMART UNLOAD')}];
+  const mid = lv.unloadSequence ? {label:'SMART PACK: it comes off in the venue\'s order', test:r => r.badges.includes('SMART PACK')}
+    : Engine.secureActive(lv) ? {label:'LOCKED IN: every tier tied in', test:r => r.badges.includes('LOCKED IN')}
+    : {label:'ROCK SOLID: nothing moves in transit', test:r => r.badges.includes('ROCK SOLID')};
+  return [{label:lv.stacked ? 'HIGH &amp; TIGHT: fill the space floor to ceiling' : 'HIGH &amp; TIGHT: no wasted floor in the load', test:r => r.badges.includes('HIGH & TIGHT')},
+    mid, {label:'CLEAN LOAD: zero rehandles', reh:true, test:r => r.rehandles === 0}];
+}
+function bonusHtml(lv, rep){
+  const g = bonusGoals(lv); if (!g) return '';
+  const passed = rep && rep.total >= 60;
+  return `<div class="section-label">BONUS STARS</div><ul class="bonus-list">${g.map(b => `<li class="${rep ? (passed && b.test(rep) ? 'met' : 'miss') : ''}">${b.label}${b.reh && !rep ? ' <span class="reh">· rehandles: <b class="rehCount">0</b></span>' : ''}</li>`).join('')}</ul>`;
+}
+const starsFor = (lv, rep) => { const g = bonusGoals(lv); return rep.total >= 60 && g ? g.filter(b => b.test(rep)).length : 0; };
+
+/* ---------- see a better pack: the stored expert solution, shown in the truck ---------- */
+function showBetter(){
+  const lv = G.level, r = buildSolution(lv); if (r.errs.length) return;
+  G.better = {p:G.placements, b:G.bars, s:G.staging, tv:G.transitView, view:G.view};
+  G.placements = clone(r.st.placements); G.bars = clone(r.st.bars); G.staging = []; G.transitView = null; G.hand = null; G.tool = null;
+  G.mode = 'better'; G.scrollY = 0; closeModals(); $('betterBar').hidden = false; layout(); refresh();
+}
+function leaveBetter(){
+  const b = G.better; if (!b) return;
+  G.placements = b.p; G.bars = b.b; G.staging = b.s; G.transitView = b.tv; G.view = b.view; G.better = null;
+  $('betterBar').hidden = true; G.mode = 'results'; layout(); refresh(); openModal('results');
+}
+
+/* ---------- achievements shelf ---------- */
+const ACH_BADGES = [
+  ['HIGH & TIGHT', 'No wasted space in the load'], ['NICE WALL', 'A full-width wall of cases'], ['ROCK SOLID', 'Nothing moved in transit'],
+  ['CLEAN LOAD', 'Zero rehandles'], ['CLEAN BASE', 'Heavy cases made the base'], ['LOCKED IN', 'Every tier tied in'],
+  ['SMART PACK', 'Comes off in the venue\'s order'], ['POCKETED', 'Hard cases trapped in pockets'], ['PINNED', 'Long cases pinned the tiers together'],
+  ['TOUR READY', 'A pack with nothing to fix'], ['SMART UNLOAD', 'An unload with no order mistakes'], ['FULL TRUCK', 'A full truck in Endless Tour']];
+function achMilestones(p){
+  const bossIds = LEVELS.filter(l => l.boss).map(l => l.id), bosses = bossIds.filter(id => (p.best[id] || 0) >= 60).length;
+  const three = Object.entries(p.bonus || {}).filter(([k, v]) => +k <= 100 && v >= 3).length;
+  return [
+    ['FLOOR CREW', 'Finished levels 1–30', p.unlocked > 30], ['STACKER', 'Finished levels 31–60', p.unlocked > 60],
+    ['RIGGER', 'Finished levels 61–90', p.unlocked > 90], ['DOCK READY', 'Finished levels 91–100', p.unlocked > 100],
+    ...(bossIds.length ? [['BOSS LOADS', `Boss loads cleared: ${bosses} of ${bossIds.length}`, bosses >= bossIds.length, bosses]] : []),
+    ['THREE STARS', `Levels with all three bonus stars: ${three}`, three >= 10, three],
+    ['PACKOLOGIST', 'Passed the final exam', !!(p.exam && p.exam.passed)], ['ON THE ROAD', 'Finished an Endless Tour', (p.loopBest || 0) > 0]];
+}
+function openAchievements(){
+  const p = G.progress, b = p.badges || {};
+  $('achBadges').innerHTML = ACH_BADGES.map(([k, d]) => `<div class="ach ${b[k] ? '' : 'locked'}"><span class="badge">${k}</span><small>${d}</small><span class="cnt">${b[k] ? '×' + b[k] : 'NOT YET'}</span></div>`).join('');
+  const ms = achMilestones(p);
+  $('achMiles').innerHTML = ms.map(([k, d, done, n]) => `<div class="ach ${done ? '' : 'locked'}"><span class="badge">${k}</span><small>${d}</small><span class="cnt">${done ? 'DONE' : n ? 'IN PROGRESS' : 'NOT YET'}</span></div>`).join('');
+  const got = ACH_BADGES.filter(([k]) => b[k]).length + ms.filter(m => m[2]).length;
+  $('achSum').textContent = `${got} of ${ACH_BADGES.length + ms.length} earned. Badges count every time you pass a level with them.`;
+  G.mode = 'achievements'; openModal('achievements');
 }
 function startPlay(){ closeModals(); G.mode = 'play'; G.coachShowUntil = performance.now() + COACH_LESSON_MS; G.coachFirst = true; G.warnSeen = {}; refresh(); }
 
@@ -3159,7 +3291,8 @@ function refresh(){
   const space = Engine.calculateSpaceEfficiency(st);
   const transit = Engine.simulateTransit(st);
   const unload = Engine.calculateUnloadAccessibility(st, G.level);
-  const score = G.placements.length ? Engine.calculateFinalScore(st, G.level) : null;
+  const score = G.placements.length ? Engine.calculateFinalScore(st, G.level, null, {rehandles:G.rehandles || 0}) : null;
+  for (const el of document.querySelectorAll('.rehCount')) el.textContent = G.rehandles || 0;
   G.live = {space, transit, unload, score};
   $('hudSpace').textContent = Math.round(space.usedPct * 100) + '%';
   $('hudStab').textContent = !G.placements.length ? '--' : transit.shifted.size ? `${transit.shifted.size} LOOSE` : 'SOLID';
@@ -3285,6 +3418,7 @@ function renderGoal(){
   }
   $('levelGoal').innerHTML = `<div style="font-weight:700;margin-bottom:4px">${lv.title}</div><ul class="goal-list">${lv.objectives.map(o => `<li>${o}</li>`).join('')}</ul>` +
     (lv.unloadSequence ? `<div class="section-label" style="margin-top:4px">VENUE LOAD-IN ORDER</div><div class="seq">${lv.unloadSequence.map((d, i) => `<div><b>${i + 1}</b><span class="chip" style="background:${DEPTS[d].color}">${d}</span><span>${i === 0 ? 'first off' : ''}</span></div>`).join('')}</div>` : '');
+  $('levelGoal').insertAdjacentHTML('beforeend', bonusHtml(lv));
   if (isPhone()) $('levelGoal').innerHTML = phoneText($('levelGoal').innerHTML);
 }
 // phone: keyboard and mouse wording becomes touch wording
@@ -3473,13 +3607,13 @@ function removeHovered(){
     if (on.length){ flashCoach('bad', `Take the ${on[0].def.name} off the top first. Cases always come off top to bottom.`); return; }
   }
   G.hist.push(snap()); G.fut = [];
-  G.placements = G.placements.filter(p => p.uid !== uid); G.hover = null;
+  G.placements = G.placements.filter(p => p.uid !== uid); G.hover = null; G.rehandles = (G.rehandles || 0) + 1;
   flashCoach('tip', `The ${itemOf(uid).def.name} is back on the dock. <b>UNDO</b> puts it back in the truck.`, 3500);
   refresh();
 }
 function returnToDock(){
   if (!G.hand) return;
-  if (G.hand.from === 'truck'){ G.hist.push(G.hand.pre); G.fut = []; }
+  if (G.hand.from === 'truck'){ G.hist.push(G.hand.pre); G.fut = []; G.rehandles = (G.rehandles || 0) + 1; } // a loaded case came back out
   G.hand = null; G.ghost = null; refresh();
 }
 function setGhost(x, y){
@@ -3526,7 +3660,7 @@ const doorView = () => G.level && G.level.stacked && G.view === 'door';
 function pointerGhost(px, py){ doorView() ? ghostFromDoorPointer(px, py) : ghostFromPointer(px, py); }
 function hitCase(px, py){ return doorView() ? caseAtDoor(px, py) : caseAt(px, py); }
 function toggleView(){
-  if (!G.level || !G.level.stacked || G.mode !== 'play') return;
+  if (!G.level || !G.level.stacked || (G.mode !== 'play' && G.mode !== 'better')) return;
   G.view = G.view === 'door' ? 'top' : 'door'; G.hover = null;
   if (G.tool) setToolLine(G.view === 'door' ? doorToolLine() : G.tool.L || 1);
   if (G.hand && G.ghost) setGhost(G.ghost.x, G.ghost.y);
@@ -3631,6 +3765,9 @@ function placeHand(){
   if (!g.ok){ flashSome('bad', g.reason, 3000); return false; }
   const before = new Set(Engine.calculateSpaceEfficiency(state()).fullRows);
   G.hist.push(h.pre); G.fut = [];
+  // moving a case that was loaded earlier is a rehandle; nudging or turning the one you just set down is not
+  if (h.from === 'truck' && h.orig && h.uid !== G.lastPlaced && (g.x !== h.orig.x || g.y !== h.orig.y || (g.z || 0) !== (h.orig.z || 0))) G.rehandles = (G.rehandles || 0) + 1;
+  G.lastPlaced = h.stack ? null : h.uid;
   if (h.stack) G.placements.push(...Engine.stackPlacements(state(), h.stack, g.x, g.y));
   else G.placements.push({uid:h.uid, x:g.x, y:g.y, z:g.z || 0, rot:h.rot});
   const {w, d} = Engine.dimsOf(itemOf(h.uid).def, h.rot);
@@ -3685,7 +3822,7 @@ function undo(){ if (G.mode !== 'play') return; G.tool = null; if (G.hand) cance
 function redo(){ if (G.mode !== 'play') return; G.tool = null; if (G.hand) cancelHand(true); if (!G.fut.length) return refresh(); G.hist.push(snap()); restore(G.fut.pop()); refresh(); }
 function resetLevel(){ if (G.mode !== 'play') return; G.tool = null; if (G.hand) cancelHand(true);
   if (G.level.loop && G.level.offload){ flashCoach('bad', 'This truck is at the venue: unload it. RESET is for packing.'); return; }
-  if (G.level.offload){ G.hist.push(snap()); G.fut = []; loadPack(); refresh(); flashCoach('tip', 'Truck reloaded. <b>UNDO</b> goes back.'); return; } if (!G.placements.length && !G.bars.length) return; G.hist.push(snap()); G.fut = []; G.placements = []; G.bars = []; G.coachStep = 0; refresh(); flashCoach('tip', 'Truck emptied. <b>UNDO</b> brings the load back.'); }
+  if (G.level.offload){ G.hist.push(snap()); G.fut = []; loadPack(); refresh(); flashCoach('tip', 'Truck reloaded. <b>UNDO</b> goes back.'); return; } if (!G.placements.length && !G.bars.length) return; G.hist.push(snap()); G.fut = []; G.rehandles = 0; G.lastPlaced = null; G.placements = []; /* starting over is a fresh plan */ G.bars = []; G.coachStep = 0; refresh(); flashCoach('tip', 'Truck emptied. <b>UNDO</b> brings the load back.'); }
 
 /* ---------- load bars + straps ---------- */
 function startTool(kind){
@@ -3914,7 +4051,7 @@ function startTransit(){
   if (G.level.loop && !G.placements.length){ flashCoach('bad', 'Load some cases first.'); return; }
   if (!G.level.loop && leftCount()){ flashCoach('bad', 'There are still cases on the dock. Everything on the manifest has to go on the truck.'); return; }
   const base = clone(G.placements);
-  const report = Engine.calculateFinalScore(state(), G.level, base);
+  const report = Engine.calculateFinalScore(state(), G.level, base, {rehandles:G.rehandles || 0});
   const sim = report.transit;
   G.mode = 'transit'; refresh();
   const intro = 900, per = 1000, outro = 900, t0 = performance.now();
@@ -3954,12 +4091,13 @@ function showResults(rep){
     $('rsNext').disabled = false; $('rsNext').textContent = 'LEAVE PRACTICE';
     G.mode = 'results'; openModal('results'); return;
   }
-  const lv = G.level, stars = rep.total >= 90 && rep.lessonPassed ? 3 : rep.total >= 75 ? 2 : rep.total >= 60 ? 1 : 0;
+  const lv = G.level, stars = starsFor(lv, rep);
   const passed = rep.total >= 60;
   const prog = G.progress;
   prog.best[lv.id] = Math.max(prog.best[lv.id] || 0, rep.total);
-  prog.stars[lv.id] = Math.max(prog.stars[lv.id] || 0, stars);
+  prog.bonus = prog.bonus || {}; prog.bonus[lv.id] = Math.max(prog.bonus[lv.id] || 0, stars); // bonus stars (earned from the three objectives)
   if (passed) prog.unlocked = Math.max(prog.unlocked, lv.id + 1);
+  if (passed){ prog.badges = prog.badges || {}; for (const b of rep.badges){ const k = b.replace(/ ×\d+$/, ''); prog.badges[k] = (prog.badges[k] || 0) + 1; } }
   saveProgress();
   $('rsKicker').textContent = `LEVEL ${lv.id} · ${lv.title.toUpperCase()}`;
   $('rsTitle').textContent = lv.offload ? (rep.badges.includes('SMART UNLOAD') ? 'SMART UNLOAD' : passed ? 'TRUCK EMPTY' : 'OUT OF ORDER') : rep.badges.includes('TOUR READY') ? 'TOUR READY' : passed ? 'TRUCK PACKED' : 'NOT ROAD READY';
@@ -3967,12 +4105,14 @@ function showResults(rep){
   $('rsBody').innerHTML = `
     <div class="score-big"><b>${rep.total}</b><span>/ 100</span><span class="stars">${'★'.repeat(stars)}<span class="dim">${'★'.repeat(3 - stars)}</span></span></div>
     ${passed ? '' : '<p style="color:var(--bad)">Score 60 or better to unlock the next level.</p>'}
+    ${bonusHtml(lv, rep)}
     ${cats}
     ${rep.badges.length ? `<div class="badges">${rep.badges.map(b => `<span class="badge">${b}</span>`).join('')}</div>` : ''}
     <div class="section-label">WHAT THE CREW SAYS</div>
     <ul class="feedback">${rep.feedback.map(([k, t]) => `<li class="${k}">${t}</li>`).join('')}</ul>`;
   const next = G.levelIdx + 1;
   $('rsNext').disabled = !(next < LEVELS.length && prog.unlocked >= LEVELS[next].id);
+  $('rsBetter').hidden = !!(lv.offload || lv.loop || !lv.solution || !lv.solution.length);
   $('rsNext').textContent = next < LEVELS.length ? 'NEXT LEVEL' : 'STACKED LEVELS SOON';
   G.mode = 'results'; openModal('results');
 }
@@ -4054,7 +4194,7 @@ function examDone(){
       const name = $('exName').value.trim(); if (!name){ $('exName').focus(); return; }
       const now = new Date(), date = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
       prog.exam = {passed:true, score:ex.right, name, date, certNo:null};
-      prog.stars[101] = 3; saveProgress();
+      prog.stars[101] = 3; (prog.bonus = prog.bonus || {})[101] = 3; saveProgress();
       issueCertNo(name, ex.right, date).then(no => { if (no){ prog.exam.certNo = no; saveProgress(); } showCertificate(name, ex.right, date, prog.exam.certNo); });
     };
     $('exMake').onclick = go; $('exName').onkeydown = e => { e.stopPropagation(); if (e.key === 'Enter') go(); }; setTimeout(() => $('exName').focus(), 50);
@@ -4347,9 +4487,9 @@ function openLevels(){
     const tier = TIERS.find(t => t.from === i);
     if (i === 1) h += `<div class="mode-head">CAMPAIGN<small>Levels 1–100 + the final exam</small></div>`;
     if (tier) h += `${i > 1 ? '</div>' : ''}<div class="tier-head">${tier.name}<small>${tier.from === tier.to ? `Level ${tier.from}` : `Levels ${tier.from}–${tier.to}`} · ${tier.note}</small></div><div class="levels-grid">`;
-    const lv = LEVELS[i - 1], open = lv && prog.unlocked >= i && (i < 101 || examReady(prog)), st = prog.stars[i] || 0;
+    const lv = LEVELS[i - 1], open = lv && prog.unlocked >= i && (i < 101 || examReady(prog)), st = (prog.bonus || {})[i] || 0;
     if (i === 101){ h += `<button class="lvl" ${open ? `data-i="${i - 1}"` : 'disabled'}><b>${i}</b><span class="tag">FINAL EXAM</span><small>3★ or 95%+ on all 100 levels</small><span class="st">${masteredCount(prog)}/100</span></button>`; continue; }
-    h += `<button class="lvl" ${open ? `data-i="${i - 1}"` : 'disabled'}><b>${i}</b><span class="tag">${lv ? (lv.practice ? 'PRACTICE' : 'LESSON') : ''}</span><small>${lv ? lv.title : 'COMING SOON'}</small><span class="st">${lv ? `${'★'.repeat(st)}${'☆'.repeat(3 - st)}` : '&nbsp;'}</span></button>`;
+    h += `<button class="lvl${lv && lv.boss ? ' boss' : ''}" ${open ? `data-i="${i - 1}"` : 'disabled'}><b>${i}</b><span class="tag">${lv ? (lv.boss ? 'BOSS LOAD' : lv.practice ? 'PRACTICE' : 'LESSON') : ''}</span><small>${lv ? lv.title : 'COMING SOON'}</small><span class="st">${lv ? `${'★'.repeat(st)}${'☆'.repeat(3 - st)}` : '&nbsp;'}</span></button>`;
   }
   const lo = loopOpen(prog);
   let hasRun = false; try { hasRun = !!localStorage.getItem(LOOP_KEY); } catch(e){}
@@ -4495,6 +4635,9 @@ function startDemo(){ closeModals(); loadLevelObj(isPhone() ? {...DEMO_LEVEL, ..
 $('titleDemo').onclick = () => homeGo(HOME.demo);
 $('titleHelp').onclick = () => homeGo(HOME.help);
 $('btnHelp').onclick = openHelp;
+$('rsBetter').onclick = showBetter; $('betterBack').onclick = leaveBetter;
+$('lvAch').onclick = () => { closeModals(); openAchievements(); };
+$('achClose').onclick = () => { closeModals(); openLevels(); };
 $('btnSound').onclick = () => setSound(!SOUND.on);
 setSound(SOUND.on);
 $('lvHelp').onclick = () => { closeModals(); G.mode = G.prevMode || 'title'; openHelp(); G.helpPrev = 'levels'; };
@@ -4507,7 +4650,7 @@ function applyProgressCode(code){
   const pad = raw + '==='.slice((raw.length + 3) % 4);
   const p = JSON.parse(atob(pad));
   if (!p || typeof p.unlocked !== 'number') throw new Error('bad code');
-  G.progress = {unlocked:Math.max(1, Math.min(101, p.unlocked)), best:p.best || {}, stars:p.stars || {}};
+  G.progress = {...p, unlocked:Math.max(1, Math.min(101, p.unlocked)), best:p.best || {}, stars:p.stars || {}}; // keep everything (exam, tour best, badges, bonus stars)
   saveProgress();
 }
 $('lvSaveCode').onclick = () => {
@@ -4525,7 +4668,7 @@ $('lvLoadCode').onclick = () => {
 /* ---------- home: the menu strip sits over the live game (next level, Level Select open), blurred ---------- */
 let homeBusy = false;
 // Level 101 (the final exam) opens only when every level 1-100 has 3 stars or a best score of 95%+.
-const isMastered = (prog, i) => (prog.stars[i] || 0) >= 3 || (prog.best[i] || 0) >= 95;
+const isMastered = (prog, i) => (prog.stars[i] || 0) >= 3 || ((prog.bonus || {})[i] || 0) >= 3 || (prog.best[i] || 0) >= 95; // old stars still count
 const masteredCount = prog => { let n = 0; for (let i = 1; i <= 100; i++) if (isMastered(prog, i)) n++; return n; };
 const examReady = prog => masteredCount(prog) === 100;
 const nextLevelIdx = () => Math.min(LEVELS.length - 1, Math.max(0, (G.progress.unlocked || 1) - 1));
@@ -4620,6 +4763,11 @@ const phoneOverCanvas = e => { const r = $('truckCanvas').getBoundingClientRect(
 function phoneDown(e){
   if (isPhone() && document.body.classList.contains('sheet-open') && !e.target.closest('.panel.info, #coach')){
     document.body.classList.remove('sheet-open'); e.preventDefault(); e.stopPropagation(); return;
+  }
+  if (isPhone() && G.mode === 'better' && e.target.closest('#truckCanvas')){ // looking at the better pack: dragging only scrolls the truck
+    const now = performance.now(); PH.pointers.set(e.pointerId, {x:e.clientX, y:e.clientY});
+    PH.g = {id:e.pointerId, x0:e.clientX, y0:e.clientY, t0:now, lx:e.clientX, ly:e.clientY, lt:now, moved:false, kind:'pan', sy0:G.scrollY || 0, vy:0};
+    e.preventDefault(); e.stopPropagation(); return;
   }
   if (!isPhone() || !G.level || G.mode !== 'play') return;
   const card = e.target.closest('.manifest-item'), onCanvas = e.target.closest('#truckCanvas'), toolBtn = e.target.closest('#btnBar, #btnStrap'), stack = !e.target.closest('#btnClearStage') && e.target.closest('#stagingBox');
