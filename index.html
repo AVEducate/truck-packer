@@ -244,8 +244,12 @@ body.phone #btnClearStage:disabled{display:none}
 body.phone .stage{flex:1 1 auto}
 body.phone .stage-tools{left:10px !important;right:10px;top:auto !important;bottom:64px;width:auto !important;display:grid !important;grid-template-columns:repeat(4,1fr);gap:8px}
 body.phone .stage-tools .btn{width:auto;height:46px;font-size:20px}
-body.phone #btnHint, body.phone #btnView{display:none !important}
-body.phone .stage-tools .btn[hidden]{display:inline-flex !important;visibility:hidden}
+body.phone #btnHint{display:none !important}
+body.phone #btnView{order:1;display:inline-flex !important} body.phone #btnBar{order:2} body.phone #btnStrap{order:3} body.phone #btnUndoPh{order:4}
+body.phone .stage-tools .btn{flex-direction:column;justify-content:center;align-items:center;gap:1px;padding:3px 2px}
+body.phone .stage-tools .btn svg{width:24px;height:24px}
+body.phone .stage-tools .btn .lock{font-size:9px;line-height:1}
+body.phone .stage-tools .btn[hidden]{display:inline-flex !important;opacity:.3;pointer-events:none} /* not used on this level: shown dimmed so the row stays four equal squares */
 body.phone .stage-tools .btn.dimmed{opacity:.35}
 body.phone #btnTransit{left:10px !important;right:10px;top:auto !important;bottom:8px;width:auto !important;height:50px}
 body.phone .panel.info{position:fixed;left:0;right:0;bottom:58px;height:50vh;height:50dvh;z-index:40;border-left:0;border-top:3px solid var(--edge);transform:translateY(calc(100% + 60px));transition:transform .25s ease;box-shadow:0 -8px 24px rgba(0,0,0,.5)}
@@ -444,12 +448,11 @@ body.phone .home-btn kbd, body.phone .link-btn kbd{display:none}
       <div id="toast"></div>
       <div id="transitLabel"></div>
       <div class="stage-tools" id="stageTools">
-        <button class="btn phone-only" id="btnUp" aria-label="Scroll toward the nose">▲</button>
-        <button class="btn phone-only" id="btnDown" aria-label="Scroll toward the doors">▼</button>
         <button class="btn hint-cube" id="btnHint" title="Hint" aria-label="Hint">?</button>
         <button class="btn" id="btnView" hidden title="Door view (V)">DOOR<span class="lock">V</span></button>
         <button class="btn" id="btnBar" hidden title="Load bar (B)">BAR<span class="lock">B</span></button>
         <button class="btn" id="btnStrap" hidden title="Strap (S)">STRAP<span class="lock">S</span></button>
+        <button class="btn phone-only" id="btnUndoPh" aria-label="Undo"><svg viewBox="0 0 40 40"><path d="M14 9 L5 17 L14 25" fill="none" stroke="#111" stroke-width="5" stroke-linejoin="round"/><path d="M14 9 L5 17 L14 25" fill="none" stroke="#f0c04a" stroke-width="2.6" stroke-linejoin="round"/><path d="M6 17 H24 A9 9 0 0 1 24 35 H15" fill="none" stroke="#111" stroke-width="5"/><path d="M6 17 H24 A9 9 0 0 1 24 35 H15" fill="none" stroke="#f0c04a" stroke-width="2.6"/></svg><span class="lock">UNDO</span></button>
       </div>
       <button class="btn primary" id="btnTransit">READY FOR TRANSIT</button>
     </div>
@@ -520,9 +523,10 @@ body.phone .home-btn kbd, body.phone .link-btn kbd{display:none}
     <kbd>TWIST</kbd><span>Two-finger twist on the truck rotates a case 90°.</span>
     <kbd>DOUBLE-TAP</kbd><span>Takes a case (or a bar or strap) back out. UNDO brings it back.</span>
     <kbd>HOLD + FLICK</kbd><span>Hold a case still for 1 second, then flick up to tip it on its side.</span>
-    <kbd>SWIPE</kbd><span>Swipe the full length of the truck, starting off a case: down for the door view, up for the top view.</span>
+    <kbd>DRAG FLOOR</kbd><span>Drag empty truck floor up or down to scroll a long truck.</span>
     <kbd>BAR · STRAP</kbd><span>Drag the button into the truck and let go behind a finished tier.</span>
-    <kbd>▲ ▼</kbd><span>Scroll a long truck toward the nose or the doors.</span>
+    <kbd>VIEW</kbd><span>Flips between the top view and the door view on stacked levels.</span>
+    <kbd>UNDO</kbd><span>Takes back your last move.</span>
     <kbd>CREW LEAD</kbd><span>Tap or pull up the bar at the bottom for the level goal and case info.</span>
     <kbd>≡ MENU</kbd><span>Undo, redo, hint, reset, help and the level list.</span>
   </div></div>
@@ -2734,10 +2738,10 @@ function phoneHowTo(h){
     [/<kbd>2 · LID<\/kbd><span>.*?<\/span>/, '<kbd>2 · LID</kbd><span>Drag smaller cases onto the card the same way. They fill the base\'s lid side by side.</span>'],
     [/<kbd>3 · PICK UP<\/kbd><span>.*?<\/span>/, '<kbd>3 · PICK UP</kbd><span>Drag the <b>DOCK STACK</b> card into the truck. The whole stack comes with you, and a two-finger twist turns it.</span>'],
     [/<kbd>4 · ROLL IN<\/kbd><span>.*?<\/span>/, '<kbd>4 · ROLL IN</kbd><span>Let go where it fits. One move loads two or three cases.</span>'],
-    [/<kbd>V<\/kbd><span>Flip to the DOOR VIEW/, '<kbd>SWIPE</kbd><span>Swipe down the full length of the truck for the DOOR VIEW (up goes back)'],
+    [/<kbd>V<\/kbd><span>Flip to the DOOR VIEW/, '<kbd>VIEW</kbd><span>Tap VIEW to flip to the DOOR VIEW'],
     [/<kbd>T<\/kbd><span>.*?<\/span>/, '<kbd>HOLD + FLICK</kbd><span>Hold the case still for 1 second, then flick up: it lays on its side and width and height swap. Do it again to stand it back up.</span>'],
     [/<kbd>R<\/kbd><span>Still turns it/, '<kbd>TWIST</kbd><span>A two-finger twist still turns it'],
-    [/<kbd>V<\/kbd><span>The door view works here too\./, '<kbd>SWIPE</kbd><span>The door view works here too.'],
+    [/<kbd>V<\/kbd><span>The door view works here too\./, '<kbd>VIEW</kbd><span>The door view works here too.'],
     [/<kbd>(?:CLICK|TAP)<\/kbd><span>Pick a case from the manifest.*?<\/span>/, '<kbd>DRAG</kbd><span>Drag a case down from the strip into the truck and let go to set it down.</span>'],
     [/<kbd>R<\/kbd><span>Rotate the case.*?<\/span>/, '<kbd>TWIST</kbd><span>Twist two fingers on the truck to rotate a case.</span>'],
     [/<kbd>SPACE<\/kbd><span>.*?<\/span>/, '<kbd>MOVE</kbd><span>Drag a case already in the truck to move it.</span>'],
@@ -2758,7 +2762,7 @@ function layout(){
   cv.width = Math.round(cw * dpr); cv.height = Math.round(ch * dpr);
   if (!G.level) return;
   const t = G.level.truck, wallIn = 4;
-  if (isPhone()){ // portrait: the truck fills the width; long trucks scroll with ▲ ▼ (the button row and READY sit below)
+  if (isPhone()){ // portrait: the truck fills the width; long trucks scroll by dragging the floor (the button row and READY sit below)
     const rulerW = 30, side = 10, topP = 24, reserve = PHONE_RESERVE;
     const view = ch - reserve - topP - 26, sW = (cw - rulerW - side) / (t.width + wallIn * 2), sH = view / (t.depth + wallIn);
     const s = Math.max(1, sW * (t.depth + wallIn) <= view * 1.15 ? Math.min(sW, sH) : sW); // almost fits: shrink to fit; long trucks scroll
@@ -2934,7 +2938,7 @@ function renderDoor(ctx){
   ctx.textAlign = 'center'; ctx.fillStyle = '#ebe3cb'; ctx.font = "800 19px 'Barlow Condensed', sans-serif";
   if (!(G.hand && G.ghost) && !(G.tool && G.tool.L != null)) ctx.fillText('DOOR VIEW · LOOKING IN FROM THE REAR DOORS', ox + Wp / 2, top - 34);
   ctx.fillStyle = '#8b8c84'; ctx.font = "700 13px 'Barlow Condensed', sans-serif";
-  ctx.fillText(isPhone() ? 'Nearest tier is brightest. Swipe up for the top view.' : 'Nearest tier is brightest. Press V for the top view.', ox + Wp / 2, floorY + 28);
+  ctx.fillText(isPhone() ? 'Nearest tier is brightest. Tap VIEW for the top view.' : 'Nearest tier is brightest. Press V for the top view.', ox + Wp / 2, floorY + 28);
   const pos = currentPositions().map(p => ({p, r:Engine.rectOf(st, p)}));
   const loadEnd = Math.max(1, ...pos.map(o => o.r.y + o.r.d));
   pos.sort((a, b) => (a.p.y + a.r.d) - (b.p.y + b.r.d) || a.r.z - b.r.z);
@@ -3061,14 +3065,14 @@ function placeStageControls(){
   if (!G.L || !G.level) return;
   if (isPhone()){ // the phone layout positions the button row and READY with CSS
     for (const el of [$('stageTools'), $('btnTransit')]) el.removeAttribute('style');
-    $('btnUp').classList.toggle('dimmed', !(G.scrollY > 0)); $('btnDown').classList.toggle('dimmed', !(G.scrollY < G.scrollMax));
+    $('btnUndoPh').classList.toggle('dimmed', !G.hist.length || G.mode !== 'play');
     return;
   }
   const L = G.L, door = doorView(), tools = $('stageTools'), btn = $('btnTransit');
   // the row under the doors: READY FOR TRANSIT centered, small square buttons at the truck's bottom-right corner
   const left = door ? G.LD.ox - 16 : L.ox - L.wall, right = door ? G.LD.ox + G.LD.Wp + 16 : L.ox + L.Wp + L.wall, span = right - left;
   const by = door ? G.LD.floorY + 40 : L.oy + L.Dp + Math.max(10, 5 * L.s) + 30;
-  const n = [...tools.children].filter(b => !b.hidden).length, cube = 52, cg = 6, cubesW = n * cube + (n - 1) * cg;
+  const n = [...tools.children].filter(b => !b.hidden && getComputedStyle(b).display !== 'none').length, cube = 52, cg = 6, cubesW = n * cube + (n - 1) * cg;
   let bw = Math.min(244, span), bx = (left + right) / 2 - bw / 2;
   // always outside the truck: a short column of squares stacked up from its bottom-right corner
   const colH = n * cube + (n - 1) * cg;
@@ -3123,7 +3127,7 @@ function refresh(){
   $('hudUnload').textContent = !unload ? '--' : !G.placements.length ? '--' : unload.outOfOrder ? `${unload.outOfOrder} BURIED` : 'CLEAR';
   $('hudScore').textContent = score && !leftCount() && !G.hand ? score.total : '--';
   $('brandSub').textContent = G.level.stacked ? `${G.view === 'door' ? 'DOOR' : 'TOP'} VIEW · STACKED LOAD` : 'TOP VIEW · FLOOR LOAD';
-  $('btnView').innerHTML = `${G.view === 'door' ? ICON_TOP : ICON_DOOR}<span class="lock">V</span>`; $('btnView').title = `${G.view === 'door' ? 'Top' : 'Door'} view (V)`;
+  $('btnView').innerHTML = `${G.view === 'door' ? ICON_TOP : ICON_DOOR}<span class="lock">${isPhone() ? (G.view === 'door' ? 'TOP' : 'DOOR') : 'V'}</span>`; $('btnView').title = `${G.view === 'door' ? 'Top' : 'Door'} view (V)`;
   placeStageControls();
   renderStaging();
   const sec = score && score.secure && score.secure.active ? score.secure : null;
@@ -3249,8 +3253,8 @@ const PHONE_WORDS = [
   [/Click to set it down\. Press <b>R<\/b> to rotate, <b>SPACE<\/b> to push it all the way in\./g, 'Let go to set it down. <b>Twist two fingers</b> to rotate it.'],
   [/Click a <b>Utility Trunk<\/b> in the MANIFEST to pick it up \(or drag it straight into the truck\)\./g, 'Drag a <b>Utility Trunk</b> from the cases strip at the top down into the truck.'],
   [/Move into the truck\./g, 'Drag it into the truck.'],
-  [/then click <b>LOAD BAR<\/b> \(or press B\) and set it/gi, 'then drag the <b>LOAD BAR</b> button into the truck and let go'],
-  [/then click LOAD BAR and set it/gi, 'then drag the LOAD BAR button into the truck and let go'],
+  [/([Tt])hen click <b>LOAD BAR<\/b> \(or press B\) and set it/g, (m, t) => `${t}hen drag the <b>LOAD BAR</b> button into the truck and let go`],
+  [/([Tt])hen click LOAD BAR and set it/g, (m, t) => `${t}hen drag the LOAD BAR button into the truck and let go`],
   [/\(or press B\)/g, '(drag the bar button onto the truck)'],
   [/\(press B\)/g, '(drag the bar button onto the truck)'],
   [/\(press S\)/g, '(drag the strap button onto the truck)'],
@@ -3261,13 +3265,13 @@ const PHONE_WORDS = [
   [/add what fits on its lid, then PICK UP STACK\./g, 'add what fits on its lid, then drag the DOCK STACK card into the truck.'],
   [/then PICK UP STACK and roll it in as one piece/g, 'then drag the DOCK STACK card into the truck as one piece'],
   [/PICK UP STACK, press R to turn it/g, 'drag the DOCK STACK card into the truck, twist two fingers to turn it'],
-  [/Press <b>V<\/b> \(or DOOR VIEW\) to look at/g, 'Swipe <b>down</b> the full length of the truck to look at'],
-  [/Press <b>V<\/b> to see the load from the doors/g, 'Swipe <b>down</b> the full length of the truck to see the load from the doors'],
-  [/Press V for the top view/g, 'Swipe up for the top view'],
-  [/V flips back\./g, 'Swipe up to flip back.'],
+  [/Press <b>V<\/b> \(or DOOR VIEW\) to look at/g, 'Tap <b>VIEW</b> to look at'],
+  [/Press <b>V<\/b> to see the load from the doors/g, 'Tap <b>VIEW</b> to see the load from the doors'],
+  [/Press V for the top view/g, 'Tap VIEW for the top view'],
+  [/V flips back\./g, 'VIEW flips back.'],
   [/Press SPACE \(Push In\) to slide it all the way in\./g, 'Drag it forward until it touches.'],
-  [/(?:[Pp]ress) <b>T<\/b> to tip the case you\\?'re holding/g, 'Hold the case still for 1 second, then <b>flick up</b> to tip it'],
-  [/(?:[Pp]ress) <b>T<\/b> to lay it on its side/g, 'Hold it still for 1 second, then <b>flick up</b> to lay it on its side'],
+  [/([Pp])ress <b>T<\/b> to tip the case you\\?'re holding/g, (m, p) => `${p === 'P' ? 'H' : 'h'}old the case still for 1 second, then <b>flick up</b> to tip it`],
+  [/([Pp])ress <b>T<\/b> to lay it on its side/g, (m, p) => `${p === 'P' ? 'H' : 'h'}old it still for 1 second, then <b>flick up</b> to lay it on its side`],
   [/\(T\)/g, '(hold 1 sec, flick up)'],
   [/\(R\)/g, '(two-finger twist)'],
   [/[Pp]ress <b>R<\/b>/g, '<b>Twist two fingers</b>'],
@@ -4313,14 +4317,14 @@ const DEMO_LEVEL = {
 const DEMO_PHONE = {
   lesson:'No score, no pressure. This is the smallest box truck: use it to get the touch controls under your fingers.',
   objectives:['Drag a case into the truck', 'Twist two fingers to rotate one', 'Stack something, then set a load bar and a strap'],
-  hint:'Drag cases down from the strip. Twist two fingers to turn one, double-tap to take one out, swipe the full truck for the door view.',
+  hint:'Drag cases down from the strip. Twist two fingers to turn one, double-tap to take one out, tap VIEW for the door view.',
   coach:[
     {until:'pick', text:'Drag a case down from the strip at the top into the truck.'},
     {until:'rotate', text:'Keep your finger down and <b>twist two fingers</b> on the truck to rotate it.'},
     {until:'place', text:'Let go where it shows <b>green</b> to set it down.'},
-    {until:'view', text:'Swipe <b>down</b> the full length of the truck (start beside the cases) for the door view.'},
+    {until:'view', text:'Tap <b>VIEW</b> (bottom left) for the door view.'},
     {until:'stack', text:'Drag another case onto one in the truck to stack it on top.'},
-    {until:'device', text:'Swipe <b>up</b> for the top view, then drag the <b>load bar</b> button into the truck behind a tier.'},
+    {until:'device', text:'Tap <b>VIEW</b> again for the top view, then drag the <b>load bar</b> button into the truck behind a tier.'},
     {text:'You\'ve got it. Double-tap a case to take it out, and use the <b>≡ menu</b> for undo, hint and reset.'}
   ]
 };
@@ -4416,8 +4420,8 @@ enterHome();
 /* =====================================================================
    PHONE CONTROLS (body.phone: touch-only devices and narrow screens)
    drag from the strip + let go = place · drag a placed case = move · double-tap = remove (UNDO) ·
-   hold 1 s + flick up = flip on its side · two-finger twist = rotate · full-length swipe on the board = view
-   (up = top view, down = door view) · holding a case blocks every other gesture · ▲ ▼ scroll long trucks ·
+   hold 1 s + flick up = flip on its side · two-finger twist = rotate · drag empty floor = scroll the truck ·
+   holding a case blocks every other gesture · button row: VIEW · LOAD BAR · STRAP · UNDO ·
    drag the bar/strap button onto a tier · tap or drag the bottom bar = level goal / case info sheet
    ===================================================================== */
 const PH = {pointers:new Map(), g:null, lastTap:null, undoTimer:null};
@@ -4493,7 +4497,7 @@ function phoneMove(e){
       if (g.armed){ g.kind = 'flick'; g.fy = e.clientY; }
       else if (G.hand) g.kind = 'drag';
       else if (g.uid){ pickFromTruck(g.uid); g.kind = G.hand ? 'drag' : 'none'; }
-      else g.kind = g.bar ? 'none' : 'swipe';
+      else { g.kind = 'pan'; g.sy0 = G.scrollY || 0; g.vy = 0; }
     }
   }
   if (g.kind === 'drag'){
@@ -4516,6 +4520,9 @@ function phoneMove(e){
     renderCoach(); render();
   } else if (g.kind === 'flick'){
     if (g.fy - e.clientY > 30){ g.kind = 'none'; phoneFlip(g.uid); }
+  } else if (g.kind === 'pan'){ // drag the floor like a map
+    const dt = Math.max(1, now - g.lt); g.vy = (e.clientY - g.ly) / dt; g.ly = e.clientY; g.lt = now;
+    if (G.scrollMax && !doorView()){ G.scrollY = clamp(g.sy0 - (e.clientY - g.y0), 0, G.scrollMax); layout(); }
   } else if (g.kind === 'strip'){
     const dt = Math.max(1, now - g.lt); g.vx = (e.clientX - g.lx) / dt; g.lx = e.clientX; g.lt = now;
     g.strip.scrollLeft = g.sl0 - (e.clientX - g.x0);
@@ -4552,11 +4559,10 @@ function phoneUp(e){
     let v = clamp(g.vx * 16, -30, 30); const el = g.strip;
     const coast = () => { if (Math.abs(v) < .5) return; el.scrollLeft -= v; v *= .88; requestAnimationFrame(coast); };
     requestAnimationFrame(coast);
-  } else if (g.kind === 'swipe'){
-    const dy = e.clientY - g.y0, dx = e.clientX - g.x0;
-    if (Math.abs(dy) > G.L.clipH * .5 && Math.abs(dy) > 2 * Math.abs(dx) && G.level.stacked){
-      if (dy < 0 && G.view === 'door') toggleView(); else if (dy > 0 && G.view === 'top') toggleView();
-    }
+  } else if (g.kind === 'pan' && G.scrollMax && !doorView()){ // the truck coasts a little after a flick
+    let v = clamp(g.vy * 16, -30, 30);
+    const coast = () => { if (Math.abs(v) < .5 || doorView()) return; G.scrollY = clamp(G.scrollY - v, 0, G.scrollMax); layout(); v *= .88; requestAnimationFrame(coast); };
+    requestAnimationFrame(coast);
   }
 }
 window.addEventListener('pointerdown', phoneDown, true);
@@ -4575,8 +4581,7 @@ window.addEventListener('pointercancel', phoneUp, true);
   });
   document.addEventListener('pointerdown', e => { if (isPhone() && document.body.classList.contains('sheet-open') && !e.target.closest('.panel.info, #coach')) document.body.classList.remove('sheet-open'); }, true);
 })();
-$('btnUp').onclick = () => phoneScroll(-1);
-$('btnDown').onclick = () => phoneScroll(1);
+$('btnUndoPh').onclick = () => { if (G.hist.length && G.mode === 'play'){ $('phUndo').hidden = true; undo(); } };
 $('btnMenu').onclick = () => { $('phoneMenu').hidden = false; };
 $('phUndoBtn').onclick = () => { $('phUndo').hidden = true; undo(); };
 $('phoneMenu').addEventListener('click', e => {
