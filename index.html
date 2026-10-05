@@ -149,6 +149,10 @@ body.home #game, body.home .modal-back{filter:blur(7px) saturate(.85)}
 /* the crew steps aside between levels, on pop-ups, during the run and once everything is loaded (and when sent off) */
 .coach{transition:transform .3s ease, opacity .3s ease}
 body.crew-away .coach{transform:translateY(calc(100% + 110px));opacity:0;pointer-events:none}
+body.crew-quiet:not(.crew-away) .coach{transform:translateY(calc(100% - 16px));cursor:pointer}
+body.crew-quiet .coach .crew-fig, body.crew-quiet .coach .coach-body{opacity:0;transition:opacity .2s ease}
+.coach .crew-fig, .coach .coach-body{transition:opacity .25s ease}
+body.crew-quiet:not(.phone) .coach::before{content:'';position:absolute;top:5px;left:50%;transform:translateX(-50%);width:38px;height:4px;border-radius:3px;background:var(--cream-dim)}
 .crew-back{position:fixed;left:12px;bottom:12px;z-index:42;font-family:var(--pixel);font-weight:800;font-size:13px;letter-spacing:.06em;padding:6px 12px;border:2px solid var(--edge);background:var(--panel2);color:var(--cream);box-shadow:inset -2px -2px 0 #1f201d,inset 2px 2px 0 #5a5b56;cursor:pointer}
 .crew-back[hidden]{display:none}
 .keys{font-size:13px;color:var(--cream-dim)}
@@ -2693,7 +2697,7 @@ function closeModals(){ for (const m of document.querySelectorAll('.modal-back')
 /* ---------- level lifecycle ---------- */
 function loadLevel(idx){  const lv = LEVELS[idx]; if (lv && lv.exam){ if (examReady(G.progress)) openExam(); else openLevels(); return; } loadLevelObj(lv, idx); }
 function loadLevelObj(lv, idx){
-  G.crewOff = false; // the crew comes back on every new level
+  G.crewOff = false; G.warnSeen = {}; G.coachPeek = 0; // the crew comes back on every new level
   G.levelIdx = idx; G.level = lv;
   G.items = new Map(); let n = 0;
   for (const c of G.level.cases) for (let i = 0; i < c.count; i++){ const uid = 'c' + (++n); G.items.set(uid, {uid, type:c.type, def:CASES[c.type]}); }
@@ -2786,7 +2790,7 @@ function phoneHowTo(h){
   for (const [a, b] of rows) h = h.replace(a, b);
   return h;
 }
-function startPlay(){ closeModals(); G.mode = 'play'; refresh(); }
+function startPlay(){ closeModals(); G.mode = 'play'; G.coachShowUntil = performance.now() + COACH_LESSON_MS; G.coachFirst = true; G.warnSeen = {}; refresh(); }
 
 /* ---------- layout + rendering ---------- */
 const PHONE_RESERVE = 124; // phone: the button row + READY under the truck
@@ -3335,6 +3339,28 @@ function crewSrc(who, kind){
   return `assets/crew/${who}-${kind}.webp`;
 }
 // when the crew member steps aside
+/* when the crew bar is up: tutorial steps and events (a drop that didn't work, a risky placement, a finished
+   row, a hint) bring the crew in; the level's lesson shows for a short while at the start; while you hold or
+   drag something the bar doesn't change (the green/red outline already says whether it fits); otherwise it
+   tucks down to a thin strip, and a tap on the strip brings the crew up for a few seconds. */
+const COACH_LESSON_MS = 10000, COACH_AFTER_FIRST_MS = 4000, COACH_PEEK_MS = 6000;
+function say(kind, html, src){
+  const now = performance.now();
+  if (src === 'live'){ if (!G.coachShown) setCoach(kind, html); crewAway(); return; }   // holding something: don't swap the message
+  setCoach(kind, html); G.coachShown = true;
+  const until = src === 'flash' ? G.coachOverride.until : src === 'step' ? Infinity : Math.max(G.coachShowUntil || 0, G.coachPeek || 0);
+  const quiet = !(until > now);
+  document.body.classList.toggle('crew-quiet', quiet);
+  clearTimeout(G.coachT);
+  if (!quiet && until !== Infinity) G.coachT = setTimeout(renderCoach, until - now + 30);
+}
+// the same warning only every third time it comes up in a level
+function flashSome(kind, html, ms){
+  const k = kind + html, n = (G.warnSeen[k] = (G.warnSeen[k] || 0) + 1);
+  if (n % 3 === 1) flashCoach(kind, html, ms);
+}
+const NICE_ROW = ['Full-width row. That\'s how it\'s done.', 'Wall to wall. Nothing slides in that row.', 'Clean row. Keep building back from it.'];
+function coachPeek(){ G.coachPeek = performance.now() + COACH_PEEK_MS; renderCoach(); }
 const crewPassed = () => { const lv = G.level; return !!lv && (lv.demo || lv.loop || (G.progress.best[lv.id] || 0) >= 60); };
 function crewAway(){
   const lv = G.level;
@@ -3350,6 +3376,7 @@ $('crewFig').addEventListener('click', e => {
 });
 $('crewFig').addEventListener('pointerup', e => e.stopPropagation()); // not a tap on the bar (that opens the sheet on phones)
 $('crewBack').onclick = () => { G.crewOff = false; crewAway(); };
+$('coach').addEventListener('click', () => { if (!isPhone() && document.body.classList.contains('crew-quiet')) coachPeek(); });
 function setCoach(kind, html){
   html = phoneText(html); const c = $('coach'); c.className = 'coach ' + kind;
   c.querySelector('.tag').textContent = {tip:'TIP', warn:'HEADS UP', bad:"WON'T WORK", good:'NICE'}[kind];
@@ -3360,38 +3387,38 @@ function setCoach(kind, html){
   crewAway();
 }
 function renderCoach(){
-  if (G.coachOverride && performance.now() < G.coachOverride.until) return setCoach(G.coachOverride.kind, G.coachOverride.html);
+  if (G.coachOverride && performance.now() < G.coachOverride.until) return say(G.coachOverride.kind, G.coachOverride.html, 'flash');
   if (G.level && G.level.offload && G.mode === 'play'){
-    if (!G.placements.length) return setCoach('good', 'Truck empty. Hit <b>FINISH</b> (Enter).');
-    if (G.hover){ const why = offBlock(G.hover), d = itemOf(G.hover).def; return why ? setCoach('bad', why) : setCoach('good', `The ${d.name} (${title(d.department)}) can come off. Click it.`); }
+    if (!G.placements.length) return say('good', 'Truck empty. Hit <b>FINISH</b> (Enter).', 'lesson');
+    if (G.hover){ const why = offBlock(G.hover), d = itemOf(G.hover).def; return why ? say('bad', why, 'live') : say('good', `The ${d.name} (${title(d.department)}) can come off. Click it.`, 'live'); }
     const st = state(), free = G.placements.map(p => p.uid).filter(u => !offBlockSt(st, u));
     const next = G.level.unloadSequence && G.level.unloadSequence.find(dp => G.placements.some(p => itemOf(p.uid).def.department === dp));
-    if (!free.length) return setCoach('tip', 'Nothing can come off until a bar or strap comes out. Click the one in front.');
-    return setCoach('tip', `Click a case to take it off${next ? `. The venue needs <b>${title(next)}</b> next` : ''}. Top cases first, front to back.`);
+    if (!free.length) return say('tip', 'Nothing can come off until a bar or strap comes out. Click the one in front.', 'lesson');
+    return say('tip', `Click a case to take it off${next ? `. The venue needs <b>${title(next)}</b> next` : ''}. Top cases first, front to back.`, 'lesson');
   }
-  if (G.level && G.level.loop && G.mode === 'play' && !G.hand && !G.tool) return setCoach('tip', G.placements.length
+  if (G.level && G.level.loop && G.mode === 'play' && !G.hand && !G.tool) return say('tip', G.placements.length
     ? 'Keep building rows from the tiles. Bar and strap as you go, then hit <b>READY FOR TRANSIT</b> to send this truck. A truck about 70% full, solid and tied in scores full marks.'
-    : 'Endless Tour: pick cases from any tile on the left and fill this truck. Finish a tile and a new one slides in. A failed pack still goes out, but it costs the gap to 60 and a strike. Three strikes ends the tour.');
+    : 'Endless Tour: pick cases from any tile on the left and fill this truck. Finish a tile and a new one slides in. A failed pack still goes out, but it costs the gap to 60 and a strike. Three strikes ends the tour.', 'lesson');
   if (G.tool){
-    if (G.tool.L != null && !G.tool.ok) return setCoach('bad', G.tool.reason);
-    if (isPhone()) return setCoach(G.tool.L != null ? 'good' : 'tip', G.tool.L != null ? `The ${G.tool.kind === 'bar' ? 'load bar' : 'strap'} goes ${fmtLen(G.tool.L * IN)} from the nose. Let go to set it, or drag it off the truck to put it back.` : `Drag the ${G.tool.kind === 'bar' ? 'load bar' : 'strap'} to the back face of a finished tier and let go.`);
-    if (doorView()) return setCoach('good', `The ${G.tool.kind === 'bar' ? 'load bar' : 'strap'} goes across the ${G.tool.tier === 'high' ? 'upper tier' : 'tier'} ${fmtLen(G.tool.L * IN)} from the nose. Click to set it, <b>↑ ↓</b> to pick another tier, <b>Esc</b> puts it back.`);
-    return setCoach(G.tool.L != null ? 'good' : 'tip', `Move the ${G.tool.kind === 'bar' ? 'load bar' : 'strap'} to the back face of a finished tier and click to set it. <b>Esc</b> puts it back.`);
+    if (G.tool.L != null && !G.tool.ok) return say('bad', G.tool.reason, 'live');
+    if (isPhone()) return say(G.tool.L != null ? 'good' : 'tip', G.tool.L != null ? `The ${G.tool.kind === 'bar' ? 'load bar' : 'strap'} goes ${fmtLen(G.tool.L * IN)} from the nose. Let go to set it, or drag it off the truck to put it back.` : `Drag the ${G.tool.kind === 'bar' ? 'load bar' : 'strap'} to the back face of a finished tier and let go.`, 'live');
+    if (doorView()) return say('good', `The ${G.tool.kind === 'bar' ? 'load bar' : 'strap'} goes across the ${G.tool.tier === 'high' ? 'upper tier' : 'tier'} ${fmtLen(G.tool.L * IN)} from the nose. Click to set it, <b>↑ ↓</b> to pick another tier, <b>Esc</b> puts it back.`, 'live');
+    return say(G.tool.L != null ? 'good' : 'tip', `Move the ${G.tool.kind === 'bar' ? 'load bar' : 'strap'} to the back face of a finished tier and click to set it. <b>Esc</b> puts it back.`, 'live');
   }
   if (G.hand && G.ghost){
-    if (!G.ghost.ok) return setCoach('bad', G.ghost.reason);
-    if (G.ghost.warn) return setCoach('warn', G.ghost.warn);
+    if (!G.ghost.ok) return say('bad', G.ghost.reason, 'live');
+    if (G.ghost.warn) return say('warn', G.ghost.warn, 'live');
   }
   const lv = G.level, left = leftCount();
   if (lv.coach){
     const st = lv.coach[Math.min(G.coachStep, lv.coach.length - 1)];
     $('stagingBox').classList.toggle('attention', ['stage', 'takeStack'].includes(st.until));
-    return setCoach('tip', st.text);
+    return say('tip', st.text, 'step');
   }
   $('stagingBox').classList.remove('attention');
-  if (!left) return setCoach('tip', 'Everything is on the truck. Hit <b>READY FOR TRANSIT</b> to see how it rides.');
-  if (G.hand && G.ghost && G.ghost.ok) return setCoach('good', 'Good spot. Click (or press ENTER) to set it down.');
-  setCoach('tip', lv.lesson);
+  if (!left) return say('tip', 'Everything is on the truck. Hit <b>READY FOR TRANSIT</b> to see how it rides.', 'lesson');
+  if (G.hand && G.ghost && G.ghost.ok) return say('good', 'Good spot. Click (or press ENTER) to set it down.', 'live');
+  say('tip', lv.lesson, 'lesson');
 }
 function flashCoach(kind, html, ms = 3500){ G.coachOverride = {kind, html, until:performance.now() + ms}; renderCoach(); setTimeout(renderCoach, ms + 20); }
 function fire(ev){
@@ -3601,7 +3628,7 @@ function tipHand(){
 function placeHand(){
   const h = G.hand, g = G.ghost;
   if (!h || !g || G.mode !== 'play') return false;
-  if (!g.ok){ flashCoach('bad', g.reason, 2500); return false; }
+  if (!g.ok){ flashSome('bad', g.reason, 3000); return false; }
   const before = new Set(Engine.calculateSpaceEfficiency(state()).fullRows);
   G.hist.push(h.pre); G.fut = [];
   if (h.stack) G.placements.push(...Engine.stackPlacements(state(), h.stack, g.x, g.y));
@@ -3618,7 +3645,9 @@ function placeHand(){
     else toast('NICE WALL!', 'Full-width row');
   }
   fire('place');
-  if (warn) flashCoach('warn', warn, 4000);
+  if (G.coachFirst){ G.coachFirst = false; G.coachShowUntil = Math.min(G.coachShowUntil || 0, performance.now() + COACH_AFTER_FIRST_MS); }
+  if (warn) flashSome('warn', warn, 4000);
+  else if (newRows.length) flashCoach('good', NICE_ROW[Math.floor(Math.random() * NICE_ROW.length)], 2800);
   refresh();
   return true;
 }
@@ -4717,7 +4746,7 @@ window.addEventListener('pointercancel', phoneUp, true);
   $('coach').addEventListener('pointerdown', e => { if (isPhone()){ y0 = e.clientY; e.preventDefault(); } });
   $('coach').addEventListener('pointerup', e => {
     if (!isPhone() || y0 == null) return; const dy = e.clientY - y0; y0 = null;
-    if (Math.abs(dy) < 10) document.body.classList.toggle('sheet-open');
+    if (Math.abs(dy) < 10){ if (document.body.classList.contains('crew-quiet')) return coachPeek(); document.body.classList.toggle('sheet-open'); }
     else document.body.classList.toggle('sheet-open', dy < 0);
   });
   document.addEventListener('pointerdown', e => { if (isPhone() && document.body.classList.contains('sheet-open') && !e.target.closest('.panel.info, #coach')) document.body.classList.remove('sheet-open'); }, true);
