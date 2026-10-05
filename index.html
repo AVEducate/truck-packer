@@ -217,7 +217,7 @@ body.home #game, body.home .modal-back{filter:blur(7px) saturate(.85)}
 .phone-only{display:none !important}
 body.phone .phone-only{display:inline-flex !important}
 body.phone .hud{gap:4px;padding:4px 6px}
-body.phone .hud .brand, body.phone #hudSpace, body.phone #hudStab, body.phone #btnHelp, body.phone #btnLevels{display:none}
+body.phone .hud .brand, body.phone #hudSpace, body.phone #hudStab, body.phone #btnHelp, body.phone #btnLevels, body.phone #btnSound{display:none}
 body.phone .hud .stat:has(#hudSpace), body.phone .hud .stat:has(#hudStab){display:none}
 body.phone .hud .stat{flex:1 1 0;min-width:0;padding:2px 4px}
 body.phone .hud .stat span{font-size:9px}
@@ -399,6 +399,7 @@ body.phone .home-btn kbd, body.phone .link-btn kbd{display:none}
     <button class="pn-btn" data-act="redo">REDO</button>
     <button class="pn-btn" data-act="reset">RESET (START OVER)</button>
     <button class="pn-btn" data-act="help">HELP</button>
+    <button class="pn-btn" data-act="sound" id="pmSound">SOUND: ON</button>
     <button class="pn-btn" data-act="home">HOME SCREEN</button>
     <button class="pn-btn primary" data-act="close">BACK TO THE TRUCK</button>
   </div>
@@ -441,6 +442,7 @@ body.phone .home-btn kbd, body.phone .link-btn kbd{display:none}
     <div class="stat"><span>STABILITY</span><b id="hudStab">--</b></div>
     <div class="stat" id="hudUnloadWrap"><span>UNLOAD</span><b id="hudUnload">--</b></div>
     <div class="stat" id="hudSecureWrap"><span>SECURED</span><b id="hudSecure">--</b></div>
+    <button class="btn" id="btnSound" aria-pressed="true">SOUND ON</button>
     <button class="btn" id="btnHelp">HELP</button>
     <button class="btn" id="btnLevels">LEVELS</button>
     <button class="btn phone-only" id="btnMenu" aria-label="Menu">≡</button>
@@ -3787,6 +3789,67 @@ window.addEventListener('keydown', e => {
 });
 
 /* ---------- transit ---------- */
+/* ---------- sound: the semi pulling out on READY FOR TRANSIT (made in the browser, no audio files) ---------- */
+const SOUND = {on:true, ctx:null};
+try { SOUND.on = localStorage.getItem('truckPackology.sound') !== 'off'; } catch(e){}
+function setSound(on){
+  SOUND.on = on; try { localStorage.setItem('truckPackology.sound', on ? 'on' : 'off'); } catch(e){}
+  $('btnSound').textContent = on ? 'SOUND ON' : 'SOUND OFF'; $('btnSound').setAttribute('aria-pressed', on);
+  $('pmSound').textContent = on ? 'SOUND: ON' : 'SOUND: OFF';
+  if (!on && SOUND.ctx) SOUND.ctx.suspend();
+}
+const noiseBuf = ctx => {
+  const b = ctx.createBuffer(1, ctx.sampleRate * 2, ctx.sampleRate), d = b.getChannelData(0);
+  for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+  return b;
+};
+// the whole run, scheduled from `at`: air-brake release + horn, diesel revs as it rolls out, a hiss on each braking phase, fade out
+function semiSound(ctx, out, at, dur, phases){
+  const end = at + dur, nb = noiseBuf(ctx);
+  const env = (g, pts) => { g.gain.setValueAtTime(0.0001, at); for (const [t, v] of pts) g.gain.exponentialRampToValueAtTime(Math.max(v, 0.0001), at + t); };
+  const hiss = (t0, len, vol, hp) => {
+    const src = ctx.createBufferSource(), f = ctx.createBiquadFilter(), g = ctx.createGain();
+    src.buffer = nb; f.type = 'highpass'; f.frequency.value = hp; src.connect(f).connect(g).connect(out);
+    g.gain.setValueAtTime(0.0001, at + t0); g.gain.exponentialRampToValueAtTime(vol, at + t0 + .02);
+    g.gain.setValueAtTime(vol, at + t0 + len * .25); g.gain.exponentialRampToValueAtTime(0.0001, at + t0 + len);
+    src.start(at + t0, Math.random()); src.stop(at + t0 + len + .05);
+  };
+  hiss(0, .7, .22, 2200);                                         // pssht: the brakes let go
+  // horn: a short two-note blast
+  const hg = ctx.createGain(), hf = ctx.createBiquadFilter(); hf.type = 'lowpass'; hf.frequency.value = 1600; hg.connect(hf).connect(out);
+  for (const fr of [185, 233]){ const o = ctx.createOscillator(); o.type = 'sawtooth'; o.frequency.value = fr; o.connect(hg); o.start(at + .15); o.stop(at + .75); }
+  hg.gain.setValueAtTime(0.0001, at + .15); hg.gain.exponentialRampToValueAtTime(.09, at + .19); hg.gain.setValueAtTime(.09, at + .6); hg.gain.exponentialRampToValueAtTime(0.0001, at + .74);
+  // diesel: a low buzzy firing note plus rumble, revving up then holding, a dip on braking
+  const eg = ctx.createGain(), ef = ctx.createBiquadFilter(); ef.type = 'lowpass'; ef.frequency.value = 420; ef.Q.value = 2; eg.connect(out);
+  ef.connect(eg);
+  const fire = ctx.createOscillator(), sub = ctx.createOscillator(); fire.type = 'sawtooth'; sub.type = 'square';
+  const chug = ctx.createOscillator(), chugG = ctx.createGain(), am = ctx.createGain(); chug.type = 'sine';
+  fire.connect(am); sub.connect(am); am.connect(ef);
+  chug.connect(chugG).connect(am.gain); am.gain.value = .6; chugG.gain.value = .4;    // the uneven chug of a diesel
+  const rum = ctx.createBufferSource(), rf = ctx.createBiquadFilter(), rg = ctx.createGain();
+  rum.buffer = nb; rum.loop = true; rf.type = 'bandpass'; rf.frequency.value = 110; rf.Q.value = .8; rg.gain.value = .5; rum.connect(rf).connect(rg).connect(ef);
+  const f = (t, hz) => { fire.frequency.linearRampToValueAtTime(hz, at + t); sub.frequency.linearRampToValueAtTime(hz / 2, at + t); chug.frequency.linearRampToValueAtTime(hz / 4, at + t); };
+  fire.frequency.setValueAtTime(34, at); sub.frequency.setValueAtTime(17, at); chug.frequency.setValueAtTime(8.5, at);
+  f(.35, 34); f(.9, 58); f(1.3, 50);
+  phases.forEach((ph, i) => { const t = .9 + i;
+    if (/BRAK|STOP/i.test(ph.label)){ f(t + .2, 38); f(t + .9, 46); hiss(t + .55, .45, .1, 2600); }
+    else if (/PULL|ACCEL|GO/i.test(ph.label)){ f(t + .2, 44); f(t + .9, 64); }
+    else f(t + .5, 52 + (i % 2) * 4);
+  });
+  env(eg, [[.3, .05], [.9, .2], [dur - .7, .17], [dur, 0.0001]]);
+  for (const o of [fire, sub, chug, rum]){ o.start(at); o.stop(end + .05); }
+}
+function playSemi(dur, phases){
+  if (!SOUND.on) return;
+  try {
+    const AC = window.AudioContext || window.webkitAudioContext; if (!AC) return;
+    SOUND.ctx = SOUND.ctx || new AC(); const ctx = SOUND.ctx; if (ctx.state !== 'running') ctx.resume();
+    const master = ctx.createGain(); master.gain.value = .8; master.connect(ctx.destination);
+    semiSound(ctx, master, ctx.currentTime + .03, dur, phases);
+    setTimeout(() => master.disconnect(), (dur + .5) * 1000);
+  } catch(e){}
+}
+document.addEventListener('visibilitychange', () => { if (document.hidden && SOUND.ctx) SOUND.ctx.suspend(); });
 function startTransit(){
   if (G.mode !== 'play') return;
   if (G.hand) cancelHand(true);
@@ -3798,6 +3861,7 @@ function startTransit(){
   const sim = report.transit;
   G.mode = 'transit'; refresh();
   const intro = 900, per = 1000, outro = 900, t0 = performance.now();
+  playSemi((intro + per * sim.phases.length + outro) / 1000, sim.phases);
   const movedSet = new Set([...sim.shifted.keys(), ...(sim.rolled ? sim.rolled.keys() : [])]), moved = movedSet.size;
   G.anim = {positions:clone(base), shiftedNow:new Set(), shake:null};
   const lbl = $('transitLabel'); lbl.style.display = 'block';
@@ -4374,6 +4438,8 @@ function startDemo(){ closeModals(); loadLevelObj(isPhone() ? {...DEMO_LEVEL, ..
 $('titleDemo').onclick = () => homeGo(HOME.demo);
 $('titleHelp').onclick = () => homeGo(HOME.help);
 $('btnHelp').onclick = openHelp;
+$('btnSound').onclick = () => setSound(!SOUND.on);
+setSound(SOUND.on);
 $('lvHelp').onclick = () => { closeModals(); G.mode = G.prevMode || 'title'; openHelp(); G.helpPrev = 'levels'; };
 
 /* ---------- progress backup codes ---------- */
@@ -4639,7 +4705,7 @@ $('phoneMenu').addEventListener('click', e => {
   $('phoneMenu').hidden = true;
   const act = b ? b.dataset.act : 'close';
   if (act === 'levels') openLevels(); else if (act === 'hint') $('btnHint').click(); else if (act === 'undo') undo(); else if (act === 'redo') redo();
-  else if (act === 'reset') resetLevel(); else if (act === 'help') openHelp(); else if (act === 'home') enterHome();
+  else if (act === 'reset') resetLevel(); else if (act === 'help') openHelp(); else if (act === 'home') enterHome(); else if (act === 'sound') setSound(!SOUND.on);
 });
 // phone mode: touch-only devices (no mouse or trackpad) and narrow screens; landscape phones are asked to turn upright
 function applyPhoneMode(){
