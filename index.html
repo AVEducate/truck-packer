@@ -4,6 +4,21 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Truck Packology</title>
+<!-- what a shared link shows (texts, Facebook, LinkedIn, X) -->
+<meta name="description" content="Think you can pack it better? 100 levels of real AV truck packing: build high and tight, strap every tier, beat the boss loads, earn a certificate. Free from AV Educate.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="AV Educate Games">
+<meta property="og:url" content="https://games.aveducate.com/truck-packology/">
+<meta property="og:title" content="Truck Packology: think you can pack it better?">
+<meta property="og:description" content="100 levels of real AV truck packing. Boss loads, a crew that coaches you, and a certificate at the end. Free.">
+<meta property="og:image" content="https://games.aveducate.com/truck-packology/assets/og-share.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="The Truck Packology crew chief giving a thumbs-up in front of a fully packed truck">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Truck Packology: think you can pack it better?">
+<meta name="twitter:description" content="100 levels of real AV truck packing. Boss loads, a crew that coaches you, and a certificate at the end. Free.">
+<meta name="twitter:image" content="https://games.aveducate.com/truck-packology/assets/og-share.jpg">
 <link rel="icon" type="image/svg+xml" href="assets/icon-boxes.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -202,6 +217,16 @@ body.crew-quiet:not(.phone) .coach::before{content:'';position:absolute;top:5px;
 .bonus-list .reh{color:var(--cream-dim);font-size:11.5px}
 /* achievements shelf: equal tiles */
 .ach-modal{width:min(820px,100%)}
+.acct-modal{width:min(480px,100%)}
+.acct-modal label{display:block;font-family:var(--pixel);font-weight:800;font-size:13px;letter-spacing:.06em;color:var(--cream-dim);margin:10px 0 4px}
+.acct-modal input, .acct-modal textarea{width:100%;font:inherit;font-size:16px;padding:9px 10px;background:#1c1d1b;color:var(--cream);border:2px solid var(--edge);border-radius:0}
+.acct-modal input.code{font-family:var(--pixel);font-weight:800;font-size:26px;letter-spacing:.3em;text-align:center}
+.ac-msg{min-height:1.2em;margin:10px 0 0;font-size:13.5px} .ac-msg.bad{color:var(--bad)} .ac-msg.good{color:var(--good)}
+.ac-small{font-size:12px;color:var(--cream-dim);margin:6px 0 0}
+.rp-kind{display:flex;gap:8px;margin:4px 0 10px}
+.hp-privacy{font-size:12.5px;color:var(--cream-dim);margin-top:14px}
+.save-nudge{border:2px solid var(--accent);background:#3a2d20;padding:10px 12px;margin:10px 0;display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.save-nudge span{font-size:13.5px;flex:1 1 220px}
 .ach-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:10px;margin:8px 0 16px}
 .ach{background:var(--panel2);border:2px solid #0d0d0c;padding:10px;min-height:96px;display:flex;flex-direction:column;gap:6px}
 .ach .badge{align-self:flex-start;font-size:13px}
@@ -378,7 +403,7 @@ body.phone .modal-back{padding:10px}
 .staging-btns .btn{font-size:13px;padding:5px 8px}
 .save-codes{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:14px;padding:10px;background:#262724;border:2px solid #121211}
 .save-codes .btn{width:120px}
-.save-code-out{flex:1;min-width:200px;font-size:12.5px;color:var(--cream-dim);word-break:break-all}
+.save-code-out{flex:1;min-width:200px;font-size:12.5px;color:var(--cream-dim);overflow-wrap:anywhere} /* long save codes still wrap; normal words don't split */
 .save-code-out b{color:var(--cream);font-family:var(--pixel);letter-spacing:.04em}
 .tier-head{font-family:var(--pixel);font-weight:800;font-size:15px;letter-spacing:.08em;color:var(--accent);margin:16px 0 8px}
 .tier-head small{color:var(--cream-dim);font-weight:600;letter-spacing:.02em;margin-left:8px}
@@ -437,6 +462,8 @@ body.phone .home-btn kbd, body.phone .link-btn kbd{display:none}
     <button class="pn-btn" data-act="help">HELP</button>
     <button class="pn-btn" data-act="sound" id="pmSound">SOUND: ON</button>
     <button class="pn-btn" data-act="home">HOME SCREEN</button>
+    <button class="pn-btn" data-act="account" id="pmAccount">SAVE PROGRESS</button>
+    <button class="pn-btn" data-act="report">REPORT A PROBLEM / IDEA</button>
     <button class="pn-btn primary" data-act="close">BACK TO THE TRUCK</button>
   </div>
 </div>
@@ -556,6 +583,7 @@ body.phone .home-btn kbd, body.phone .link-btn kbd{display:none}
 <div class="modal-back" id="certificate"><div class="modal cert-modal" role="dialog" aria-modal="true" aria-label="Certificate">
   <div id="certSheet" class="cert-sheet"></div>
   <div class="row no-print">
+    <button class="btn" id="certRegister" hidden>REGISTER MY CERTIFICATE NUMBER</button>
     <button class="btn" id="certClose">CLOSE</button>
     <button class="btn primary" id="certPrint">PRINT / SAVE AS PDF</button>
   </div>
@@ -568,6 +596,7 @@ body.phone .home-btn kbd, body.phone .link-btn kbd{display:none}
   <p style="margin-top:14px;font-size:13px;color:var(--cream-dim)">Every lesson is followed by a practice level that tests it a different way. Earn 3 stars (or 95%+) on all 100 levels to unlock the final exam and your AV Educate certificate.</p>
   <div class="save-codes">
     <button class="btn" id="lvAch">ACHIEVEMENTS</button>
+    <button class="btn" id="lvAccount">SAVE PROGRESS</button>
     <button class="btn" id="lvSaveCode">SAVE CODE</button>
     <button class="btn" id="lvLoadCode">LOAD CODE</button>
     <span id="saveCodeOut" class="save-code-out">Back up your progress: SAVE CODE copies a code you can paste back in with LOAD CODE, on any browser or computer.</span>
@@ -575,6 +604,22 @@ body.phone .home-btn kbd, body.phone .link-btn kbd{display:none}
   <div class="row"><button class="btn" id="lvHelp">HELP</button><button class="btn" id="lvTitleBtn">TITLE SCREEN</button><button class="btn primary" id="lvClose">CLOSE</button></div>
 </div></div>
 
+<div class="modal-back" id="account"><div class="modal acct-modal" role="dialog" aria-modal="true" aria-labelledby="acTitle">
+  <h3>AV EDUCATE · TRUCK PACKOLOGY</h3>
+  <h2 id="acTitle">SAVE YOUR PROGRESS</h2>
+  <div id="acBody"></div>
+  <p class="ac-msg" id="acMsg"></p>
+  <div class="row" id="acRow"></div>
+</div></div>
+<div class="modal-back" id="report"><div class="modal acct-modal" role="dialog" aria-modal="true" aria-labelledby="rpTitle">
+  <h3>AV EDUCATE · TRUCK PACKOLOGY</h3>
+  <h2 id="rpTitle">TELL US</h2>
+  <div class="rp-kind"><button class="btn on" data-kind="problem">A PROBLEM</button><button class="btn" data-kind="idea">AN IDEA</button></div>
+  <textarea id="rpText" maxlength="2000" rows="5" placeholder="What happened, or what would make the game better?"></textarea>
+  <p class="ac-small" id="rpInfo"></p>
+  <p class="ac-msg" id="rpMsg"></p>
+  <div class="row"><button class="btn" id="rpCancel">CANCEL</button><button class="btn primary" id="rpSend">SEND</button></div>
+</div></div>
 <div class="modal-back" id="achievements"><div class="modal ach-modal" role="dialog" aria-modal="true" aria-labelledby="achTitle">
   <h3>AV EDUCATE · TRUCK PACKOLOGY</h3>
   <h2 id="achTitle">ACHIEVEMENTS</h2>
@@ -616,7 +661,8 @@ body.phone .home-btn kbd, body.phone .link-btn kbd{display:none}
   <div id="helpKeyboard"></div>
   <div class="kb-desc" id="helpKeyDesc">Click a highlighted key, or press it on your keyboard, to see what it does.</div>
   </div>
-  <div class="row"><button class="btn" id="hpDemo">TRY THE PRACTICE BAY</button><button class="btn primary" id="hpClose">CLOSE <kbd>ESC</kbd></button></div>
+  <p class="hp-privacy">Your progress is saved in this browser. Make a free account (SAVE PROGRESS on the level screen) to keep it safe and play on other devices. The game also sends anonymous play stats (level, score, phone or computer) so we can see which levels need work. Nothing personal.</p>
+  <div class="row"><button class="btn" id="hpReport">REPORT A PROBLEM / IDEA</button><button class="btn" id="hpDemo">TRY THE PRACTICE BAY</button><button class="btn primary" id="hpClose">CLOSE <kbd>ESC</kbd></button></div>
 </div></div>
 
 <script>
@@ -2746,7 +2792,7 @@ function loadProgress(){
   } catch(e){}
   return {unlocked:1, best:{}, stars:{}};
 }
-function saveProgress(){ try { localStorage.setItem(STORE_KEY, JSON.stringify(G.progress)); } catch(e){} }
+function saveProgress(){ try { localStorage.setItem(STORE_KEY, JSON.stringify(G.progress)); } catch(e){} if (typeof cloudSave === 'function') cloudSave(); }
 G.progress = loadProgress();
 
 const levelState = (lv, items, placements, bars) => ({truck:lv.truck, items, placements, bars, accel:Engine.secureActive(lv),
@@ -2922,7 +2968,7 @@ function openAchievements(){
   $('achSum').textContent = `${got} of ${ACH_BADGES.length + ms.length} earned. Badges count every time you pass a level with them.`;
   G.mode = 'achievements'; openModal('achievements');
 }
-function startPlay(){ closeModals(); G.mode = 'play'; G.coachShowUntil = performance.now() + COACH_LESSON_MS; G.coachFirst = true; G.warnSeen = {}; refresh(); }
+function startPlay(){ closeModals(); if (G.level && G.level.id && !G.level.demo) stat('level_start', {level:G.level.id}); G.mode = 'play'; G.coachShowUntil = performance.now() + COACH_LESSON_MS; G.coachFirst = true; G.warnSeen = {}; refresh(); }
 
 /* ---------- layout + rendering ---------- */
 const PHONE_RESERVE = 124; // phone: the button row + READY under the truck
@@ -3573,7 +3619,7 @@ function pickFromDock(type){
   G.coachOverride = null;
   G.tool = null;
   G.hand = {uid, rot:0, from:'dock', pre:snap()};
-  G.ghost = null; G.lastInfo = uid; fire('pick');
+  G.ghost = null; G.lastInfo = uid; sfx('pick'); fire('pick');
   if (G.keyMode) spawnGhostAtDoor();
   refresh();
 }
@@ -3587,7 +3633,7 @@ function pickFromTruck(uid){
   G.placements = G.placements.filter(q => q.uid !== uid);
   G.coachOverride = null;
   G.hand = {uid, rot:p.rot, from:'truck', pre, orig:{...p}};
-  G.lastInfo = uid; setGhost(p.x, p.y); fire('pick'); refresh();
+  G.lastInfo = uid; setGhost(p.x, p.y); sfx('pick'); fire('pick'); refresh();
 }
 function cancelHand(silent){
   if (!G.hand) return;
@@ -3607,13 +3653,13 @@ function removeHovered(){
     if (on.length){ flashCoach('bad', `Take the ${on[0].def.name} off the top first. Cases always come off top to bottom.`); return; }
   }
   G.hist.push(snap()); G.fut = [];
-  G.placements = G.placements.filter(p => p.uid !== uid); G.hover = null; G.rehandles = (G.rehandles || 0) + 1;
+  G.placements = G.placements.filter(p => p.uid !== uid); G.hover = null; G.rehandles = (G.rehandles || 0) + 1; sfx('out');
   flashCoach('tip', `The ${itemOf(uid).def.name} is back on the dock. <b>UNDO</b> puts it back in the truck.`, 3500);
   refresh();
 }
 function returnToDock(){
   if (!G.hand) return;
-  if (G.hand.from === 'truck'){ G.hist.push(G.hand.pre); G.fut = []; G.rehandles = (G.rehandles || 0) + 1; } // a loaded case came back out
+  if (G.hand.from === 'truck'){ G.hist.push(G.hand.pre); G.fut = []; G.rehandles = (G.rehandles || 0) + 1; sfx('out'); } // a loaded case came back out
   G.hand = null; G.ghost = null; refresh();
 }
 function setGhost(x, y){
@@ -3762,7 +3808,7 @@ function tipHand(){
 function placeHand(){
   const h = G.hand, g = G.ghost;
   if (!h || !g || G.mode !== 'play') return false;
-  if (!g.ok){ flashSome('bad', g.reason, 3000); return false; }
+  if (!g.ok){ sfx('bad'); flashSome('bad', g.reason, 3000); return false; }
   const before = new Set(Engine.calculateSpaceEfficiency(state()).fullRows);
   G.hist.push(h.pre); G.fut = [];
   // moving a case that was loaded earlier is a rehandle; nudging or turning the one you just set down is not
@@ -3781,6 +3827,7 @@ function placeHand(){
     if (sp.voids.length === 0 && sp.ratio === 1) toast('HIGH &amp; TIGHT!', 'Wall to wall, nose to load line');
     else toast('NICE WALL!', 'Full-width row');
   }
+  sfx(newRows.length ? 'row' : 'place'); if (newRows.length) setTimeout(() => sfx('place'), 0);
   fire('place');
   if (G.coachFirst){ G.coachFirst = false; G.coachShowUntil = Math.min(G.coachShowUntil || 0, performance.now() + COACH_AFTER_FIRST_MS); }
   if (warn) flashSome('warn', warn, 4000);
@@ -3849,9 +3896,9 @@ function setToolLine(L){
 function toolFromPointer(py){ const D = G.level.truck.depth / IN; setToolLine(clamp(Math.round((py - G.L.oy) / G.L.cell), 1, D)); }
 function placeTool(){
   const t = G.tool; if (!t || t.L == null || G.mode !== 'play') return;
-  if (!t.ok){ flashCoach('bad', t.reason, 3000); return; }
+  if (!t.ok){ sfx('bad'); flashCoach('bad', t.reason, 3000); return; }
   G.hist.push(snap()); G.fut = [];
-  G.bars.push({kind:t.kind, y:t.L, tier:t.tier || 'low'}); G.tool = null;
+  G.bars.push({kind:t.kind, y:t.L, tier:t.tier || 'low'}); G.tool = null; sfx(t.kind === 'strap' ? 'strap' : 'bar');
   toast(t.kind === 'strap' ? 'STRAPPED!' : 'BARRED!', t.tier === 'high' ? 'Upper tier locked in' : 'Tier locked in');
   fire('device'); refresh();
 }
@@ -3936,6 +3983,11 @@ window.addEventListener('pointerup', e => {
 /* ---------- keyboard ---------- */
 window.addEventListener('keydown', e => {
   const k = e.key;
+  // typing in a form (account, report, exam name): the game's shortcuts stay out of the way
+  if (G.mode === 'account' || G.mode === 'report' || (e.target && /^(INPUT|TEXTAREA)$/.test(e.target.tagName))){
+    if (k === 'Escape'){ if (G.mode === 'account') closeAccount(); else if (G.mode === 'report') closeReport(); }
+    return;
+  }
   if (G.mode === 'help'){
     e.preventDefault();
     if (k === 'Escape') closeHelp(); else showKey(codeOf(e), $('helpKeyDesc'), $('helpKeyboard'));
@@ -4033,6 +4085,43 @@ function semiSound(ctx, out, at, dur, phases){
   env(eg, [[.3, .05], [.9, .2], [dur - .7, .17], [dur, 0.0001]]);
   for (const o of [fire, sub, chug, rum]){ o.start(at); o.stop(end + .05); }
 }
+/* ---------- sound effects (made in the browser; follow SOUND ON/OFF; phones on silent stay silent) ---------- */
+function sfx(name){
+  if (!SOUND.on) return;
+  try {
+    const AC = window.AudioContext || window.webkitAudioContext; if (!AC) return;
+    SOUND.ctx = SOUND.ctx || new AC(); const ctx = SOUND.ctx; if (ctx.state !== 'running') ctx.resume();
+    const t = ctx.currentTime + .01, out = ctx.createGain(); out.gain.value = .55; out.connect(ctx.destination);
+    SOUND.noise = SOUND.noise || noiseBuf(ctx);
+    const tone = (type, f0, f1, at, len, vol, lp) => {
+      const o = ctx.createOscillator(), g = ctx.createGain(); o.type = type;
+      o.frequency.setValueAtTime(f0, t + at); if (f1) o.frequency.exponentialRampToValueAtTime(f1, t + at + len);
+      g.gain.setValueAtTime(0.0001, t + at); g.gain.exponentialRampToValueAtTime(vol, t + at + .008); g.gain.exponentialRampToValueAtTime(0.0001, t + at + len);
+      let node = o; if (lp){ const f = ctx.createBiquadFilter(); f.type = 'lowpass'; f.frequency.value = lp; o.connect(f); node = f; }
+      node.connect(g).connect(out); o.start(t + at); o.stop(t + at + len + .02);
+    };
+    const hiss = (type, freq, at, len, vol, q) => {
+      const src = ctx.createBufferSource(), f = ctx.createBiquadFilter(), g = ctx.createGain();
+      src.buffer = SOUND.noise; f.type = type; f.frequency.value = freq; if (q) f.Q.value = q;
+      g.gain.setValueAtTime(0.0001, t + at); g.gain.exponentialRampToValueAtTime(vol, t + at + .005); g.gain.exponentialRampToValueAtTime(0.0001, t + at + len);
+      src.connect(f).connect(g).connect(out); src.start(t + at, Math.random()); src.stop(t + at + len + .02);
+    };
+    const notes = (seq, type = 'triangle', vol = .24) => seq.forEach(([hz, at, len]) => tone(type, hz, 0, at, len, vol));
+    ({
+      pick:  () => { tone('sine', 150, 230, 0, .09, .22); hiss('lowpass', 900, 0, .06, .12); },                     // the case comes up off its wheels
+      place: () => { tone('sine', 95, 48, 0, .18, .5, 400); hiss('lowpass', 500, 0, .07, .3); tone('square', 2400, 0, .02, .03, .02); }, // road-case thunk + a caster tick
+      bad:   () => { tone('square', 120, 0, 0, .08, .14, 900); tone('square', 120, 0, .12, .1, .14, 900); },       // soft "nope"
+      strap: () => { for (let i = 0; i < 6; i++){ hiss('highpass', 2400 + i * 180, i * .065, .03, .22); tone('square', 900 + i * 40, 0, i * .065, .015, .03); } }, // ratchet clicks
+      bar:   () => { tone('triangle', 330, 0, 0, .35, .18); tone('triangle', 347, 0, 0, .3, .12); tone('square', 1180, 0, 0, .12, .04, 3000); hiss('bandpass', 1800, 0, .05, .2, 3); }, // metal clunk
+      row:   () => notes([[1047, 0, .16], [1568, .11, .3]], 'sine', .2),                                           // full-width row chime
+      out:   () => { hiss('bandpass', 1400, 0, .16, .45, 1.2); tone('sine', 260, 140, 0, .12, .12); },                                                        // a case back out
+      pass:  () => notes([[523, 0, .14], [659, .12, .14], [784, .24, .32]]),
+      star3: () => notes([[523, 0, .12], [659, .1, .12], [784, .2, .12], [1047, .32, .45]], 'triangle', .26),
+      fail:  () => notes([[392, 0, .18], [311, .18, .35]], 'triangle', .2)
+    })[name]();
+    setTimeout(() => out.disconnect(), 1500);
+  } catch(e){}
+}
 function playSemi(dur, phases){
   if (!SOUND.on) return;
   try {
@@ -4105,6 +4194,7 @@ function showResults(rep){
   $('rsBody').innerHTML = `
     <div class="score-big"><b>${rep.total}</b><span>/ 100</span><span class="stars">${'★'.repeat(stars)}<span class="dim">${'★'.repeat(3 - stars)}</span></span></div>
     ${passed ? '' : '<p style="color:var(--bad)">Score 60 or better to unlock the next level.</p>'}
+    ${passed && (lv.id === 3 || lv.id === 6) && !ACCOUNT.get() ? `<div class="save-nudge"><span><b>Your progress is saved only in this browser.</b> Clear it, switch phones or computers, and it's gone. Make a free account to keep it.</span><button class="btn primary" id="rsSave">SAVE PROGRESS</button></div>` : ''}
     ${bonusHtml(lv, rep)}
     ${cats}
     ${rep.badges.length ? `<div class="badges">${rep.badges.map(b => `<span class="badge">${b}</span>`).join('')}</div>` : ''}
@@ -4113,6 +4203,9 @@ function showResults(rep){
   const next = G.levelIdx + 1;
   $('rsNext').disabled = !(next < LEVELS.length && prog.unlocked >= LEVELS[next].id);
   $('rsBetter').hidden = !!(lv.offload || lv.loop || !lv.solution || !lv.solution.length);
+  if ($('rsSave')) $('rsSave').onclick = () => openAccount('start');
+  stat('level_end', {level:lv.id, score:rep.total, stars, rehandles:rep.rehandles, passed});
+  setTimeout(() => sfx(!passed ? 'fail' : stars === 3 ? 'star3' : 'pass'), 150);
   $('rsNext').textContent = next < LEVELS.length ? 'NEXT LEVEL' : 'STACKED LEVELS SOON';
   G.mode = 'results'; openModal('results');
 }
@@ -4129,6 +4222,7 @@ function tryUnload(uid){
     G.offMistakes.push({took:def.department, skipped:sk});
     flashCoach('warn', `${title(sk)} is needed before ${title(def.department)}, and a ${itemOf(sooner[0]).def.name} was ready to come off. Grab what's needed first.`, 4000);
   } else toast('OFF!', def.name);
+  sfx('pick');
   G.placements = G.placements.filter(p => p.uid !== uid); G.hover = null;
   refresh();
 }
@@ -4193,7 +4287,7 @@ function examDone(){
     const go = () => {
       const name = $('exName').value.trim(); if (!name){ $('exName').focus(); return; }
       const now = new Date(), date = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
-      prog.exam = {passed:true, score:ex.right, name, date, certNo:null};
+      prog.exam = {passed:true, score:ex.right, name, date, certNo:null}; stat('exam_end', {level:101, score:ex.right, passed:true});
       prog.stars[101] = 3; (prog.bonus = prog.bonus || {})[101] = 3; saveProgress();
       issueCertNo(name, ex.right, date).then(no => { if (no){ prog.exam.certNo = no; saveProgress(); } showCertificate(name, ex.right, date, prog.exam.certNo); });
     };
@@ -4204,14 +4298,137 @@ function examDone(){
 const gradeOf = pct => pct >= 97 ? 'A+' : pct >= 94 ? 'A' : pct >= 90 ? 'A-' : pct >= 87 ? 'B+' : pct >= 84 ? 'B' : pct >= 80 ? 'B-' : pct >= 77 ? 'C+' : pct >= 74 ? 'C' : pct >= 70 ? 'C-' : 'F';
 // Certificate number: date of achievement in military format (YYYYMMDD) + a 3-digit running count across all players,
 // e.g. 20261004001 (001 is Omar Colom's). The count comes from AV Educate's online registry; until it's set up the number shows as pending.
-const CERT_REGISTRY_URL = ''; // set when the online registry is live: POST {name, score, date} → {seq}
+// AV Educate's online registry (a Google Sheet + Apps Script web app, see server/registry.gs): accounts, certificate
+// numbers, problem reports and anonymous play stats. Empty = offline (reports fall back to email).
+const CLOUD_URL = '';
 const certDate = date => date.replace(/-/g, '');
+async function cloud(action, data){
+  if (!CLOUD_URL) return {ok:false, error:'offline'};
+  try { const r = await fetch(CLOUD_URL, {method:'POST', body:JSON.stringify({action, ...data})}); return await r.json(); }
+  catch(e){ return {ok:false, error:'Can\'t reach the server. Check your connection and try again.'}; }
+}
 async function issueCertNo(name, score, date){
-  if (!CERT_REGISTRY_URL) return null;
-  try {
-    const r = await fetch(CERT_REGISTRY_URL, {method:'POST', body:JSON.stringify({name, score, date})});
-    const j = await r.json(); return j && j.seq ? certDate(date) + String(j.seq).padStart(3, '0') : null;
-  } catch(e){ return null; }
+  const a = ACCOUNT.get(); if (!a) return null;
+  const j = await cloud('cert', {token:a.token, name, score, date});
+  return j && j.ok ? String(j.certNo) : null;
+}
+/* ---------- accounts: email + emailed 6-digit code, progress kept in sync ---------- */
+const ACCOUNT = {
+  key:'truckPackology.account',
+  get(){ try { return JSON.parse(localStorage.getItem(this.key)); } catch(e){ return null; } },
+  set(a){ try { a ? localStorage.setItem(this.key, JSON.stringify(a)) : localStorage.removeItem(this.key); } catch(e){} accountButtons(); }
+};
+function accountButtons(){
+  const a = ACCOUNT.get(), label = a ? `ACCOUNT · ${(a.name || a.email).toUpperCase().split(/[\s@]/)[0].slice(0, 10)}` : 'SAVE PROGRESS';
+  for (const id of ['lvAccount', 'pmAccount']) if ($(id)) $(id).textContent = label;
+}
+// merge two saves: the best of both, nothing lost
+function mergeProgress(a, b){
+  if (!b) return a; if (!a) return b;
+  const mx = (x, y) => { const o = {...(x || {})}; for (const k in (y || {})) o[k] = Math.max(o[k] || 0, y[k]); return o; };
+  const exam = (a.exam && a.exam.passed) ? (a.exam.certNo || !(b.exam && b.exam.certNo) ? a.exam : b.exam) : b.exam;
+  return {...b, ...a, unlocked:Math.max(a.unlocked || 1, b.unlocked || 1), best:mx(a.best, b.best), stars:mx(a.stars, b.stars), bonus:mx(a.bonus, b.bonus),
+    badges:mx(a.badges, b.badges), loopBest:Math.max(a.loopBest || 0, b.loopBest || 0), ...(exam ? {exam} : {})};
+}
+let cloudSaveT = null;
+function cloudSave(){
+  const a = ACCOUNT.get(); if (!a || !CLOUD_URL) return;
+  clearTimeout(cloudSaveT); cloudSaveT = setTimeout(() => cloud('save', {token:a.token, progress:G.progress}).then(j => { if (j && j.error === 'signed out') ACCOUNT.set(null); }), 1500);
+}
+async function cloudPull(){
+  const a = ACCOUNT.get(); if (!a || !CLOUD_URL) return;
+  const j = await cloud('load', {token:a.token});
+  if (!j.ok){ if (j.error === 'signed out') ACCOUNT.set(null); return; }
+  G.progress = mergeProgress(G.progress, j.progress); saveProgress(); registerPendingCert();
+}
+async function registerPendingCert(){ // an exam passed while signed out gets its number once signed in
+  const e = G.progress.exam; if (!e || !e.passed || e.certNo) return;
+  const no = await issueCertNo(e.name, e.score, e.date); if (no){ e.certNo = no; saveProgress(); }
+}
+function openAccount(step, msg){
+  const a = ACCOUNT.get(), body = $('acBody'), row = $('acRow'), m = $('acMsg');
+  m.className = 'ac-msg'; m.textContent = msg || '';
+  G.acctPrev = G.acctPrev || G.mode; G.mode = 'account';
+  if (a && step !== 'code'){
+    $('acTitle').textContent = 'YOUR ACCOUNT';
+    body.innerHTML = `<p>Signed in as <b>${a.name ? a.name.replace(/[<>&]/g, '') + ' · ' : ''}${a.email}</b>. Your progress is saved to your account, so you can pick up on any device by signing in with the same email.</p>`;
+    row.innerHTML = '<button class="btn" id="acOut">SIGN OUT</button><button class="btn primary" id="acDone">CLOSE</button>';
+    $('acOut').onclick = () => { ACCOUNT.set(null); openAccount(null, 'Signed out. Your progress stays in this browser too.'); };
+  } else if (step === 'code'){
+    $('acTitle').textContent = 'CHECK YOUR EMAIL';
+    body.innerHTML = `<p>We sent a 6-digit code to <b>${G.acctEmail}</b>. It works for 15 minutes. (Check spam if it isn't there.)</p><label for="acCode">CODE</label><input id="acCode" class="code" inputmode="numeric" autocomplete="one-time-code" maxlength="6">`;
+    row.innerHTML = '<button class="btn" id="acBack">USE ANOTHER EMAIL</button><button class="btn primary" id="acGo">SIGN IN</button>';
+    $('acBack').onclick = () => openAccount('start');
+    $('acGo').onclick = async () => {
+      m.className = 'ac-msg'; m.textContent = 'Checking…';
+      const j = await cloud('verify', {email:G.acctEmail, code:$('acCode').value, name:G.acctName});
+      if (!j.ok){ m.className = 'ac-msg bad'; m.textContent = j.error; return; }
+      ACCOUNT.set({token:j.token, email:j.email, name:j.name, playerId:j.playerId});
+      G.progress = mergeProgress(G.progress, j.progress); saveProgress(); registerPendingCert(); stat('signup', {});
+      openAccount(null, 'You\'re signed in. Your progress is saved.');
+    };
+    setTimeout(() => $('acCode').focus(), 50);
+  } else {
+    $('acTitle').textContent = 'SAVE YOUR PROGRESS';
+    body.innerHTML = `<p>Right now your progress lives only in this browser. Make a free account to keep it safe, play on another device, and get your certificate number when you pass the final exam. No password: we email you a code.</p>
+      <label for="acName">YOUR NAME</label><input id="acName" maxlength="60" autocomplete="name" value="${(G.acctName || '').replace(/"/g, '')}">
+      <label for="acEmail">EMAIL</label><input id="acEmail" type="email" maxlength="120" autocomplete="email" value="${(G.acctEmail || '').replace(/"/g, '')}">`;
+    row.innerHTML = '<button class="btn" id="acDone">NOT NOW</button><button class="btn primary" id="acSend">EMAIL ME A CODE</button>';
+    $('acSend').onclick = async () => {
+      G.acctName = $('acName').value.trim(); G.acctEmail = $('acEmail').value.trim();
+      if (!CLOUD_URL){ m.className = 'ac-msg bad'; m.textContent = 'Accounts are being set up. Try again soon.'; return; }
+      m.className = 'ac-msg'; m.textContent = 'Sending…';
+      const j = await cloud('sendCode', {email:G.acctEmail, name:G.acctName});
+      if (!j.ok){ m.className = 'ac-msg bad'; m.textContent = j.error; return; }
+      openAccount('code');
+    };
+  }
+  if ($('acDone')) $('acDone').onclick = closeAccount;
+  openModal('account');
+}
+function closeAccount(){
+  closeModals(); const prev = G.acctPrev || 'title'; G.acctPrev = null; G.mode = prev;
+  if (prev === 'results') openModal('results'); else if (prev === 'levels') openLevels(); else if (prev === 'certificate') showCertificate(G.progress.exam.name, G.progress.exam.score, G.progress.exam.date, G.progress.exam.certNo);
+  else if (prev === 'play') refresh();
+}
+/* ---------- report a problem / suggest an idea ---------- */
+const deviceKind = () => isPhone() ? 'phone' : matchMedia('(any-pointer: fine)').matches ? 'computer' : 'tablet';
+function openReport(){
+  G.reportPrev = G.mode === 'report' ? G.reportPrev : G.mode; G.mode = 'report';
+  const lv = G.level, where = lv ? (lv.loop ? 'Endless Tour' : lv.demo ? 'Practice Bay' : `Level ${lv.id}`) : 'Home';
+  G.reportWhere = where; $('rpText').value = ''; $('rpMsg').textContent = ''; $('rpMsg').className = 'ac-msg';
+  $('rpInfo').textContent = `Sent with: ${where} · ${deviceKind()} · your browser.`;
+  openModal('report'); setTimeout(() => $('rpText').focus(), 50);
+}
+function closeReport(){
+  closeModals(); const prev = G.reportPrev || 'title'; G.mode = prev;
+  if (prev === 'help') openModal('help'); else if (prev === 'levels') openLevels(); else if (prev === 'play') refresh();
+}
+for (const b of document.querySelectorAll('.rp-kind .btn')) b.onclick = () => { for (const x of document.querySelectorAll('.rp-kind .btn')) x.classList.toggle('on', x === b); };
+$('rpCancel').onclick = closeReport;
+$('rpSend').onclick = async () => {
+  const kind = document.querySelector('.rp-kind .btn.on').dataset.kind, message = $('rpText').value.trim(), m = $('rpMsg');
+  if (!message){ m.className = 'ac-msg bad'; m.textContent = 'Write a few words first.'; return; }
+  if (!CLOUD_URL){ // no registry yet: hand it to the email app
+    location.href = `mailto:info@aveducate.com?subject=${encodeURIComponent(`Truck Packology ${kind} · ${G.reportWhere}`)}&body=${encodeURIComponent(`${message}\n\n${G.reportWhere} · ${deviceKind()} · ${navigator.userAgent}`)}`;
+    return;
+  }
+  m.className = 'ac-msg'; m.textContent = 'Sending…';
+  const a = ACCOUNT.get();
+  const j = await cloud('report', {kind, message, level:G.reportWhere, device:deviceKind(), browser:navigator.userAgent, playerId:playerId(), token:a && a.token});
+  if (!j.ok){ m.className = 'ac-msg bad'; m.textContent = j.error || 'That didn\'t send. Try again.'; return; }
+  m.className = 'ac-msg good'; m.textContent = 'Thanks! It went straight to AV Educate.'; setTimeout(closeReport, 1400);
+};
+/* ---------- anonymous play stats ---------- */
+function playerId(){
+  try { let id = localStorage.getItem('truckPackology.pid'); if (!id){ id = Math.random().toString(36).slice(2, 10); localStorage.setItem('truckPackology.pid', id); } return id; }
+  catch(e){ return 'none'; }
+}
+function stat(event, data){
+  if (!CLOUD_URL) return;
+  const body = JSON.stringify({action:'stat', event, playerId:playerId(), device:deviceKind(), ...data});
+  try { if (navigator.sendBeacon && navigator.sendBeacon(CLOUD_URL, body)) return; } catch(e){}
+  try { fetch(CLOUD_URL, {method:'POST', body, keepalive:true, mode:'no-cors'}); } catch(e){}
 }
 function showCertificate(name, score, date, certNo){
   const pct = score / EXAM.length * 100, pctTxt = String(Math.round(pct * 100) / 100), grade = gradeOf(pct);
@@ -4226,6 +4443,7 @@ function showCertificate(name, score, date, certNo){
       <div class="cell"><div class="val"><img class="c-sig" src="assets/signature-cert.png" alt="Omar Colom signature"></div><div class="lab">Issued by AV Educate</div></div>
     </div>
     <div class="c-small">Simulation-Based Training · Certificate No. ${certNo || certDate(date) + '-PENDING'}</div></div>`;
+  $('certRegister').hidden = !!certNo || !CLOUD_URL;
   G.mode = 'certificate'; openModal('certificate');
 }
 
@@ -4344,7 +4562,7 @@ function pickFromDockUid(uid){
   if (G.hand){ if (G.hand.from === 'dock' && G.hand.uid === uid) return; cancelHand(true); }
   G.coachOverride = null; G.tool = null;
   G.hand = {uid, rot:0, from:'dock', pre:snap()};
-  G.ghost = null; G.lastInfo = uid;
+  G.ghost = null; G.lastInfo = uid; sfx('pick');
   if (G.keyMode) spawnGhostAtDoor();
   refresh();
 }
@@ -4463,6 +4681,7 @@ function loopDepart(){
 }
 function loopFinish(restart, why){
   const L = G.loop; if (!L) return;
+  stat('tour_end', {level:'tour', score:L.total});
   const newBest = L.history.length && L.total > (G.progress.loopBest || 0);
   if (newBest){ G.progress.loopBest = L.total; saveProgress(); }
   const best = G.progress.loopBest || 0;
@@ -4635,6 +4854,10 @@ function startDemo(){ closeModals(); loadLevelObj(isPhone() ? {...DEMO_LEVEL, ..
 $('titleDemo').onclick = () => homeGo(HOME.demo);
 $('titleHelp').onclick = () => homeGo(HOME.help);
 $('btnHelp').onclick = openHelp;
+$('lvAccount').onclick = () => { closeModals(); G.mode = 'levels'; openAccount(); };
+$('hpReport').onclick = () => { G.mode = 'help'; openReport(); };
+$('certRegister').onclick = () => openAccount('start');
+accountButtons(); cloudPull();
 $('rsBetter').onclick = showBetter; $('betterBack').onclick = leaveBetter;
 $('lvAch').onclick = () => { closeModals(); openAchievements(); };
 $('achClose').onclick = () => { closeModals(); openLevels(); };
@@ -4912,7 +5135,7 @@ $('phoneMenu').addEventListener('click', e => {
   $('phoneMenu').hidden = true;
   const act = b ? b.dataset.act : 'close';
   if (act === 'levels') openLevels(); else if (act === 'hint') $('btnHint').click(); else if (act === 'undo') undo(); else if (act === 'redo') redo();
-  else if (act === 'reset') resetLevel(); else if (act === 'help') openHelp(); else if (act === 'home') enterHome(); else if (act === 'sound') setSound(!SOUND.on);
+  else if (act === 'reset') resetLevel(); else if (act === 'help') openHelp(); else if (act === 'home') enterHome(); else if (act === 'sound') setSound(!SOUND.on); else if (act === 'account'){ G.acctPrev = G.mode; openAccount(); } else if (act === 'report') openReport();
 });
 // phone mode: touch-only devices (no mouse or trackpad) and narrow screens; landscape phones are asked to turn upright
 function applyPhoneMode(){
