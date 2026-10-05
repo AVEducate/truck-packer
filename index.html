@@ -154,7 +154,7 @@ body.home #game, body.home .modal-back{filter:blur(7px) saturate(.85)}
 /* modals */
 .modal-back{position:fixed;inset:0;background:rgba(10,10,9,.72);display:none;align-items:center;justify-content:center;z-index:20;padding:16px}
 .modal-back.open{display:flex}
-.modal{background:var(--panel);border:3px solid #0d0d0c;box-shadow:0 0 0 3px #4b4c47,10px 12px 0 rgba(0,0,0,.5);width:min(620px,100%);max-height:92vh;overflow:auto;padding:22px 24px}
+.modal{background:var(--panel);border:3px solid #0d0d0c;box-shadow:0 0 0 3px #4b4c47,10px 12px 0 rgba(0,0,0,.5);width:min(620px,100%);max-height:92vh;max-height:min(92vh, 100%);overflow:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;padding:22px 24px}
 .modal h3{font-family:var(--pixel);font-weight:800;font-size:16px;color:var(--accent);margin:0 0 4px;letter-spacing:.12em}
 .modal h2{font-family:var(--pixel);font-weight:800;letter-spacing:.02em;font-size:40px;margin:0 0 12px;line-height:1.05}
 .modal p{line-height:1.55;font-size:14.5px;margin:0 0 12px}
@@ -218,7 +218,8 @@ body.phone .panel.manifest{flex:0 0 auto;flex-direction:row;align-items:flex-sta
 body.phone .panel.manifest::-webkit-scrollbar{display:none}
 body.phone .manifest-head, body.phone #manifestCount{display:none}
 body.phone #manifestList{display:flex;gap:6px;align-items:flex-start}
-body.phone .manifest-item{flex:0 0 72px;width:72px;height:86px;margin:0;padding:4px 3px;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:2px;position:relative;touch-action:pan-x}
+body.phone .manifest-item{flex:0 0 72px;width:72px;height:86px;margin:0;padding:4px 3px;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:2px;position:relative;touch-action:none}
+body.phone .manifest-item:hover{border-color:#121211} /* phones keep :hover stuck after a touch, which looked like the card was selected */
 body.phone .manifest-item img{width:46px;height:46px}
 body.phone .manifest-item .mi-meta{display:none}
 body.phone .manifest-item .mi-name{font-size:10px;line-height:1.05;text-align:center}
@@ -230,7 +231,7 @@ body.phone .loop-tile .lt-head{display:block;writing-mode:vertical-rl;transform:
 body.phone .loop-tile .lt-head small{display:none}
 body.phone .loop-tile.bonus .lt-head{border-color:var(--warn)}
 body.phone .loop-tile .manifest-item{margin:0}
-body.phone #stagingBox{flex:0 0 72px;width:72px;height:86px;margin:0;padding:4px 3px;display:flex;flex-direction:column;align-items:center;gap:2px;position:relative;touch-action:pan-x} /* same size as every case card */
+body.phone #stagingBox{flex:0 0 72px;width:72px;height:86px;margin:0;padding:4px 3px;display:flex;flex-direction:column;align-items:center;gap:2px;position:relative;touch-action:none} /* same size as every case card */
 body.phone #stagingBox[hidden]{display:none}
 body.phone #stagingBox h2{font-size:9.5px;margin:0;line-height:1;text-align:center;letter-spacing:.04em}
 body.phone #stagingBox canvas{width:64px;height:48px}
@@ -247,14 +248,15 @@ body.phone #btnHint, body.phone #btnView{display:none !important}
 body.phone .stage-tools .btn[hidden]{display:inline-flex !important;visibility:hidden}
 body.phone .stage-tools .btn.dimmed{opacity:.35}
 body.phone #btnTransit{left:10px !important;right:10px;top:auto !important;bottom:8px;width:auto !important;height:50px}
-body.phone .panel.info{position:fixed;left:0;right:0;bottom:58px;height:50vh;z-index:40;border-left:0;border-top:3px solid var(--edge);transform:translateY(calc(100% + 60px));transition:transform .25s ease;box-shadow:0 -8px 24px rgba(0,0,0,.5)}
+body.phone .panel.info{position:fixed;left:0;right:0;bottom:58px;height:50vh;height:50dvh;z-index:40;border-left:0;border-top:3px solid var(--edge);transform:translateY(calc(100% + 60px));transition:transform .25s ease;box-shadow:0 -8px 24px rgba(0,0,0,.5)}
 body.phone.sheet-open .panel.info{transform:none}
 body.phone .coach{position:fixed;left:0;right:0;bottom:0;height:58px;z-index:41;padding:10px 10px 4px;font-size:12.5px;line-height:1.3;align-items:flex-start;gap:8px;touch-action:none}
 body.phone .coach::before{content:'';position:absolute;top:4px;left:50%;transform:translateX(-50%);width:38px;height:4px;border-radius:3px;background:var(--cream-dim)}
 body.phone .coach .tag{font-size:10px;padding:2px 5px}
 body.phone #coachText{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
 body.phone .levels-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
-body.phone .modal{max-width:calc(100vw - 20px)}
+body.phone .modal{max-width:calc(100vw - 20px);padding:16px 16px}
+body.phone .modal-back{padding:10px}
 .phone-menu{position:fixed;inset:0;z-index:998;background:rgba(0,0,0,.6);display:flex;align-items:flex-start;justify-content:flex-end;padding:56px 10px 10px}
 .phone-menu[hidden]{display:none}
 .pm-card{width:min(260px,100%);background:var(--panel);border:3px solid var(--edge);box-shadow:4px 4px 0 #000;padding:6px 12px 14px}
@@ -4446,7 +4448,7 @@ function phoneAutoScroll(clientY){
 const phoneOverCanvas = e => { const r = $('truckCanvas').getBoundingClientRect(); return e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.top + (G.L.clipH || r.height); };
 function phoneDown(e){
   if (!isPhone() || !G.level || G.mode !== 'play') return;
-  const card = e.target.closest('.manifest-item'), onCanvas = e.target.closest('#truckCanvas'), toolBtn = e.target.closest('#btnBar, #btnStrap'), stack = !e.target.closest('#btnClearStage') && G.staging.length && e.target.closest('#stagingBox');
+  const card = e.target.closest('.manifest-item'), onCanvas = e.target.closest('#truckCanvas'), toolBtn = e.target.closest('#btnBar, #btnStrap'), stack = !e.target.closest('#btnClearStage') && e.target.closest('#stagingBox');
   if (!card && !onCanvas && !toolBtn && !stack) return;
   PH.pointers.set(e.pointerId, {x:e.clientX, y:e.clientY});
   if (PH.pointers.size === 2 && onCanvas){ // two fingers: twist to rotate
@@ -4456,8 +4458,8 @@ function phoneDown(e){
   }
   if (PH.pointers.size > 1) return;
   const now = performance.now(), g = {id:e.pointerId, x0:e.clientX, y0:e.clientY, t0:now, lx:e.clientX, ly:e.clientY, lt:now, moved:false};
-  if (card){ if (card.classList.contains('done') || G.level.offload) return; g.kind = 'card'; g.card = card; }
-  else if (stack){ g.kind = 'stack'; }
+  if (card){ g.kind = 'card'; g.card = card; g.noPick = card.classList.contains('done') || G.level.offload; } // empty cards still scroll the strip
+  else if (stack){ g.kind = 'stack'; g.noPick = !G.staging.length; }
   else if (toolBtn){ if (toolBtn.hidden) return; g.kind = 'tool'; g.tool = toolBtn.id === 'btnBar' ? 'bar' : 'strap'; }
   else {
     if (G.level.offload || G.tool) return; // unloading taps and tool taps use the regular handlers
@@ -4480,8 +4482,9 @@ function phoneMove(e){
   const dx = e.clientX - g.x0, dy = e.clientY - g.y0, now = performance.now();
   if (!g.moved && Math.hypot(dx, dy) > 9){
     g.moved = true; clearTimeout(g.holdTimer);
-    if (g.kind === 'card'){
-      if (Math.abs(dy) < Math.abs(dx)){ PH.g = null; return; } // sideways: the strip scrolls
+    if ((g.kind === 'card' || g.kind === 'stack') && (g.noPick || !(dy > 0 && dy >= Math.abs(dx) * .5))){ // sideways (or up): scroll the strip by hand
+      g.kind = 'strip'; g.strip = document.querySelector('.panel.manifest'); g.sl0 = g.strip.scrollLeft; g.vx = 0;
+    } else if (g.kind === 'card'){
       const c = g.card; if (G.level.loop){ if (c.dataset.uid) pickFromDockUid(c.dataset.uid); } else pickFromDock(c.dataset.type);
       if (!G.hand){ PH.g = null; return; } g.kind = 'drag';
     } else if (g.kind === 'stack'){ takeStack(); if (!G.hand){ PH.g = null; return; } g.kind = 'drag'; }
@@ -4513,6 +4516,9 @@ function phoneMove(e){
     renderCoach(); render();
   } else if (g.kind === 'flick'){
     if (g.fy - e.clientY > 30){ g.kind = 'none'; phoneFlip(g.uid); }
+  } else if (g.kind === 'strip'){
+    const dt = Math.max(1, now - g.lt); g.vx = (e.clientX - g.lx) / dt; g.lx = e.clientX; g.lt = now;
+    g.strip.scrollLeft = g.sl0 - (e.clientX - g.x0);
   }
   e.preventDefault(); e.stopPropagation();
 }
@@ -4532,8 +4538,8 @@ function phoneUp(e){
   } else if (g.kind === 'tooldrag' && G.tool){
     if (phoneOverCanvas(e) && G.tool.ok) placeTool(); else { if (phoneOverCanvas(e)) flashCoach('bad', G.tool.reason, 3000); G.tool = null; refresh(); }
   } else if (g.kind === 'tool' && !g.moved){ startTool(g.tool); }
-  else if (g.kind === 'stack' && !g.moved){ takeStack(); }
-  else if (g.kind === 'card' && !g.moved){ flashCoach('tip', 'Drag the case down into the truck and let go to set it down.', 2500); }
+  else if (g.kind === 'stack' && !g.moved && !g.noPick){ takeStack(); }
+  else if (g.kind === 'card' && !g.moved && !g.noPick){ flashCoach('tip', 'Drag the case down into the truck and let go to set it down.', 2500); }
   else if (g.kind === 'canvas' && !g.moved && !g.armed){
     if (G.hand){ const p = canvasPoint(e); pointerGhost(p.x, p.y); placeHand(); return; }
     const key = g.uid || (g.bar ? 'bar:' + g.bar.y + g.bar.tier : null);
@@ -4542,6 +4548,10 @@ function phoneUp(e){
       if (g.bar){ removeBar(g.bar); phoneUndoBanner(`${g.bar.kind === 'strap' ? 'Strap' : 'Load bar'} taken out`); }
       else { const name = itemOf(g.uid).def.name; pickFromTruck(g.uid); if (G.hand){ returnToDock(); phoneUndoBanner(`${name} removed`); } }
     } else PH.lastTap = key ? {key, t:now} : null;
+  } else if (g.kind === 'strip'){ // let the strip coast a little after a flick
+    let v = clamp(g.vx * 16, -30, 30); const el = g.strip;
+    const coast = () => { if (Math.abs(v) < .5) return; el.scrollLeft -= v; v *= .88; requestAnimationFrame(coast); };
+    requestAnimationFrame(coast);
   } else if (g.kind === 'swipe'){
     const dy = e.clientY - g.y0, dx = e.clientX - g.x0;
     if (Math.abs(dy) > G.L.clipH * .5 && Math.abs(dy) > 2 * Math.abs(dx) && G.level.stacked){
@@ -4550,6 +4560,7 @@ function phoneUp(e){
   }
 }
 window.addEventListener('pointerdown', phoneDown, true);
+document.addEventListener('click', e => { if (isPhone() && G.mode === 'play' && e.target.closest('.manifest-item, #stageCanvas')){ e.preventDefault(); e.stopPropagation(); } }, true);
 window.addEventListener('pointermove', phoneMove, true);
 window.addEventListener('pointerup', phoneUp, true);
 window.addEventListener('pointercancel', phoneUp, true);
