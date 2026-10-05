@@ -131,7 +131,7 @@ body.home #game, body.home .modal-back{filter:blur(7px) saturate(.85)}
 .controls .btn kbd, .controls .btn .lock{display:block;margin:0;font-size:11px;opacity:.75;letter-spacing:.04em}
 .controls .btn.primary{width:244px}
 .controls .btn[hidden]{display:none}
-.coach .keys{margin-left:auto;white-space:nowrap}
+#coachText{flex:1 1 auto;min-width:0} /* the crew-lead message uses the whole bottom row (keys live in HELP) */
 /* fixed-height crew-lead bar so the play area (and the truck) never changes size mid-level */
 #coachText{display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden}
 .keys{font-size:13px;color:var(--cream-dim)}
@@ -180,6 +180,26 @@ body.home #game, body.home .modal-back{filter:blur(7px) saturate(.85)}
 .feedback li.bad::before{content:'FIX';color:var(--bad);font-size:13px;top:8px;left:4px}
 .feedback li.info::before{content:'i';color:var(--warn)}
 .feedback li.warn::before{content:'!';color:var(--warn)}
+/* Endless Tour feed: case-group tiles slide up and away when loaded; new ones come in at the bottom */
+.loop-tile{background:#262724;border:2px solid var(--edge);margin-bottom:10px;padding:8px 8px 2px}
+.loop-tile .lt-head{font-family:var(--pixel);font-weight:800;letter-spacing:.06em;font-size:13px;color:var(--accent);margin:0 2px 6px;display:flex;justify-content:space-between}
+.loop-tile .lt-head small{color:var(--cream-dim)}
+.loop-tile .manifest-item{margin-bottom:6px}
+.loop-tile.entering{animation:tileIn .45s ease-out}
+.loop-tile.leaving{animation:tileUp .45s ease-in forwards;pointer-events:none}
+@keyframes tileIn{from{transform:translateY(60px);opacity:0}to{transform:none;opacity:1}}
+@keyframes tileUp{to{transform:translateY(-60px);opacity:0;max-height:0;margin:0;padding:0}}
+.loop-goal .big{font-family:var(--pixel);font-weight:800;font-size:30px;line-height:1}
+.loop-goal .row{display:flex;justify-content:space-between;gap:8px;margin:6px 0}
+.loop-goal .log{font-size:13px;line-height:1.6;margin:6px 0 10px}
+.loop-goal .log .neg{color:var(--bad)}.loop-goal .log .pos{color:var(--good)}
+.loop-goal .btns{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.loop-goal .strikes{display:flex;gap:6px}
+.loop-goal .strike{display:inline-grid;place-items:center;width:24px;height:24px;border:2px solid #0d0d0c;background:#2f302c;color:#55564f;font-weight:800}
+.loop-goal .strike.on{background:var(--bad);color:#1a0b08}
+.loop-note{font-size:13px;line-height:1.45;color:var(--cream-dim);margin:6px 0 8px}
+.loop-tile.bonus{border-color:var(--warn);box-shadow:0 0 0 2px rgba(240,192,74,.25)}
+.loop-tile.bonus .lt-head{color:var(--warn)}
 /* phones and touch-only tablets: a friendly note instead of a game they can't really play */
 .phone-note{position:fixed;inset:0;z-index:999;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:16px;overflow:auto}
 .phone-note[hidden]{display:none}
@@ -353,7 +373,7 @@ body.home #game, body.home .modal-back{filter:blur(7px) saturate(.85)}
       <div id="levelGoal"></div>
     </aside>
   </main>
-  <div class="coach" id="coach"><span class="tag">CREW LEAD</span><span id="coachText"></span><span class="keys" id="keysHint">Arrows move · Enter set down · Esc cancel · Right-click rotates</span></div>
+  <div class="coach" id="coach"><span class="tag">CREW LEAD</span><span id="coachText"></span></div>
 </section>
 
 <!-- ================= MODALS ================= -->
@@ -1571,6 +1591,7 @@ const Engine = (() => {
   const wf = def => WEIGHTS[def.weightClass].f;
   const xOverlap = (a, b) => a.x < b.x + b.w && b.x < a.x + a.w;
 
+  const LOOP_FILL = 0.7; // Endless Tour: a truck 70% full (by volume) earns full space marks
   const LIFT_OVER = 6; // cells: one 30" row (plus a little slack) is as far as you can lift a hard case
   const hOf = (def, rot = 0) => Math.round((rot & 2 ? def.width : def.height) / IN);
   function rectOf(state, p){ const def = state.items.get(p.uid).def; const {w, d} = dimsOf(def, p.rot); return {uid:p.uid, x:p.x, y:p.y, z:p.z || 0, w, d, h:hOf(def, p.rot), rot:p.rot, def}; }
@@ -2003,6 +2024,7 @@ const Engine = (() => {
     placements = placements || state.placements;
     const transit = simulateTransit(state, placements);
     const space = calculateSpaceEfficiency(state, placements);
+    if (level.loop) space.score01 = Math.min(1, space.usedPct / LOOP_FILL); // Endless Tour: fill the truck, not just a short load
     const stab = calculateStability(state, level, placements, transit);
     const unload = calculateUnloadAccessibility(state, level, placements);
     const secure = calculateSecurement(state, level, placements, transit);
@@ -2020,7 +2042,12 @@ const Engine = (() => {
     const badges = [], fb = [];
     const ft = c => fmtLen(c * IN);
     // space
-    if (state.stacked){
+    if (level.loop){
+      const pct = Math.round(space.usedPct * 100);
+      fb.push([space.score01 >= .97 ? 'good' : 'bad', `The truck is ${pct}% full, floor to ceiling, nose to doors (full marks at ${Math.round(LOOP_FILL * 100)}%).`]);
+      if (space.score01 >= .97) badges.push('FULL TRUCK');
+    }
+    else if (state.stacked){
       const pct = Math.round(space.ratio * 100), best = Math.round(space.par * 100);
       if (space.score01 >= .97){ badges.push('HIGH & TIGHT'); fb.push(['good', `High &amp; Tight: the load is ${ft(space.loadLength)} long and fills ${pct}% of the space floor to ceiling (the best known pack is ${best}%).`]); }
       else fb.push(['bad', `The load is ${ft(space.loadLength)} long but fills only ${pct}% of the space floor to ceiling. The best known pack reaches ${best}%. Stack up before you build back toward the doors.`]);
@@ -2539,7 +2566,6 @@ function loadLevelObj(lv, idx){
   $('hudSecureWrap').classList.toggle('off', !Engine.secureActive(G.level));
   G.offMistakes = []; if (G.level.offload) loadPack();
   $('stagingBox').hidden = !G.level.stacked || !!G.level.offload; $('btnView').hidden = !G.level.stacked;
-  $('keysHint').textContent = G.level.offload ? 'Click a case to take it off · click a strap or bar to take it out · V door view · Enter finish' : Engine.secureActive(G.level) ? 'Arrows move · Enter set down · B bar · S strap · click a bar to remove it' : 'Arrows move · Enter set down · Esc cancel · Right-click rotates';
   renderGoal(); refresh();
   showBriefing();
 }
@@ -2652,6 +2678,7 @@ function render(){
   ctx.fillStyle = '#1f201d'; ctx.fillRect(0, 0, L.cw, L.ch);
   ctx.save();
   if (G.anim && G.anim.shake){ ctx.translate(G.anim.shake[0], G.anim.shake[1]); }
+  if (G.loopShift) ctx.translate(0, G.loopShift); // Endless Tour: the truck driving off / backing in
   if (G.level.stacked && G.view === 'door'){ renderDoor(ctx); ctx.restore(); return; }
   const {ox, oy, Wp, Dp, cell, wall} = L;
   const W = G.level.truck.width / IN, D = G.level.truck.depth / IN;
@@ -2965,6 +2992,7 @@ function refresh(){
     b.innerHTML = `${kind === 'bar' ? ICON_BAR : ICON_STRAP}<span class="lock">${devicesLeft(kind)}/${total}</span>`; b.title = `${label} (${kind === 'bar' ? 'B' : 'S'}): ${devicesLeft(kind)} of ${total} left`;
     b.classList.toggle('active-tool', !!(G.tool && G.tool.kind === kind));
   }
+  placeStageControls(); // again, now that the bar/strap buttons are shown or hidden for this level
   const btn = $('btnTransit');
   if (G.level.offload){
     const inT = G.placements.length;
@@ -2976,6 +3004,16 @@ function refresh(){
     $('hudSpace').textContent = `${inT} IN`;
     renderManifest(); renderInfo(); renderCoach(); render();
     const stg0 = $('stage'); if (G.L && (stg0.clientHeight !== G.L.ch || stg0.clientWidth !== G.L.cw)) layout();
+    return;
+  }
+  if (G.level.loop){
+    loopSyncTiles();
+    const n = G.placements.length;
+    btn.disabled = !n || G.mode !== 'play'; btn.classList.toggle('ready', !!n && G.mode === 'play');
+    btn.innerHTML = n ? 'READY FOR TRANSIT<span class="lock">ENTER · SEND THIS TRUCK</span>' : 'READY FOR TRANSIT<span class="lock">LOAD SOME CASES</span>';
+    $('hudScore').textContent = G.loop.total;
+    renderManifest(); renderInfo(); renderCoach(); renderGoal(); render();
+    const stg1 = $('stage'); if (G.L && (stg1.clientHeight !== G.L.ch || stg1.clientWidth !== G.L.cw)) layout();
     return;
   }
   const left = leftCount();
@@ -2996,6 +3034,7 @@ function thumb(type){
   return thumbCache[type] = c.toDataURL();
 }
 function renderManifest(){
+  if (G.level.loop) return renderLoopFeed();
   const groups = [];
   for (const c of G.level.cases) groups.push(c.type);
   const left = unplaced();
@@ -3051,6 +3090,7 @@ function renderInfo(){
 }
 function renderGoal(){
   const lv = G.level;
+  if (lv.loop){ document.querySelector('.panel.info').classList.remove('demo'); $('goalHead').textContent = 'ENDLESS TOUR'; return renderLoopGoal(); }
   document.querySelector('.panel.info').classList.toggle('demo', !!lv.demo);
   $('goalHead').textContent = lv.demo ? 'KEYBOARD' : 'LEVEL GOAL';
   if (lv.demo){
@@ -3072,6 +3112,9 @@ function renderCoach(){
     if (!free.length) return setCoach('tip', 'Nothing can come off until a bar or strap comes out. Click the one in front.');
     return setCoach('tip', `Click a case to take it off${next ? `. The venue needs <b>${title(next)}</b> next` : ''}. Top cases first, front to back.`);
   }
+  if (G.level && G.level.loop && G.mode === 'play' && !G.hand && !G.tool) return setCoach('tip', G.placements.length
+    ? 'Keep building rows from the tiles. Bar and strap as you go, then hit <b>READY FOR TRANSIT</b> to send this truck. A truck about 70% full, solid and tied in scores full marks.'
+    : 'Endless Tour: pick cases from any tile on the left and fill this truck. Finish a tile and a new one slides in. A failed pack still goes out, but it costs the gap to 60 and a strike. Three strikes ends the tour.');
   if (G.tool){
     if (G.tool.L != null && !G.tool.ok) return setCoach('bad', G.tool.reason);
     if (doorView()) return setCoach('good', `The ${G.tool.kind === 'bar' ? 'load bar' : 'strap'} goes across the ${G.tool.tier === 'high' ? 'upper tier' : 'tier'} ${fmtLen(G.tool.L * IN)} from the nose. Click to set it, <b>↑ ↓</b> to pick another tier, <b>Esc</b> puts it back.`);
@@ -3353,6 +3396,7 @@ function moveGhost(dx, dy){
 function undo(){ if (G.mode !== 'play') return; G.tool = null; if (G.hand) cancelHand(true); if (!G.hist.length) return refresh(); G.fut.push(snap()); restore(G.hist.pop()); refresh(); }
 function redo(){ if (G.mode !== 'play') return; G.tool = null; if (G.hand) cancelHand(true); if (!G.fut.length) return refresh(); G.hist.push(snap()); restore(G.fut.pop()); refresh(); }
 function resetLevel(){ if (G.mode !== 'play') return; G.tool = null; if (G.hand) cancelHand(true);
+  if (G.level.loop && G.level.offload){ flashCoach('bad', 'This truck is at the venue: unload it. RESET is for packing.'); return; }
   if (G.level.offload){ G.hist.push(snap()); G.fut = []; loadPack(); refresh(); flashCoach('tip', 'Truck reloaded. <b>UNDO</b> goes back.'); return; } if (!G.placements.length && !G.bars.length) return; G.hist.push(snap()); G.fut = []; G.placements = []; G.bars = []; G.coachStep = 0; refresh(); flashCoach('tip', 'Truck emptied. <b>UNDO</b> brings the load back.'); }
 
 /* ---------- load bars + straps ---------- */
@@ -3415,7 +3459,7 @@ let drag = null; // {startX,startY,moved}
 $('manifestList').addEventListener('pointerdown', e => {
   const b = e.target.closest('.manifest-item'); if (!b || b.classList.contains('done') || G.mode !== 'play' || G.level.offload) return;
   e.preventDefault(); G.keyMode = false;
-  pickFromDock(b.dataset.type);
+  if (G.level.loop){ if (b.dataset.uid) pickFromDockUid(b.dataset.uid); } else pickFromDock(b.dataset.type);
   if (G.hand) drag = {startX:e.clientX, startY:e.clientY, moved:false};
 });
 $('truckCanvas').addEventListener('pointerdown', e => {
@@ -3518,7 +3562,8 @@ function startTransit(){
   if (G.mode !== 'play') return;
   if (G.hand) cancelHand(true);
   G.tool = null;
-  if (leftCount()){ flashCoach('bad', 'There are still cases on the dock. Everything on the manifest has to go on the truck.'); return; }
+  if (G.level.loop && !G.placements.length){ flashCoach('bad', 'Load some cases first.'); return; }
+  if (!G.level.loop && leftCount()){ flashCoach('bad', 'There are still cases on the dock. Everything on the manifest has to go on the truck.'); return; }
   const base = clone(G.placements);
   const report = Engine.calculateFinalScore(state(), G.level, base);
   const sim = report.transit;
@@ -3543,7 +3588,7 @@ function startTransit(){
     } else {
       lbl.style.display = 'none'; G.anim = null;
       G.transitView = {final:sim.final, shifted:movedSet};
-      render(); showResults(report); return;
+      render(); if (G.level.loop) loopTruckDone(report); else showResults(report); return;
     }
     lbl.textContent = label; lbl.style.color = lbl.style.borderColor = amp === 0 ? (moved ? 'var(--bad)' : 'var(--good)') : 'var(--warn)';
     G.anim.shake = amp ? [Math.sin(t * .09) * amp, Math.cos(t * .13) * amp * .6] : null;
@@ -3608,6 +3653,7 @@ function loadPack(){ const st = packState(G.level); G.placements = clone(st.plac
 function finishOffload(){
   if (G.mode !== 'play') return;
   if (G.placements.length){ flashCoach('bad', 'There are still cases in the truck. Everything comes off.'); return; }
+  if (G.level.loop) return loopUnloadDone(offloadReport(G.level, G.offMistakes));
   showResults(offloadReport(G.level, G.offMistakes));
 }
 
@@ -3615,7 +3661,7 @@ function finishOffload(){
 function openExam(){
   G.prevMode = 'title'; G.mode = 'exam';
   const prog = G.progress, passed = prog.exam && prog.exam.passed;
-  $('exTitle').textContent = 'FINAL EXAM';
+  $('exKicker').textContent = 'LEVEL 101 · FINAL EXAM'; $('exTitle').textContent = 'FINAL EXAM';
   $('exBody').innerHTML = `<p>${EXAM.length} questions on everything in Truck Packer: building the load, securing it, stacking, pockets, and unloading at the venue. Get <b>${EXAM_PASS} or more</b> right to earn your <b>AV Educate certificate</b>.</p>
     ${passed ? `<p style="color:var(--good)">You passed with ${prog.exam.score}/${EXAM.length}. You can view your certificate or take the exam again.</p>` : ''}`;
   $('exRow').innerHTML = `<button class="btn" id="exBack">LEVELS</button>${passed ? '<button class="btn" id="exCert">VIEW CERTIFICATE</button>' : ''}<button class="btn primary" id="exStart">START EXAM</button>`;
@@ -3693,6 +3739,253 @@ function showCertificate(name, score, date, certNo){
   G.mode = 'certificate'; openModal('certificate');
 }
 
+
+/* =====================================================================
+   ENDLESS TOUR (code name: loop): endless mode, unlocks after level 60
+   A feed of case-group tiles on the left; load the truck, hit READY, the truck runs its transit test,
+   drives off, and the next truck (a different size) backs in. Passing trucks add their score to the run;
+   failed packs still go out but cost the gap to 60. Half-used tiles stay in the feed for the next truck.
+   ===================================================================== */
+// One row's worth of cases per tile: [label, [[type, count], ...], weight]
+// One row's worth of cases per tile: [label, [[type, count], ...], weight, first truck it can appear on]
+// The ramp: simple trunks/racks first, fragile video and lighting from truck 4, pockets and LED from 7, the tipped odd row from 10.
+const LOOP_TILES = [
+  ['Utility trunks, two high', [['utility_trunk', 8]], 3, 1],
+  ['Big trunks + utility trunks', [['big_trunk', 2], ['utility_trunk', 4]], 3, 1],
+  ['Audio: speaker carts + amp racks', [['speaker_cart', 2], ['audio_rack', 4]], 3, 1],
+  ['Amp racks, two high', [['audio_rack', 8]], 2, 1],
+  ['Power: feeders + distros', [['feeder_trunk', 2], ['distro', 4]], 3, 1],
+  ['Rigging: hardware + motors', [['hardware_trunk', 2], ['motor', 4]], 3, 1],
+  ['Cable trunks + utility trunks', [['cable_trunk', 2], ['utility_trunk', 4]], 2, 1],
+  ['Distros + utility trunks', [['distro', 4], ['utility_trunk', 4]], 2, 1],
+  ['Video racks + switchers', [['video_rack', 4], ['switcher', 4]], 2, 4],
+  ['Lighting: movers + fixtures', [['mover', 2], ['fixture', 4]], 2, 4],
+  ['Video racks + playback', [['video_rack', 4], ['playback', 4]], 1, 4],
+  ['Monitor cases', [['monitor', 4]], 1, 4],
+  ['Comms + hard cases (pocket)', [['comms', 4], ['hard_l', 4]], 2, 7],
+  ['LED wall: carts + processors', [['led_cart', 4], ['led_proc', 8]], 1, 7],
+  ['The odd row (tip two)', [['big_trunk', 1], ['utility_trunk', 3], ['hard_l', 3]], 1, 10]
+];
+// Production changes: the client adds cases mid-pack. Load them on this truck for the bonus.
+const LOOP_ADDONS = [
+  ['Client added 4 monitor cases', [['monitor', 4]], 60],
+  ['Client added an extra amp rack package', [['audio_rack', 4]], 40],
+  ['Client added 2 speaker carts', [['speaker_cart', 2]], 40],
+  ['Client added a power package', [['distro', 4]], 40],
+  ['Client added an LED processor package', [['led_proc', 4]], 50]
+];
+const LOOP_TRUCKS = [[288, 'Box truck · 24 ft'], [240, 'Box truck · 20 ft'], [192, 'Box truck · 16 ft'], [120, 'Box truck · 10 ft bay']];
+const LOOP_FEED = 5, LOOP_STRIKES = 3, LOOP_LOADIN_EVERY = 5;
+const LOOP_KEY = STORE_KEY + '.loop';
+const loopOpen = prog => (prog.unlocked || 1) > 60;
+const loopIsLoadIn = n => n % LOOP_LOADIN_EVERY === 0;
+function loopLevel(depth, name, n){
+  return {loop:true, stacked:true, title:'Endless Tour', truck:STACK_TRUCK(depth, `${name} · 96" tall inside`), cases:[], unloadSequence:null, rules:{heavyBase:false},
+    availableLoadBars:2, availableStraps:Math.round(depth / 30) * 2, timer:null, focus:null, objectives:[], lesson:'', hint:'', loopNo:n};
+}
+function loopNewTile(counts, label, extra){
+  const L = G.loop;
+  if (!counts){
+    const pool = LOOP_TILES.filter(t => L.truckNo >= t[3]);
+    const total = pool.reduce((a, t) => a + t[2], 0); let r = Math.random() * total, pick = pool[0];
+    for (const t of pool){ r -= t[2]; if (r <= 0){ pick = t; break; } }
+    label = pick[0]; counts = pick[1];
+  }
+  const tile = Object.assign({id:++L.tileSeq, label, uids:[], born:performance.now()}, extra || {});
+  for (const [type, c] of counts) for (let i = 0; i < c; i++){ const uid = 'L' + (++L.uidSeq); G.items.set(uid, {uid, type, def:CASES[type], tile:tile.id}); tile.uids.push(uid); }
+  if (tile.bonus) L.tiles.unshift(tile); else L.tiles.push(tile);
+  return tile;
+}
+function loopSave(){
+  const L = G.loop; if (!L) return;
+  const data = {truckNo:L.truckNo, total:L.total, strikes:L.strikes, history:L.history, nextDepth:L.nextDepth,
+    tiles:L.tiles.map(t => ({label:t.label.replace(/^★ /, ''), counts:Object.entries(t.uids.filter(u => G.items.has(u)).reduce((a, u) => (a[itemOf(u).type] = (a[itemOf(u).type] || 0) + 1, a), {}))}))};
+  try { localStorage.setItem(LOOP_KEY, JSON.stringify(data)); } catch(e){}
+}
+function startLoop(fresh){
+  let saved = null; if (!fresh){ try { saved = JSON.parse(localStorage.getItem(LOOP_KEY)); } catch(e){} }
+  closeModals();
+  G.items = new Map();
+  G.loop = {truckNo:saved ? saved.truckNo : 1, total:saved ? saved.total : 0, strikes:saved ? saved.strikes || 0 : 0, history:saved ? saved.history : [], tiles:[], tileSeq:0, uidSeq:0, last:null};
+  if (saved) for (const t of saved.tiles) if (t.counts.length) loopNewTile(t.counts, t.label);
+  while (G.loop.tiles.length < LOOP_FEED) loopNewTile();
+  const [depth, name] = saved && saved.nextDepth ? LOOP_TRUCKS.find(t => t[0] === saved.nextDepth) || LOOP_TRUCKS[0] : LOOP_TRUCKS[0];
+  setScreen('game'); G.mode = 'play';
+  loopSetTruck(depth, name);
+  if (saved) toast('TOUR RESUMED', `Truck #${G.loop.truckNo} · score ${G.loop.total}`);
+  else toast('ENDLESS TOUR', 'Fill the truck, then READY');
+  loopSave();
+}
+function loopSetTruck(depth, name){
+  const L = G.loop;
+  G.levelIdx = -2; G.level = loopLevel(depth, name, L.truckNo);
+  G.placements = []; G.bars = []; G.staging = []; G.view = 'top'; G.tool = null; G.hist = []; G.fut = []; G.hand = null;
+  G.ghost = null; G.hover = null; G.lastInfo = null; G.coachStep = 0; G.transitView = null; G.anim = null; G.flash = null; G.floorCache = null;
+  L.event = L.truckNo >= 6 && Math.random() < .35 ? {at:4 + Math.floor(Math.random() * 6)} : null; // a production change, once enough is on the truck
+  L.sent = null; L.loadIn = false;
+  $('hudLevel').textContent = 'TOUR';
+  $('hudUnloadWrap').classList.add('off'); $('hudSecureWrap').classList.remove('off');
+  $('stagingBox').hidden = false; $('btnView').hidden = false;
+  layout(); renderGoal(); refresh();
+}
+// Tiles: a tile is done when every case in it is on the truck; it slides up and a new one comes in at the bottom.
+function loopSyncTiles(){
+  const L = G.loop; if (!L) return;
+  const placed = placedSet(), now = performance.now();
+  if (L.event && !L.event.fired && !L.loadIn && G.placements.length >= L.event.at){
+    const a = LOOP_ADDONS[Math.floor(Math.random() * LOOP_ADDONS.length)];
+    L.event.fired = true;
+    const t = loopNewTile(a[1], '★ ' + a[0].replace('Client added ', 'Add-on: '), {bonus:a[2], bonusTruck:L.truckNo});
+    t.born = now; L.addons = (L.addons || []).concat({uids:t.uids.slice(), bonus:a[2], truck:L.truckNo}); // remembered even after the tile slides away
+    toast('PRODUCTION CHANGE', `${a[0]} · +${a[2]} if they ride on this truck`);
+    flashCoach('warn', `<b>Production change:</b> ${a[0].toLowerCase()}. Load the ★ tile on this truck for <b>+${a[2]}</b>. Skip it and it just waits in the feed.`, 6000);
+  }
+  if (L.loadIn) return;
+  for (const t of L.tiles){
+    const left = t.uids.filter(u => G.items.has(u) && !placed.has(u));
+    if (!left.length && !t.leaving){
+      t.leaving = now;
+      setTimeout(() => { L.tiles = L.tiles.filter(x => x !== t); if (G.loop === L){ while (L.tiles.filter(x => !x.leaving).length < LOOP_FEED) loopNewTile(); refresh(); } }, 450);
+    }
+  }
+}
+function pickFromDockUid(uid){
+  if (G.mode !== 'play' || !G.items.has(uid)) return;
+  if (G.hand){ if (G.hand.from === 'dock' && G.hand.uid === uid) return; cancelHand(true); }
+  G.coachOverride = null; G.tool = null;
+  G.hand = {uid, rot:0, from:'dock', pre:snap()};
+  G.ghost = null; G.lastInfo = uid;
+  if (G.keyMode) spawnGhostAtDoor();
+  refresh();
+}
+function renderLoopFeed(){
+  const L = G.loop, placed = placedSet(), staged = new Set(G.staging.map(m => m.uid)), held = new Set(inHand()), now = performance.now();
+  $('manifestCount').textContent = L.loadIn ? `Load-in · ${G.placements.length} still in the truck` : `Truck #${L.truckNo} · ${G.placements.length} in the truck · pick from any tile`;
+  $('manifestList').innerHTML = L.tiles.map(t => {
+    const left = t.uids.filter(u => G.items.has(u) && !placed.has(u));
+    const types = [...new Set(t.uids.filter(u => G.items.has(u)).map(u => itemOf(u).type))];
+    return `<div class="loop-tile ${t.bonus ? 'bonus' : ''} ${t.leaving ? 'leaving' : now - t.born < 450 ? 'entering' : ''}">
+      <div class="lt-head"><span>${t.label.toUpperCase()}</span><small>${t.bonus && t.bonusTruck === L.truckNo ? `+${t.bonus} · ` : ''}${left.length} LEFT</small></div>
+      ${types.map(type => {
+        const def = CASES[type], avail = t.uids.filter(u => G.items.has(u) && itemOf(u).type === type && !placed.has(u) && !staged.has(u) && !held.has(u));
+        const total = t.uids.filter(u => G.items.has(u) && itemOf(u).type === type).length;
+        const active = G.hand && G.hand.from === 'dock' && itemOf(G.hand.uid).type === type && itemOf(G.hand.uid).tile === t.id;
+        return `<button class="manifest-item ${!avail.length && !active ? 'done' : ''} ${active ? 'active' : ''}" data-type="${type}" data-uid="${L.loadIn ? '' : avail[0] || ''}">
+          <img src="${thumb(type)}" alt=""><div><div class="mi-name">${def.name}</div>
+          <div class="mi-meta"><span class="chip" style="background:${DEPTS[def.department].color}">${def.department}</span>${def.width}×${def.depth}" · ${WEIGHTS[def.weightClass].label}</div></div>
+          <div class="mi-count">${avail.length}<small>OF ${total}</small></div></button>`;
+      }).join('')}
+    </div>`;
+  }).join('');
+}
+function renderLoopGoal(){
+  const L = G.loop, best = G.progress.loopBest || 0; // best FINISHED tour
+  const log = L.history.slice(-6).reverse().map(h => `<div>${h.kind === 'loadin' ? 'Load-in' : 'Truck'} #${h.n} · ${h.size} · ${h.score}/100 · <span class="${h.pts < 0 ? 'neg' : 'pos'}">${h.pts < 0 ? '' : '+'}${h.pts}</span>${h.bonus ? ` <span class="pos">+${h.bonus}★</span>` : ''}</div>`).join('') || '<div>No trucks out yet.</div>';
+  const last = L.last ? `<div class="section-label">LAST TRUCK</div><ul class="feedback">${L.last.map(([k, t]) => `<li class="${k}">${t}</li>`).join('')}</ul>` : '';
+  const strikes = Array.from({length:LOOP_STRIKES}, (_, i) => `<span class="strike ${i < L.strikes ? 'on' : ''}">✕</span>`).join('');
+  const next = L.loadIn ? `<div class="section-label" style="margin-top:4px">LOAD-IN · VENUE ORDER</div><div class="seq">${G.level.unloadSequence.map((d, i) => `<div><b>${i + 1}</b><span class="chip" style="background:${DEPTS[d].color}">${d}</span><span>${i === 0 ? 'first off' : ''}</span></div>`).join('')}</div>`
+    : loopIsLoadIn(L.truckNo) ? '<div class="loop-note">This truck is a <b>load-in</b>: after the transit test you unload it at the venue.</div>' : '';
+  $('levelGoal').innerHTML = `<div class="loop-goal">
+    <div style="font-weight:700">${L.loadIn ? 'Load-in' : 'Truck'} #${L.truckNo} · ${G.level.truck.name.split(' · 96')[0]}</div>
+    <div class="row"><div><div class="section-label">TOUR SCORE</div><div class="big">${L.total}</div></div><div style="text-align:right"><div class="section-label">BEST TOUR</div><div class="big">${best || '--'}</div></div></div>
+    <div class="row"><div class="section-label">STRIKES</div><div class="strikes">${strikes}</div></div>
+    ${next}
+    <div class="section-label">TRUCKS OUT</div><div class="log">${log}</div>
+    ${last}
+    <div class="btns"><button class="btn" id="loopNew">NEW TOUR</button><button class="btn" id="loopEnd">END TOUR</button></div>
+  </div>`;
+  $('loopNew').onclick = () => { if (confirm('Start a new tour? This tour ends with its current score.')){ loopFinish(true); } };
+  $('loopEnd').onclick = () => loopFinish(false);
+}
+// Score one truck (or one load-in): a pass adds its score, a fail costs the gap to 60 and a strike.
+function loopScore(rep, kind){
+  const L = G.loop, passed = rep.total >= 60, pts = passed ? rep.total : -(60 - rep.total);
+  L.total += pts; if (!passed) L.strikes++;
+  const h = {n:L.truckNo, kind, size:G.level.truck.name.split(' · ')[1] || '', score:rep.total, pts};
+  L.history.push(h);
+  L.last = rep.feedback.filter(f => f[0] !== 'good').slice(0, 3);
+  if (!L.last.length) L.last = [['good', kind === 'loadin' ? 'Clean load-in: everything came off in the venue\'s order.' : 'Clean truck: tight, solid and tied in.']];
+  toast(passed ? `+${pts}` : `${pts}`, `${kind === 'loadin' ? 'Load-in' : 'Truck'} #${L.truckNo}: ${rep.total}/100${passed ? '' : ` · strike ${L.strikes} of ${LOOP_STRIKES}`}`);
+  return h;
+}
+// After the transit test.
+function loopTruckDone(rep){
+  const L = G.loop, h = loopScore(rep, 'pack');
+  // the cases on this truck have left the dock: take them out of the feed now (they're drawn on the truck until it drives off)
+  L.sent = new Set(G.placements.map(p => p.uid));
+  for (const a of (L.addons || []).filter(a => a.truck === L.truckNo))
+    if (a.uids.every(u => L.sent.has(u))){ L.total += a.bonus; h.bonus = a.bonus; setTimeout(() => toast(`+${a.bonus} ★`, 'Production change handled'), 1400); }
+  L.addons = (L.addons || []).filter(a => a.truck > L.truckNo);
+  for (const t of L.tiles) t.uids = t.uids.filter(u => !L.sent.has(u));
+  L.tiles = L.tiles.filter(t => t.uids.length);
+  while (L.tiles.length < LOOP_FEED) loopNewTile();
+  if (L.strikes >= LOOP_STRIKES) return setTimeout(() => loopFinish(false, 'Three failed packs. The tour is over.'), 900);
+  if (loopIsLoadIn(L.truckNo) && G.placements.length) return loopStartLoadIn();
+  loopDepart();
+}
+// Every 5th truck arrives at the venue: unload it in the venue's order (the offloading rules).
+function loopStartLoadIn(){
+  const L = G.loop;
+  const depts = [...new Set(G.placements.map(p => itemOf(p.uid).def.department))];
+  for (let i = depts.length - 1; i > 0; i--){ const j = Math.floor(Math.random() * (i + 1)); [depts[i], depts[j]] = [depts[j], depts[i]]; }
+  L.loadIn = true;
+  G.level.offload = true; G.level.unloadSequence = depts; G.offMistakes = [];
+  G.transitView = null; G.hand = null; G.tool = null; G.hist = []; G.fut = []; G.mode = 'play';
+  $('hudUnloadWrap').classList.remove('off'); $('stagingBox').hidden = true;
+  toast('LOAD-IN', 'You\'re at the venue: unload in its order');
+  renderGoal(); refresh();
+}
+function loopUnloadDone(rep){
+  const L = G.loop;
+  loopScore(rep, 'loadin');
+  G.level.offload = false; L.loadIn = false;
+  $('hudUnloadWrap').classList.add('off'); $('stagingBox').hidden = false;
+  if (L.strikes >= LOOP_STRIKES) return setTimeout(() => loopFinish(false, 'Three strikes. The tour is over.'), 900);
+  loopDepart();
+}
+// The truck pulls forward and away; the next one (a different size) backs in.
+function loopDepart(){
+  const L = G.loop;
+  const next = LOOP_TRUCKS[Math.floor(Math.random() * LOOP_TRUCKS.length)];
+  L.nextDepth = next[0];
+  G.mode = 'transit'; G.view = 'top';
+  const Lh = G.L, off = -(Lh.oy + Lh.Dp + 80), t0 = performance.now();
+  const away = now => {
+    const k = Math.min(1, (now - t0) / 1100), e = k * k;
+    G.loopShift = off * e; render();
+    if (k < 1) return requestAnimationFrame(away);
+    if (L.sent) for (const u of L.sent) G.items.delete(u);
+    L.truckNo++; G.transitView = null;
+    loopSetTruck(next[0], next[1]);
+    const t1 = performance.now(), start = G.L.ch;
+    const arrive = now2 => {
+      const k2 = Math.min(1, (now2 - t1) / 1000), e2 = 1 - (1 - k2) * (1 - k2);
+      G.loopShift = start * (1 - e2); render();
+      if (k2 < 1) return requestAnimationFrame(arrive);
+      G.loopShift = 0; G.mode = 'play'; loopSave(); refresh();
+    };
+    requestAnimationFrame(arrive);
+  };
+  requestAnimationFrame(away);
+}
+function loopFinish(restart, why){
+  const L = G.loop; if (!L) return;
+  const newBest = L.history.length && L.total > (G.progress.loopBest || 0);
+  if (newBest){ G.progress.loopBest = L.total; saveProgress(); }
+  const best = G.progress.loopBest || 0;
+  try { localStorage.removeItem(LOOP_KEY); } catch(e){}
+  if (restart){ startLoop(true); return; }
+  const packs = L.history.filter(h => h.kind !== 'loadin');
+  $('exKicker').textContent = 'ENDLESS TOUR';
+  $('exTitle').textContent = 'TOUR OVER';
+  $('exBody').innerHTML = `${why ? `<p style="color:var(--bad)">${why}</p>` : ''}<div class="score-big"><b>${L.total}</b><span>points</span></div>${newBest ? '<p style="color:var(--good)"><b>New best tour!</b></p>' : ''}
+    <p>${packs.length} truck${packs.length === 1 ? '' : 's'} sent out · ${packs.filter(h => h.pts >= 0).length} passed · ${L.history.length - packs.length} load-in${L.history.length - packs.length === 1 ? '' : 's'} · best tour ${best}</p>`;
+  $('exRow').innerHTML = `<button class="btn" id="lfLevels">LEVELS</button><button class="btn primary" id="lfNew">NEW TOUR</button>`;
+  $('lfLevels').onclick = () => { closeModals(); G.loop = null; openLevels(); };
+  $('lfNew').onclick = () => startLoop(true);
+  G.mode = 'exam'; openModal('exam');
+}
+
 /* ---------- levels modal ---------- */
 function openLevels(){
   const prog = G.progress, grid = $('levelsGrid');
@@ -3704,6 +3997,10 @@ function openLevels(){
     if (i === 101){ h += `<button class="lvl" ${open ? `data-i="${i - 1}"` : 'disabled'}><b>${i}</b><span class="tag">FINAL EXAM</span><small>3★ or 95%+ on all 100 levels</small><span class="st">${masteredCount(prog)}/100</span></button>`; continue; }
     h += `<button class="lvl" ${open ? `data-i="${i - 1}"` : 'disabled'}><b>${i}</b><span class="tag">${lv ? (lv.practice ? 'PRACTICE' : 'LESSON') : ''}</span><small>${lv ? lv.title : 'COMING SOON'}</small><span class="st">${lv ? `${'★'.repeat(st)}${'☆'.repeat(3 - st)}` : '&nbsp;'}</span></button>`;
   }
+  const lo = loopOpen(prog);
+  let hasRun = false; try { hasRun = !!localStorage.getItem(LOOP_KEY); } catch(e){}
+  h += `</div><div class="tier-head">ENDLESS<small>Endless Tour · opens after level 60</small></div><div class="levels-grid">
+    <button class="lvl" ${lo ? 'data-loop="1"' : 'disabled'}><b>∞</b><span class="tag">${hasRun ? 'CONTINUE' : 'ENDLESS'}</span><small>Endless Tour</small><span class="st">${prog.loopBest ? `BEST ${prog.loopBest}` : '&nbsp;'}</span></button>`;
   grid.innerHTML = h + '</div>';
   G.prevMode = G.mode; G.mode = 'levels'; openModal('levels');
 }
@@ -3713,7 +4010,7 @@ function closeLevels(){
   G.mode = G.prevMode === 'title' ? 'title' : G.level ? (G.prevMode === 'briefing' ? (openModal('briefing'), 'briefing') : G.prevMode === 'results' ? (openModal('results'), 'results') : 'play') : 'title';
   if (G.level) refresh();
 }
-$('levelsGrid').addEventListener('click', e => { const b = e.target.closest('.lvl'); if (!b || b.disabled) return; closeModals(); loadLevel(+b.dataset.i); });
+$('levelsGrid').addEventListener('click', e => { const b = e.target.closest('.lvl'); if (!b || b.disabled) return; closeModals(); if (b.dataset.loop){ startLoop(false); return; } G.loop = null; loadLevel(+b.dataset.i); });
 $('certClose').onclick = () => { closeModals(); openExam(); };
 $('certPrint').onclick = () => window.print();
 
