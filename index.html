@@ -145,6 +145,12 @@ body.home #game, body.home .modal-back{filter:blur(7px) saturate(.85)}
 .crew-fig img{display:block;width:100%;height:auto}
 .coach.good .crew-fig{--o:var(--good)} .coach.warn .crew-fig{--o:var(--warn)} .coach.bad .crew-fig{--o:var(--bad)}
 .panel.manifest{padding-bottom:84px} /* the last case card can scroll clear of the crew member's head */
+.crew-fig{pointer-events:auto;cursor:pointer} /* tap the crew member: on a level you've passed, that sends them off */
+/* the crew steps aside between levels, on pop-ups, during the run and once everything is loaded (and when sent off) */
+.coach{transition:transform .3s ease, opacity .3s ease}
+body.crew-away .coach{transform:translateY(calc(100% + 110px));opacity:0;pointer-events:none}
+.crew-back{position:fixed;left:12px;bottom:12px;z-index:42;font-family:var(--pixel);font-weight:800;font-size:13px;letter-spacing:.06em;padding:6px 12px;border:2px solid var(--edge);background:var(--panel2);color:var(--cream);box-shadow:inset -2px -2px 0 #1f201d,inset 2px 2px 0 #5a5b56;cursor:pointer}
+.crew-back[hidden]{display:none}
 .keys{font-size:13px;color:var(--cream-dim)}
 
 /* case info */
@@ -224,6 +230,9 @@ body.phone .hud .stat span{font-size:9px}
 body.phone .hud .stat b{font-size:17px}
 body.phone #btnMenu{flex:0 0 46px;max-width:46px;font-size:24px;justify-content:center;align-items:center}
 body.phone .board{display:flex;flex-direction:column;padding-bottom:58px}
+html:has(body.phone), body.phone{height:100dvh;overflow:hidden;overscroll-behavior:none}
+body.phone{position:fixed;inset:0}
+body.phone #game.active{bottom:auto;height:100dvh}
 body.phone .panel.manifest{flex:0 0 auto;flex-direction:row;align-items:flex-start;overflow-x:auto;overflow-y:hidden;padding:6px;gap:6px;border-right:0;border-bottom:3px solid var(--edge);touch-action:pan-x;scrollbar-width:none}
 body.phone .panel.manifest::-webkit-scrollbar{display:none}
 body.phone .manifest-head, body.phone #manifestCount{display:none}
@@ -266,7 +275,7 @@ body.phone .panel.info{position:fixed;left:0;right:0;bottom:58px;height:50vh;hei
 body.phone.sheet-open .panel.info{transform:none}
 body.phone .panel.info{padding-top:22px;touch-action:pan-y}
 body.phone .panel.info::before{content:'';position:absolute;top:7px;left:50%;transform:translateX(-50%);width:38px;height:4px;border-radius:3px;background:var(--cream-dim)}
-.sheet-x{position:absolute;top:6px;right:8px;width:34px;height:34px;padding:0;border:2px solid var(--edge);background:var(--panel2);color:var(--cream);font-size:16px;line-height:1;cursor:pointer;z-index:2}
+.sheet-x{position:absolute;top:6px;right:8px;width:34px;height:34px;padding:0;justify-content:center;align-items:center;border:2px solid var(--edge);background:var(--panel2);color:var(--cream);font-size:16px;line-height:1;cursor:pointer;z-index:2}
 body.phone .coach{position:fixed;left:0;right:0;bottom:0;height:58px;z-index:41;padding:10px 10px 4px;font-size:12.5px;line-height:1.3;align-items:flex-start;gap:8px;touch-action:none}
 body.phone .coach::before{content:'';position:absolute;top:4px;left:50%;transform:translateX(-50%);width:38px;height:4px;border-radius:3px;background:var(--cream-dim)}
 body.phone .coach .tag{font-size:10px;padding:2px 5px}
@@ -484,6 +493,7 @@ body.phone .home-btn kbd, body.phone .link-btn kbd{display:none}
       <div id="levelGoal"></div>
     </aside>
   </main>
+  <button class="crew-back" id="crewBack" hidden>▲ CREW TIPS</button>
   <div class="coach" id="coach">
     <div class="crew-fig" id="crewFig" aria-hidden="true"><img id="crewImg" alt="" src="assets/crew/chief-tip.webp"></div>
     <div class="coach-body"><div class="coach-hd"><span class="crew-name" id="crewName">CREW CHIEF</span><span class="tag">TIP</span></div><span id="coachText"></span></div>
@@ -2677,12 +2687,13 @@ const TIERS = [{name:'BEGINNER', from:1, to:30, note:'Floor loads'}, {name:'INTE
 const tierOf = id => TIERS.find(t => id >= t.from && id <= t.to) || TIERS[0];
 
 function setScreen(id){ for (const s of document.querySelectorAll('.screen')) s.classList.toggle('active', s.id === id); }
-function openModal(id){ for (const m of document.querySelectorAll('.modal-back')) m.classList.toggle('open', m.id === id); }
-function closeModals(){ for (const m of document.querySelectorAll('.modal-back')) m.classList.remove('open'); }
+function openModal(id){ for (const m of document.querySelectorAll('.modal-back')) m.classList.toggle('open', m.id === id); if (typeof crewAway === 'function') crewAway(); }
+function closeModals(){ for (const m of document.querySelectorAll('.modal-back')) m.classList.remove('open'); if (typeof crewAway === 'function') crewAway(); }
 
 /* ---------- level lifecycle ---------- */
-function loadLevel(idx){ const lv = LEVELS[idx]; if (lv && lv.exam){ if (examReady(G.progress)) openExam(); else openLevels(); return; } loadLevelObj(lv, idx); }
+function loadLevel(idx){  const lv = LEVELS[idx]; if (lv && lv.exam){ if (examReady(G.progress)) openExam(); else openLevels(); return; } loadLevelObj(lv, idx); }
 function loadLevelObj(lv, idx){
+  G.crewOff = false; // the crew comes back on every new level
   G.levelIdx = idx; G.level = lv;
   G.items = new Map(); let n = 0;
   for (const c of G.level.cases) for (let i = 0; i < c.count; i++){ const uid = 'c' + (++n); G.items.set(uid, {uid, type:c.type, def:CASES[c.type]}); }
@@ -3323,6 +3334,22 @@ function crewSrc(who, kind){
   for (const k of ['tip', 'good', 'warn', 'bad']) if (!crewCache[who + k]){ crewCache[who + k] = new Image(); crewCache[who + k].src = `assets/crew/${who}-${k}.webp`; } // preload this crew member's four poses
   return `assets/crew/${who}-${kind}.webp`;
 }
+// when the crew member steps aside
+const crewPassed = () => { const lv = G.level; return !!lv && (lv.demo || lv.loop || (G.progress.best[lv.id] || 0) >= 60); };
+function crewAway(){
+  const lv = G.level;
+  const loaded = lv && G.mode === 'play' && !lv.loop && !G.hand && !G.tool && (lv.offload ? !G.placements.length : !leftCount());
+  const away = !lv || G.mode !== 'play' || G.crewOff || loaded || document.querySelector('.modal-back.open');
+  document.body.classList.toggle('crew-away', !!away);
+  $('crewBack').hidden = !(G.crewOff && lv && G.mode === 'play' && !document.querySelector('.modal-back.open'));
+}
+$('crewFig').addEventListener('click', e => {
+  e.stopPropagation();
+  if (crewPassed()){ G.crewOff = true; crewAway(); }
+  else flashCoach('tip', 'Pass this level first. After that, tap me to switch the tips off.', 2600);
+});
+$('crewFig').addEventListener('pointerup', e => e.stopPropagation()); // not a tap on the bar (that opens the sheet on phones)
+$('crewBack').onclick = () => { G.crewOff = false; crewAway(); };
 function setCoach(kind, html){
   html = phoneText(html); const c = $('coach'); c.className = 'coach ' + kind;
   c.querySelector('.tag').textContent = {tip:'TIP', warn:'HEADS UP', bad:"WON'T WORK", good:'NICE'}[kind];
@@ -3330,6 +3357,7 @@ function setCoach(kind, html){
   if (img.getAttribute('src') !== src) img.setAttribute('src', src);
   $('crewName').textContent = CREW[who];
   $('coachText').innerHTML = html;
+  crewAway();
 }
 function renderCoach(){
   if (G.coachOverride && performance.now() < G.coachOverride.until) return setCoach(G.coachOverride.kind, G.coachOverride.html);
@@ -4521,6 +4549,8 @@ $('rsNext').onclick = () => {
   loadLevel(G.levelIdx + 1);
 };
 window.addEventListener('resize', () => layout());
+// phone browsers grow and shrink the visible area as their toolbars show and hide
+if (window.visualViewport) visualViewport.addEventListener('resize', () => { if (isPhone()) layout(); });
 // the coach bar can grow to several lines; re-measure the play area whenever it changes size
 if (window.ResizeObserver){ let rw = 0, rh = 0; new ResizeObserver(([en]) => { const {width, height} = en.contentRect; if (Math.abs(width - rw) > 1 || Math.abs(height - rh) > 1){ rw = width; rh = height; if (G.level) layout(); } }).observe($('stage')); }
 
