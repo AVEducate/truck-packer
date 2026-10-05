@@ -3,7 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Truck Packer</title>
+<title>Truck Packology</title>
+<link rel="icon" type="image/svg+xml" href="assets/icon-boxes.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Silkscreen:wght@700&family=Barlow+Condensed:wght@600;700;800&family=Barlow:wght@500;600;700&family=Anton&family=Open+Sans:ital,wght@0,400;0,600;0,700;1,400;1,700&display=swap" rel="stylesheet">
@@ -193,6 +194,8 @@ body.home #game, body.home .modal-back{filter:blur(7px) saturate(.85)}
 .loop-goal .row{display:flex;justify-content:space-between;gap:8px;margin:6px 0}
 .loop-goal .log{font-size:13px;line-height:1.6;margin:6px 0 10px}
 .loop-goal .log .neg{color:var(--bad)}.loop-goal .log .pos{color:var(--good)}
+.mode-head{font-family:var(--pixel);font-weight:800;letter-spacing:.12em;font-size:22px;color:var(--cream);margin:16px 0 4px;padding-bottom:6px;border-bottom:3px solid var(--accent)}
+.mode-head small{font-size:13px;letter-spacing:.06em;color:var(--cream-dim);margin-left:10px}
 .loop-goal .btns{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
 .loop-goal .strikes{display:flex;gap:6px}
 .loop-goal .strike{display:inline-grid;place-items:center;width:24px;height:24px;border:2px solid #0d0d0c;background:#2f302c;color:#55564f;font-weight:800}
@@ -238,6 +241,7 @@ body.home #game, body.home .modal-back{filter:blur(7px) saturate(.85)}
 .cert-sheet .c-logo{height:10.5cqw;width:auto;margin:-2.4cqw 0 -1.6cqw}
 .cert-sheet .c-foot .val{position:relative}
 .cert-sheet .c-sig{position:absolute;left:0;width:100%;height:auto;bottom:0;transform:translateY(31.7%)} /* spans its line; the bottom of the "m" in Omar (68.3% down the image) rests on the line */
+.cert-sheet .c-cat{font-size:1.15cqw;letter-spacing:.35cqw;color:#6b6457;margin:-.6cqw 0 .9cqw}
 .cert-sheet .c-small{margin-top:1.2cqw;font-size:1cqw;letter-spacing:.25cqw;text-transform:uppercase;color:#7a7468}
 @page{size:landscape;margin:0.4in}
 @media print{body *{visibility:hidden}#certSheet,#certSheet *{visibility:visible}#certSheet{position:fixed;left:0;top:0;width:100%;height:auto;margin:0;border-width:12px}.no-print{display:none}}
@@ -301,11 +305,11 @@ body.home #game, body.home .modal-back{filter:blur(7px) saturate(.85)}
 <!-- ================= TITLE ================= -->
 <div id="phoneNote" class="phone-note" hidden role="dialog" aria-modal="true" aria-labelledby="pnTitle">
   <div class="pn-card">
-    <div class="pn-logo">TRUCK<br>PACKER</div>
+    <div class="pn-logo">TRUCK<br>PACKOLOGY</div>
     <h2 id="pnTitle">BUILT FOR A COMPUTER</h2>
-    <p>Truck Packer needs a keyboard and mouse (rotate, tip, load bars and straps) and a bigger screen than a phone.</p>
+    <p>Truck Packology needs a keyboard and mouse (rotate, tip, load bars and straps) and a bigger screen than a phone.</p>
     <p>Open it on a laptop or desktop:</p>
-    <div class="pn-url">games.aveducate.com/truck-packer</div>
+    <div class="pn-url">games.aveducate.com/truck-packology</div>
     <button class="pn-btn primary" id="pnShare">SEND ME THE LINK</button>
     <button class="pn-btn" id="pnPlay">PLAY ANYWAY</button>
     <p class="pn-small" id="pnMsg">&nbsp;</p>
@@ -314,7 +318,7 @@ body.home #game, body.home .modal-back{filter:blur(7px) saturate(.85)}
 <section id="title" class="home-overlay" aria-label="Home">
   <div class="home-panel" id="homePanel">
     <div class="presents">AV EDUCATE PRESENTS</div>
-    <h1 class="logo">TRUCK<br>PACKER</h1>
+    <h1 class="logo">TRUCK<br>PACKOLOGY</h1>
     <div class="tagline">PACK IT HIGH.<br>PACK IT TIGHT.<br>PACK IT SMART.</div>
     <div class="home-menu">
       <button id="pressEnter" class="home-btn primary">PRESS ENTER</button>
@@ -328,7 +332,7 @@ body.home #game, body.home .modal-back{filter:blur(7px) saturate(.85)}
 <!-- ================= GAME ================= -->
 <section id="game" class="screen" aria-label="Truck pack">
   <header class="hud">
-    <div class="brand"><div>TRUCK PACKER<small id="brandSub">TOP VIEW · FLOOR LOAD</small></div></div>
+    <div class="brand"><div>TRUCK PACKOLOGY<small id="brandSub">TOP VIEW · FLOOR LOAD</small></div></div>
     <div class="stat"><span>LEVEL</span><b id="hudLevel">1</b></div>
     <div class="stat"><span>SCORE</span><b id="hudScore">--</b></div>
     <div class="stat"><span>SPACE USED</span><b id="hudSpace">0%</b></div>
@@ -424,8 +428,8 @@ body.home #game, body.home .modal-back{filter:blur(7px) saturate(.85)}
 
 <div class="modal-back" id="help"><div class="modal help-modal" role="dialog" aria-modal="true" aria-labelledby="hpTitle">
   <h3>AV EDUCATE · HOW TO PLAY</h3>
-  <h2 id="hpTitle">WHAT IS TRUCK PACKER?</h2>
-  <p>Truck Packer teaches the logic AV crews use to load a show truck. Build a heavy base at the nose, pack <b>high and tight</b>, leave no gaps that let cases slide, secure every tier, and load in <b>reverse of the venue's load-in order</b> so the first gear needed comes off first.</p>
+  <h2 id="hpTitle">WHAT IS TRUCK PACKOLOGY?</h2>
+  <p>Truck Packology teaches the logic AV crews use to load a show truck. Build a heavy base at the nose, pack <b>high and tight</b>, leave no gaps that let cases slide, secure every tier, and load in <b>reverse of the venue's load-in order</b> so the first gear needed comes off first.</p>
   <p>A truck can be full and still be a bad pack. Every run is scored on space, stability, unload order and securement, and the crew lead explains each call. 30 beginner floor levels, 30 intermediate stacking levels, expert levels, offloading, and a final exam for your AV Educate certificate.</p>
   <div class="section-label">MOUSE</div>
   <div class="howto">
@@ -3662,7 +3666,7 @@ function openExam(){
   G.prevMode = 'title'; G.mode = 'exam';
   const prog = G.progress, passed = prog.exam && prog.exam.passed;
   $('exKicker').textContent = 'LEVEL 101 · FINAL EXAM'; $('exTitle').textContent = 'FINAL EXAM';
-  $('exBody').innerHTML = `<p>${EXAM.length} questions on everything in Truck Packer: building the load, securing it, stacking, pockets, and unloading at the venue. Get <b>${EXAM_PASS} or more</b> right to earn your <b>AV Educate certificate</b>.</p>
+  $('exBody').innerHTML = `<p>${EXAM.length} questions on everything in Truck Packology: building the load, securing it, stacking, pockets, and unloading at the venue. Get <b>${EXAM_PASS} or more</b> right to earn your <b>AV Educate certificate</b>.</p>
     ${passed ? `<p style="color:var(--good)">You passed with ${prog.exam.score}/${EXAM.length}. You can view your certificate or take the exam again.</p>` : ''}`;
   $('exRow').innerHTML = `<button class="btn" id="exBack">LEVELS</button>${passed ? '<button class="btn" id="exCert">VIEW CERTIFICATE</button>' : ''}<button class="btn primary" id="exStart">START EXAM</button>`;
   $('exBack').onclick = () => { closeModals(); openLevels(); };
@@ -3727,9 +3731,9 @@ function showCertificate(name, score, date, certNo){
   const pct = score / EXAM.length * 100, pctTxt = String(Math.round(pct * 100) / 100), grade = gradeOf(pct);
   const esc = t => t.replace(/[&<>"]/g, c => ({'&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;'}[c]));
   const d = new Date(date + 'T12:00:00').toLocaleDateString(undefined, {year:'numeric', month:'long', day:'numeric'});
-  $('certSheet').innerHTML = `<div class="c-inner"><img class="c-logo" src="assets/ave-logo-light.png" alt="AV Educate"><div class="c-kicker">CERTIFICATE OF ACHIEVEMENT</div><div class="c-title">TRUCK PACKER — AV TRUCK LOGISTICS</div>
+  $('certSheet').innerHTML = `<div class="c-inner"><img class="c-logo" src="assets/ave-logo-light.png" alt="AV Educate"><div class="c-kicker">CERTIFICATE OF ACHIEVEMENT</div><div class="c-title">TRUCK PACKING FUNDAMENTALS</div><div class="c-cat">AV TRUCK PACKING · TRUCK PACKOLOGY</div>
     <div>This certifies that</div><div class="c-name">${esc(name)}</div>
-    <div class="c-text">has successfully completed all 100 levels of <i>Truck Packer</i> and passed the final assessment, demonstrating an understanding of essential audiovisual truck loading and unloading principles.</div>
+    <div class="c-text">has successfully completed all 100 levels of <i>Truck Packology</i> and passed the final assessment, demonstrating an understanding of essential audiovisual truck loading and unloading principles.</div>
     <div class="c-foot">
       <div class="cell"><div class="val">${d}</div><div class="lab">Date of Achievement</div></div>
       <div class="cell"><div class="val">${pctTxt}% · ${grade}</div><div class="lab">Final assessment: ${score} / ${EXAM.length}</div></div>
@@ -3992,6 +3996,7 @@ function openLevels(){
   let h = '';
   for (let i = 1; i <= 101; i++){
     const tier = TIERS.find(t => t.from === i);
+    if (i === 1) h += `<div class="mode-head">CAMPAIGN<small>Levels 1–100 + the final exam</small></div>`;
     if (tier) h += `${i > 1 ? '</div>' : ''}<div class="tier-head">${tier.name}<small>${tier.from === tier.to ? `Level ${tier.from}` : `Levels ${tier.from}–${tier.to}`} · ${tier.note}</small></div><div class="levels-grid">`;
     const lv = LEVELS[i - 1], open = lv && prog.unlocked >= i && (i < 101 || examReady(prog)), st = prog.stars[i] || 0;
     if (i === 101){ h += `<button class="lvl" ${open ? `data-i="${i - 1}"` : 'disabled'}><b>${i}</b><span class="tag">FINAL EXAM</span><small>3★ or 95%+ on all 100 levels</small><span class="st">${masteredCount(prog)}/100</span></button>`; continue; }
@@ -3999,7 +4004,7 @@ function openLevels(){
   }
   const lo = loopOpen(prog);
   let hasRun = false; try { hasRun = !!localStorage.getItem(LOOP_KEY); } catch(e){}
-  h += `</div><div class="tier-head">ENDLESS<small>Endless Tour · opens after level 60</small></div><div class="levels-grid">
+  h += `</div><div class="mode-head">ENDLESS TOUR<small>Opens after level 60</small></div><div style="height:4px"></div><div class="levels-grid">
     <button class="lvl" ${lo ? 'data-loop="1"' : 'disabled'}><b>∞</b><span class="tag">${hasRun ? 'CONTINUE' : 'ENDLESS'}</span><small>Endless Tour</small><span class="st">${prog.loopBest ? `BEST ${prog.loopBest}` : '&nbsp;'}</span></button>`;
   grid.innerHTML = h + '</div>';
   G.prevMode = G.mode; G.mode = 'levels'; openModal('levels');
@@ -4014,7 +4019,7 @@ $('levelsGrid').addEventListener('click', e => { const b = e.target.closest('.lv
 $('certClose').onclick = () => { closeModals(); openExam(); };
 $('certPrint').onclick = () => window.print();
 
-/* ---------- help: what Truck Packer is, and an on-screen keyboard (Mac / PC) ---------- */
+/* ---------- help: what Truck Packology is, and an on-screen keyboard (Mac / PC) ---------- */
 const PLATFORM = { cur:/Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent) ? 'mac' : 'pc' };
 const KB_LAYOUT = plat => {
   const L = c => [ 'Key' + c, c, c, 1 ];
@@ -4076,7 +4081,7 @@ function showKey(code, descEl, kbEl){
   const info = keyInfo(code, PLATFORM.cur);
   for (const k of kbEl.querySelectorAll('.kb-key.lit')) k.classList.remove('lit');
   for (const k of kbEl.querySelectorAll(`.kb-key[data-code="${code}"]`)){ k.classList.add('lit'); setTimeout(() => k.classList.remove('lit'), 900); }
-  descEl.innerHTML = info ? `<b>${info[0]}</b>${info[1]}` : 'That key isn\'t used in Truck Packer. The highlighted keys are the ones that do something.';
+  descEl.innerHTML = info ? `<b>${info[0]}</b>${info[1]}` : 'That key isn\'t used in Truck Packology. The highlighted keys are the ones that do something.';
 }
 function openHelp(){
   if (G.mode === 'help' || G.mode === 'transit') return;
@@ -4146,7 +4151,7 @@ $('lvSaveCode').onclick = () => {
   if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(code).then(() => done(true), () => done(false)); else done(false);
 };
 $('lvLoadCode').onclick = () => {
-  const code = window.prompt('Paste your Truck Packer save code:');
+  const code = window.prompt('Paste your Truck Packology save code:');
   if (!code) return;
   try { applyProgressCode(code); openLevels(); $('saveCodeOut').innerHTML = `<b>Progress restored.</b> Level ${G.progress.unlocked} is unlocked.`; }
   catch(e){ $('saveCodeOut').innerHTML = "<b>That code didn't work.</b> Check that the whole code was pasted, starting with TP1-."; }
@@ -4217,12 +4222,12 @@ enterHome();
   const touchOnly = !matchMedia('(any-pointer: fine)').matches, narrow = Math.min(innerWidth, screen.width) < 760;
   let seen = false; try { seen = sessionStorage.getItem('truckPacker.playAnyway') === '1'; } catch(e){}
   if ((!touchOnly && !narrow) || seen) return;
-  const url = 'https://games.aveducate.com/truck-packer/';
+  const url = 'https://games.aveducate.com/truck-packology/';
   $('phoneNote').hidden = false;
   $('pnPlay').onclick = () => { try { sessionStorage.setItem('truckPacker.playAnyway', '1'); } catch(e){} $('phoneNote').hidden = true; };
   $('pnShare').onclick = async () => {
     try {
-      if (navigator.share){ await navigator.share({title:'Truck Packer', text:'Truck Packer: the free AV truck-packing game from AV Educate. Play it on a computer:', url}); return; }
+      if (navigator.share){ await navigator.share({title:'Truck Packology', text:'Truck Packology: the free AV truck-packing game from AV Educate. Play it on a computer:', url}); return; }
       await navigator.clipboard.writeText(url); $('pnMsg').textContent = 'Link copied. Paste it into a message or email to yourself.';
     } catch(e){ $('pnMsg').textContent = 'Type this into your computer\'s browser: ' + url; }
   };
