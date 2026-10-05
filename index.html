@@ -203,6 +203,64 @@ body.home #game, body.home .modal-back{filter:blur(7px) saturate(.85)}
 .loop-note{font-size:13px;line-height:1.45;color:var(--cream-dim);margin:6px 0 8px}
 .loop-tile.bonus{border-color:var(--warn);box-shadow:0 0 0 2px rgba(240,192,74,.25)}
 .loop-tile.bonus .lt-head{color:var(--warn)}
+/* ===== PHONE LAYOUT (body.phone): portrait; case strip on top, truck full width, button row + READY, crew lead / info sheet at the bottom ===== */
+.phone-only{display:none !important}
+body.phone .phone-only{display:inline-flex !important}
+body.phone .hud{gap:4px;padding:4px 6px}
+body.phone .hud .brand, body.phone #hudSpace, body.phone #hudStab, body.phone #btnHelp, body.phone #btnLevels{display:none}
+body.phone .hud .stat:has(#hudSpace), body.phone .hud .stat:has(#hudStab){display:none}
+body.phone .hud .stat{flex:1 1 0;min-width:0;padding:2px 4px}
+body.phone .hud .stat span{font-size:9px}
+body.phone .hud .stat b{font-size:17px}
+body.phone #btnMenu{flex:0 0 46px;max-width:46px;font-size:24px;justify-content:center;align-items:center}
+body.phone .board{display:flex;flex-direction:column;padding-bottom:58px}
+body.phone .panel.manifest{flex:0 0 auto;flex-direction:row;align-items:flex-start;overflow-x:auto;overflow-y:hidden;padding:6px;gap:6px;border-right:0;border-bottom:3px solid var(--edge);touch-action:pan-x;scrollbar-width:none}
+body.phone .panel.manifest::-webkit-scrollbar{display:none}
+body.phone .manifest-head, body.phone #manifestCount{display:none}
+body.phone #manifestList{display:flex;gap:6px;align-items:flex-start}
+body.phone .manifest-item{flex:0 0 72px;width:72px;height:86px;margin:0;padding:4px 3px;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:2px;position:relative;touch-action:pan-x}
+body.phone .manifest-item img{width:46px;height:46px}
+body.phone .manifest-item .mi-meta{display:none}
+body.phone .manifest-item .mi-name{font-size:10px;line-height:1.05;text-align:center}
+body.phone .manifest-item .mi-count{position:absolute;top:1px;right:4px;font-size:15px;line-height:1}
+body.phone .manifest-item .mi-count small{display:none}
+/* tour tiles on the phone: no frame around the cards, so every box in the strip stays 72 × 86; a label bar on the left ties the tile's cards together */
+body.phone .loop-tile{display:flex;align-items:flex-start;gap:6px;margin:0 4px 0 0;padding:0;border:0;background:none;box-shadow:none;height:86px;flex:0 0 auto}
+body.phone .loop-tile .lt-head{display:block;writing-mode:vertical-rl;transform:rotate(180deg);font-size:9px;line-height:14px;margin:0;width:18px;height:86px;box-sizing:border-box;padding:4px 0;background:#262724;border:2px solid var(--edge);text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+body.phone .loop-tile .lt-head small{display:none}
+body.phone .loop-tile.bonus .lt-head{border-color:var(--warn)}
+body.phone .loop-tile .manifest-item{margin:0}
+body.phone #stagingBox{flex:0 0 72px;width:72px;height:86px;margin:0;padding:4px 3px;display:flex;flex-direction:column;align-items:center;gap:2px;position:relative;touch-action:pan-x} /* same size as every case card */
+body.phone #stagingBox[hidden]{display:none}
+body.phone #stagingBox h2{font-size:9.5px;margin:0;line-height:1;text-align:center;letter-spacing:.04em}
+body.phone #stagingBox canvas{width:64px;height:48px}
+body.phone #stagingText{display:none}
+body.phone .staging-btns{display:contents}
+body.phone #btnStage, body.phone #btnTakeStack{display:none}
+body.phone #btnClearStage{position:absolute;top:1px;right:1px;width:18px;height:18px;min-height:0;padding:0;font-size:0;line-height:18px}
+body.phone #btnClearStage::after{content:'✕';font-size:11px}
+body.phone #btnClearStage:disabled{display:none}
+body.phone .stage{flex:1 1 auto}
+body.phone .stage-tools{left:10px !important;right:10px;top:auto !important;bottom:64px;width:auto !important;display:grid !important;grid-template-columns:repeat(4,1fr);gap:8px}
+body.phone .stage-tools .btn{width:auto;height:46px;font-size:20px}
+body.phone #btnHint, body.phone #btnView{display:none !important}
+body.phone .stage-tools .btn[hidden]{display:inline-flex !important;visibility:hidden}
+body.phone .stage-tools .btn.dimmed{opacity:.35}
+body.phone #btnTransit{left:10px !important;right:10px;top:auto !important;bottom:8px;width:auto !important;height:50px}
+body.phone .panel.info{position:fixed;left:0;right:0;bottom:58px;height:50vh;z-index:40;border-left:0;border-top:3px solid var(--edge);transform:translateY(calc(100% + 60px));transition:transform .25s ease;box-shadow:0 -8px 24px rgba(0,0,0,.5)}
+body.phone.sheet-open .panel.info{transform:none}
+body.phone .coach{position:fixed;left:0;right:0;bottom:0;height:58px;z-index:41;padding:10px 10px 4px;font-size:12.5px;line-height:1.3;align-items:flex-start;gap:8px;touch-action:none}
+body.phone .coach::before{content:'';position:absolute;top:4px;left:50%;transform:translateX(-50%);width:38px;height:4px;border-radius:3px;background:var(--cream-dim)}
+body.phone .coach .tag{font-size:10px;padding:2px 5px}
+body.phone #coachText{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+body.phone .levels-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+body.phone .modal{max-width:calc(100vw - 20px)}
+.phone-menu{position:fixed;inset:0;z-index:998;background:rgba(0,0,0,.6);display:flex;align-items:flex-start;justify-content:flex-end;padding:56px 10px 10px}
+.phone-menu[hidden]{display:none}
+.pm-card{width:min(260px,100%);background:var(--panel);border:3px solid var(--edge);box-shadow:4px 4px 0 #000;padding:6px 12px 14px}
+.ph-undo{position:fixed;left:50%;transform:translateX(-50%);bottom:186px;z-index:60;display:flex;align-items:center;gap:10px;background:#1d1e1b;border:2px solid var(--cream);padding:6px 6px 6px 12px;font-family:var(--pixel);font-weight:700;font-size:15px;box-shadow:3px 3px 0 #000}
+.ph-undo[hidden]{display:none}
+.ph-undo button{font-family:var(--pixel);font-weight:800;letter-spacing:.06em;font-size:15px;background:var(--accent);color:#1a1209;border:2px solid #1a1209;padding:6px 12px}
 /* phones and touch-only tablets: a friendly note instead of a game they can't really play */
 .phone-note{position:fixed;inset:0;z-index:999;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:16px;overflow:auto}
 .phone-note[hidden]{display:none}
@@ -267,6 +325,12 @@ body.home #game, body.home .modal-back{filter:blur(7px) saturate(.85)}
 .help-modal{width:min(820px,100%)}
 .kb-head{display:flex;align-items:center;justify-content:space-between;margin:16px 0 8px}
 .kb-toggle{display:flex;gap:6px}
+.touch-help{display:none}
+body.phone .touch-help{display:block}
+body.phone .desk-only{display:none}
+body.phone .modal .btn kbd{display:none}
+body.phone .howto kbd{white-space:nowrap;font-size:11px;align-self:start;width:92px;box-sizing:border-box;text-align:center;padding:2px 4px}
+body.phone .home-btn kbd, body.phone .link-btn kbd{display:none}
 .kb-toggle .btn.on{background:var(--accent);color:#1a1209}
 .kb{display:flex;flex-direction:column;gap:var(--g,4px);background:#1a1b19;border:2px solid #0d0d0c;border-radius:10px;padding:10px;user-select:none}
 .kb-row{display:flex;gap:var(--g,4px)}
@@ -303,6 +367,20 @@ body.home #game, body.home .modal-back{filter:blur(7px) saturate(.85)}
 <body>
 
 <!-- ================= TITLE ================= -->
+<div id="phoneMenu" class="phone-menu" hidden role="dialog" aria-modal="true" aria-label="Menu">
+  <div class="pm-card">
+    <button class="pn-btn" data-act="levels">LEVELS</button>
+    <button class="pn-btn" data-act="hint">HINT</button>
+    <button class="pn-btn" data-act="undo">UNDO</button>
+    <button class="pn-btn" data-act="redo">REDO</button>
+    <button class="pn-btn" data-act="reset">RESET (START OVER)</button>
+    <button class="pn-btn" data-act="help">HELP</button>
+    <button class="pn-btn" data-act="home">HOME SCREEN</button>
+    <button class="pn-btn primary" data-act="close">BACK TO THE TRUCK</button>
+  </div>
+</div>
+<div id="phoneRotate" class="phone-note" hidden><div class="pn-card"><div class="pn-logo">TRUCK<br>PACKOLOGY</div><h2>TURN YOUR PHONE UPRIGHT</h2><p>Truck Packology plays in portrait on a phone: the truck runs top to bottom.</p></div></div>
+<div id="phUndo" class="ph-undo" hidden><span id="phUndoText">Removed</span><button id="phUndoBtn">UNDO</button></div>
 <div id="phoneNote" class="phone-note" hidden role="dialog" aria-modal="true" aria-labelledby="pnTitle">
   <div class="pn-card">
     <div class="pn-logo">TRUCK<br>PACKOLOGY</div>
@@ -341,6 +419,7 @@ body.home #game, body.home .modal-back{filter:blur(7px) saturate(.85)}
     <div class="stat" id="hudSecureWrap"><span>SECURED</span><b id="hudSecure">--</b></div>
     <button class="btn" id="btnHelp">HELP</button>
     <button class="btn" id="btnLevels">LEVELS</button>
+    <button class="btn phone-only" id="btnMenu" aria-label="Menu">≡</button>
   </header>
   <main class="board">
     <aside class="panel manifest">
@@ -363,6 +442,8 @@ body.home #game, body.home .modal-back{filter:blur(7px) saturate(.85)}
       <div id="toast"></div>
       <div id="transitLabel"></div>
       <div class="stage-tools" id="stageTools">
+        <button class="btn phone-only" id="btnUp" aria-label="Scroll toward the nose">▲</button>
+        <button class="btn phone-only" id="btnDown" aria-label="Scroll toward the doors">▼</button>
         <button class="btn hint-cube" id="btnHint" title="Hint" aria-label="Hint">?</button>
         <button class="btn" id="btnView" hidden title="Door view (V)">DOOR<span class="lock">V</span></button>
         <button class="btn" id="btnBar" hidden title="Load bar (B)">BAR<span class="lock">B</span></button>
@@ -431,6 +512,19 @@ body.home #game, body.home .modal-back{filter:blur(7px) saturate(.85)}
   <h2 id="hpTitle">WHAT IS TRUCK PACKOLOGY?</h2>
   <p>Truck Packology teaches the logic AV crews use to load a show truck. Build a heavy base at the nose, pack <b>high and tight</b>, leave no gaps that let cases slide, secure every tier, and load in <b>reverse of the venue's load-in order</b> so the first gear needed comes off first.</p>
   <p>A truck can be full and still be a bad pack. Every run is scored on space, stability, unload order and securement, and the crew lead explains each call. 30 beginner floor levels, 30 intermediate stacking levels, expert levels, offloading, and a final exam for your AV Educate certificate.</p>
+  <div class="touch-help"><div class="section-label">TOUCH</div>
+  <div class="howto">
+    <kbd>DRAG</kbd><span>Drag a case down from the strip into the truck. Let go to set it down. Drag a case in the truck to move it.</span>
+    <kbd>TWIST</kbd><span>Two-finger twist on the truck rotates a case 90°.</span>
+    <kbd>DOUBLE-TAP</kbd><span>Takes a case (or a bar or strap) back out. UNDO brings it back.</span>
+    <kbd>HOLD + FLICK</kbd><span>Hold a case still for 1 second, then flick up to tip it on its side.</span>
+    <kbd>SWIPE</kbd><span>Swipe the full length of the truck, starting off a case: down for the door view, up for the top view.</span>
+    <kbd>BAR · STRAP</kbd><span>Drag the button into the truck and let go behind a finished tier.</span>
+    <kbd>▲ ▼</kbd><span>Scroll a long truck toward the nose or the doors.</span>
+    <kbd>CREW LEAD</kbd><span>Tap or pull up the bar at the bottom for the level goal and case info.</span>
+    <kbd>≡ MENU</kbd><span>Undo, redo, hint, reset, help and the level list.</span>
+  </div></div>
+  <div class="desk-only">
   <div class="section-label">MOUSE</div>
   <div class="howto">
     <kbd>CLICK</kbd><span>Pick a case from the manifest, then click in the truck to set it down. Dragging works too.</span>
@@ -441,6 +535,7 @@ body.home #game, body.home .modal-back{filter:blur(7px) saturate(.85)}
     <div class="kb-toggle"><button class="btn" data-plat="mac">MAC</button><button class="btn" data-plat="pc">PC</button></div></div>
   <div id="helpKeyboard"></div>
   <div class="kb-desc" id="helpKeyDesc">Click a highlighted key, or press it on your keyboard, to see what it does.</div>
+  </div>
   <div class="row"><button class="btn" id="hpDemo">TRY THE PRACTICE BAY</button><button class="btn primary" id="hpClose">CLOSE <kbd>ESC</kbd></button></div>
 </div></div>
 
@@ -2625,18 +2720,53 @@ function showBriefing(){
       <kbd>ARROWS</kbd><span>Move the case one grid square (6") at a time. <kbd>ENTER</kbd> sets it down.</span>
       <kbd>CLICK A CASE</kbd><span>Pick a case back up out of the truck. <kbd>⌘Z</kbd> undoes.</span>
     </div>`;
-  $('brBody').innerHTML = h;
+  $('brBody').innerHTML = isPhone() ? phoneHowTo(phoneText(h)) : h;
   G.mode = 'briefing'; openModal('briefing');
+}
+function phoneHowTo(h){
+  const rows = [
+    [/<kbd>LOAD BAR · B<\/kbd><span>[^<]*<\/span>/, '<kbd>LOAD BAR</kbd><span>Drag the load bar button into the truck and let go right behind a finished tier. It wedges wall to wall in the E-track.</span>'],
+    [/<kbd>STRAP · S<\/kbd>/, '<kbd>STRAP</kbd>'],
+    [/<kbd>(?:CLICK|TAP) A BAR<\/kbd><span>Takes it back out/, '<kbd>DOUBLE-TAP A BAR</kbd><span>Takes it back out'],
+    [/<kbd>1 · BASE<\/kbd><span>.*?<\/span>/, '<kbd>1 · BASE</kbd><span>Drag a big case from the strip onto the <b>DOCK STACK</b> card. It becomes the base.</span>'],
+    [/<kbd>2 · LID<\/kbd><span>.*?<\/span>/, '<kbd>2 · LID</kbd><span>Drag smaller cases onto the card the same way. They fill the base\'s lid side by side.</span>'],
+    [/<kbd>3 · PICK UP<\/kbd><span>.*?<\/span>/, '<kbd>3 · PICK UP</kbd><span>Drag the <b>DOCK STACK</b> card into the truck. The whole stack comes with you, and a two-finger twist turns it.</span>'],
+    [/<kbd>4 · ROLL IN<\/kbd><span>.*?<\/span>/, '<kbd>4 · ROLL IN</kbd><span>Let go where it fits. One move loads two or three cases.</span>'],
+    [/<kbd>V<\/kbd><span>Flip to the DOOR VIEW/, '<kbd>SWIPE</kbd><span>Swipe down the full length of the truck for the DOOR VIEW (up goes back)'],
+    [/<kbd>T<\/kbd><span>.*?<\/span>/, '<kbd>HOLD + FLICK</kbd><span>Hold the case still for 1 second, then flick up: it lays on its side and width and height swap. Do it again to stand it back up.</span>'],
+    [/<kbd>R<\/kbd><span>Still turns it/, '<kbd>TWIST</kbd><span>A two-finger twist still turns it'],
+    [/<kbd>V<\/kbd><span>The door view works here too\./, '<kbd>SWIPE</kbd><span>The door view works here too.'],
+    [/<kbd>(?:CLICK|TAP)<\/kbd><span>Pick a case from the manifest.*?<\/span>/, '<kbd>DRAG</kbd><span>Drag a case down from the strip into the truck and let go to set it down.</span>'],
+    [/<kbd>R<\/kbd><span>Rotate the case.*?<\/span>/, '<kbd>TWIST</kbd><span>Twist two fingers on the truck to rotate a case.</span>'],
+    [/<kbd>SPACE<\/kbd><span>.*?<\/span>/, '<kbd>MOVE</kbd><span>Drag a case already in the truck to move it.</span>'],
+    [/<kbd>ARROWS<\/kbd><span>.*?<\/span>/, '<kbd>DOUBLE-TAP</kbd><span>Takes a case back out to the dock. UNDO brings it back.</span>'],
+    [/<kbd>(?:CLICK|TAP) A CASE<\/kbd><span>Pick a case back up out of the truck\..*?<\/span>/, '<kbd>≡ MENU</kbd><span>Undo, redo, hint, reset and the level list.</span>'],
+  ];
+  for (const [a, b] of rows) h = h.replace(a, b);
+  return h;
 }
 function startPlay(){ closeModals(); G.mode = 'play'; refresh(); }
 
 /* ---------- layout + rendering ---------- */
+const PHONE_RESERVE = 124; // phone: the button row + READY under the truck
+const isPhone = () => document.body.classList.contains('phone');
 function layout(){
   const st = $('stage'), cv = $('truckCanvas'), dpr = window.devicePixelRatio || 1;
   const cw = st.clientWidth, ch = st.clientHeight;
   cv.width = Math.round(cw * dpr); cv.height = Math.round(ch * dpr);
   if (!G.level) return;
   const t = G.level.truck, wallIn = 4;
+  if (isPhone()){ // portrait: the truck fills the width; long trucks scroll with ▲ ▼ (the button row and READY sit below)
+    const rulerW = 30, side = 10, topP = 24, reserve = PHONE_RESERVE;
+    const view = ch - reserve - topP - 26, sW = (cw - rulerW - side) / (t.width + wallIn * 2), sH = view / (t.depth + wallIn);
+    const s = Math.max(1, sW * (t.depth + wallIn) <= view * 1.15 ? Math.min(sW, sH) : sW); // almost fits: shrink to fit; long trucks scroll
+    const Wp = t.width * s, Dp = t.depth * s, wall = wallIn * s;
+    G.scrollMax = Math.max(0, Dp + wall - view); G.scrollY = clamp(G.scrollY || 0, 0, G.scrollMax);
+    G.L = {cw, ch, dpr, s, cell:IN * s, wall, ox:rulerW + wall + Math.max(0, cw - rulerW - side - (Wp + 2 * wall)) / 2, oy:topP + wall - G.scrollY, Wp, Dp, clipH:ch - reserve};
+    const Hin = t.height || 96, sD = Math.max(1, Math.min((cw - rulerW - side - 32) / t.width, (ch - reserve - 90) / Hin)), WpD = t.width * sD;
+    G.LD = {s:sD, cell:IN * sD, ox:rulerW + 16 + Math.max(0, cw - rulerW - side - 32 - WpD) / 2, floorY:60 + Hin * sD, Wp:WpD, Hp:Hin * sD, Hin};
+    G.floorCache = null; render(); placeStageControls(); return;
+  }
   // The truck fills the play area; the button column beside it gets whatever width is left (76-118px).
   // The truck fills the play area. Its buttons are small squares under its bottom-right corner, beside READY FOR TRANSIT.
   const top = 42, bottom = 118, leftM = 74, gap = 74;
@@ -2682,6 +2812,7 @@ function render(){
   ctx.fillStyle = '#1f201d'; ctx.fillRect(0, 0, L.cw, L.ch);
   ctx.save();
   if (G.anim && G.anim.shake){ ctx.translate(G.anim.shake[0], G.anim.shake[1]); }
+  if (L.clipH){ ctx.beginPath(); ctx.rect(0, 0, L.cw, L.clipH); ctx.clip(); } // phone: the truck stays above the button row
   if (G.loopShift) ctx.translate(0, G.loopShift); // Endless Tour: the truck driving off / backing in
   if (G.level.stacked && G.view === 'door'){ renderDoor(ctx); ctx.restore(); return; }
   const {ox, oy, Wp, Dp, cell, wall} = L;
@@ -2801,7 +2932,7 @@ function renderDoor(ctx){
   ctx.textAlign = 'center'; ctx.fillStyle = '#ebe3cb'; ctx.font = "800 19px 'Barlow Condensed', sans-serif";
   if (!(G.hand && G.ghost) && !(G.tool && G.tool.L != null)) ctx.fillText('DOOR VIEW · LOOKING IN FROM THE REAR DOORS', ox + Wp / 2, top - 34);
   ctx.fillStyle = '#8b8c84'; ctx.font = "700 13px 'Barlow Condensed', sans-serif";
-  ctx.fillText('Nearest tier is brightest. Press V for the top view.', ox + Wp / 2, floorY + 28);
+  ctx.fillText(isPhone() ? 'Nearest tier is brightest. Swipe up for the top view.' : 'Nearest tier is brightest. Press V for the top view.', ox + Wp / 2, floorY + 28);
   const pos = currentPositions().map(p => ({p, r:Engine.rectOf(st, p)}));
   const loadEnd = Math.max(1, ...pos.map(o => o.r.y + o.r.d));
   pos.sort((a, b) => (a.p.y + a.r.d) - (b.p.y + b.r.d) || a.r.z - b.r.z);
@@ -2926,6 +3057,11 @@ const ICON_TOP = `<svg class="ico" viewBox="0 0 40 40" aria-hidden="true">
 
 function placeStageControls(){
   if (!G.L || !G.level) return;
+  if (isPhone()){ // the phone layout positions the button row and READY with CSS
+    for (const el of [$('stageTools'), $('btnTransit')]) el.removeAttribute('style');
+    $('btnUp').classList.toggle('dimmed', !(G.scrollY > 0)); $('btnDown').classList.toggle('dimmed', !(G.scrollY < G.scrollMax));
+    return;
+  }
   const L = G.L, door = doorView(), tools = $('stageTools'), btn = $('btnTransit');
   // the row under the doors: READY FOR TRANSIT centered, small square buttons at the truck's bottom-right corner
   const left = door ? G.LD.ox - 16 : L.ox - L.wall, right = door ? G.LD.ox + G.LD.Wp + 16 : L.ox + L.Wp + L.wall, span = right - left;
@@ -3001,7 +3137,7 @@ function refresh(){
   if (G.level.offload){
     const inT = G.placements.length;
     btn.disabled = inT > 0 || G.mode !== 'play'; btn.classList.toggle('ready', !inT && G.mode === 'play');
-    btn.innerHTML = inT ? `UNLOADING<span class="lock">${inT} STILL IN THE TRUCK</span>` : 'TRUCK EMPTY · FINISH<span class="lock">ENTER</span>';
+    btn.innerHTML = inT ? `UNLOADING<span class="lock">${inT} STILL IN THE TRUCK</span>` : `TRUCK EMPTY · FINISH<span class="lock">${isPhone() ? 'TAP TO FINISH' : 'ENTER'}</span>`;
     $('hudUnload').textContent = G.offMistakes.length ? `${G.offMistakes.length} MISSED` : 'CLEAN';
     $('hudScore').textContent = inT ? '--' : Math.max(0, 100 - 10 * G.offMistakes.length);
     $('hudStab').textContent = '--'; $('hudSecure').textContent = G.bars.length ? `${G.bars.length} LEFT` : 'ALL OUT';
@@ -3014,7 +3150,7 @@ function refresh(){
     loopSyncTiles();
     const n = G.placements.length;
     btn.disabled = !n || G.mode !== 'play'; btn.classList.toggle('ready', !!n && G.mode === 'play');
-    btn.innerHTML = n ? 'READY FOR TRANSIT<span class="lock">ENTER · SEND THIS TRUCK</span>' : 'READY FOR TRANSIT<span class="lock">LOAD SOME CASES</span>';
+    btn.innerHTML = n ? `READY FOR TRANSIT<span class="lock">${isPhone() ? '' : 'ENTER · '}SEND THIS TRUCK</span>` : 'READY FOR TRANSIT<span class="lock">LOAD SOME CASES</span>';
     $('hudScore').textContent = G.loop.total;
     renderManifest(); renderInfo(); renderCoach(); renderGoal(); render();
     const stg1 = $('stage'); if (G.L && (stg1.clientHeight !== G.L.ch || stg1.clientWidth !== G.L.cw)) layout();
@@ -3023,7 +3159,7 @@ function refresh(){
   const left = leftCount();
   btn.disabled = left > 0 || G.mode !== 'play';
   btn.classList.toggle('ready', left === 0 && G.mode === 'play');
-  btn.innerHTML = left > 0 ? `READY FOR TRANSIT<span class="lock">${left} STILL ON THE DOCK</span>` : 'READY FOR TRANSIT<span class="lock">ENTER</span>';
+  btn.innerHTML = left > 0 ? `READY FOR TRANSIT<span class="lock">${left} STILL ON THE DOCK</span>` : `READY FOR TRANSIT<span class="lock">${isPhone() ? 'TAP TO SEND THIS TRUCK' : 'ENTER'}</span>`;
   renderManifest(); renderInfo(); renderCoach(); render();
   // the crew-lead message can change the play area's height: re-fit the truck if it did
   const stg = $('stage'); if (G.L && (stg.clientHeight !== G.L.ch || stg.clientWidth !== G.L.cw)) layout();
@@ -3096,16 +3232,55 @@ function renderGoal(){
   const lv = G.level;
   if (lv.loop){ document.querySelector('.panel.info').classList.remove('demo'); $('goalHead').textContent = 'ENDLESS TOUR'; return renderLoopGoal(); }
   document.querySelector('.panel.info').classList.toggle('demo', !!lv.demo);
-  $('goalHead').textContent = lv.demo ? 'KEYBOARD' : 'LEVEL GOAL';
-  if (lv.demo){
+  $('goalHead').textContent = lv.demo && !isPhone() ? 'KEYBOARD' : 'LEVEL GOAL';
+  if (lv.demo && !isPhone()){
     $('levelGoal').innerHTML = `<div style="font-weight:700;margin-bottom:6px">Keys light up as you press them</div><div id="demoKb"></div><div class="kb-desc" id="demoKeyDesc" style="font-size:12.5px">Press any key.</div>`;
     renderKeyboard($('demoKb'), PLATFORM.cur, {mini:true, width:250});
     return;
   }
   $('levelGoal').innerHTML = `<div style="font-weight:700;margin-bottom:4px">${lv.title}</div><ul class="goal-list">${lv.objectives.map(o => `<li>${o}</li>`).join('')}</ul>` +
     (lv.unloadSequence ? `<div class="section-label" style="margin-top:4px">VENUE LOAD-IN ORDER</div><div class="seq">${lv.unloadSequence.map((d, i) => `<div><b>${i + 1}</b><span class="chip" style="background:${DEPTS[d].color}">${d}</span><span>${i === 0 ? 'first off' : ''}</span></div>`).join('')}</div>` : '');
+  if (isPhone()) $('levelGoal').innerHTML = phoneText($('levelGoal').innerHTML);
 }
-function setCoach(kind, html){ const c = $('coach'); c.className = 'coach ' + kind; c.querySelector('.tag').textContent = {tip:'CREW LEAD', warn:'HEADS UP', bad:"WON'T WORK", good:'NICE'}[kind]; $('coachText').innerHTML = html; }
+// phone: keyboard and mouse wording becomes touch wording
+const PHONE_WORDS = [
+  [/Click to set it down\. Press <b>R<\/b> to rotate, <b>SPACE<\/b> to push it all the way in\./g, 'Let go to set it down. <b>Twist two fingers</b> to rotate it.'],
+  [/Click a <b>Utility Trunk<\/b> in the MANIFEST to pick it up \(or drag it straight into the truck\)\./g, 'Drag a <b>Utility Trunk</b> from the cases strip at the top down into the truck.'],
+  [/Move into the truck\./g, 'Drag it into the truck.'],
+  [/then click <b>LOAD BAR<\/b> \(or press B\) and set it/gi, 'then drag the <b>LOAD BAR</b> button into the truck and let go'],
+  [/then click LOAD BAR and set it/gi, 'then drag the LOAD BAR button into the truck and let go'],
+  [/\(or press B\)/g, '(drag the bar button onto the truck)'],
+  [/\(press B\)/g, '(drag the bar button onto the truck)'],
+  [/\(press S\)/g, '(drag the strap button onto the truck)'],
+  [/then click <b>ADD TO STACK<\/b> in the DOCK STACK box/g, 'then drag it onto the <b>DOCK STACK</b> card'],
+  [/on its lid the same way, then click <b>PICK UP STACK<\/b>/g, 'on its lid the same way, then drag the <b>DOCK STACK</b> card into the truck'],
+  [/Roll it in like any case: click, or SPACE to push it in\./g, 'Roll it in like any case: drag it and let go.'],
+  [/then PICK UP STACK and push it/g, 'then drag the DOCK STACK card into the truck and push it'],
+  [/add what fits on its lid, then PICK UP STACK\./g, 'add what fits on its lid, then drag the DOCK STACK card into the truck.'],
+  [/then PICK UP STACK and roll it in as one piece/g, 'then drag the DOCK STACK card into the truck as one piece'],
+  [/PICK UP STACK, press R to turn it/g, 'drag the DOCK STACK card into the truck, twist two fingers to turn it'],
+  [/Press <b>V<\/b> \(or DOOR VIEW\) to look at/g, 'Swipe <b>down</b> the full length of the truck to look at'],
+  [/Press <b>V<\/b> to see the load from the doors/g, 'Swipe <b>down</b> the full length of the truck to see the load from the doors'],
+  [/Press V for the top view/g, 'Swipe up for the top view'],
+  [/V flips back\./g, 'Swipe up to flip back.'],
+  [/Press SPACE \(Push In\) to slide it all the way in\./g, 'Drag it forward until it touches.'],
+  [/(?:[Pp]ress) <b>T<\/b> to tip the case you\\?'re holding/g, 'Hold the case still for 1 second, then <b>flick up</b> to tip it'],
+  [/(?:[Pp]ress) <b>T<\/b> to lay it on its side/g, 'Hold it still for 1 second, then <b>flick up</b> to lay it on its side'],
+  [/\(T\)/g, '(hold 1 sec, flick up)'],
+  [/\(R\)/g, '(two-finger twist)'],
+  [/[Pp]ress <b>R<\/b>/g, '<b>Twist two fingers</b>'],
+  [/[Pp]ress R\b/g, 'twist two fingers'],
+  [/, R to turn,/g, ', twist two fingers to turn,'],
+  [/Hit <b>FINISH<\/b> \(Enter\)/g, 'Tap <b>FINISH</b>'],
+  [/Good spot\. Click \(or press ENTER\) to set it down\./g, 'Good spot. Let go to set it down.'],
+  [/Click (it|one in the truck) to take it (back )?out/g, 'Double-tap $1 to take it $2out'],
+  [/\bClick\b/g, 'Tap'], [/\bclick\b/g, 'tap'], [/\bclicks\b/g, 'taps'],
+  [/Pick up or hover over a case/g, 'Pick up a case'],
+  [/from any tile on the left/g, 'from any tile in the strip at the top'],
+  [/pick from any tile\b/g, 'pick from any tile above'],
+];
+const phoneText = h => { if (!isPhone() || !h) return h; for (const [a, b] of PHONE_WORDS) h = h.replace(a, b); return h; };
+function setCoach(kind, html){ html = phoneText(html); const c = $('coach'); c.className = 'coach ' + kind; c.querySelector('.tag').textContent = {tip:'CREW LEAD', warn:'HEADS UP', bad:"WON'T WORK", good:'NICE'}[kind]; $('coachText').innerHTML = html; }
 function renderCoach(){
   if (G.coachOverride && performance.now() < G.coachOverride.until) return setCoach(G.coachOverride.kind, G.coachOverride.html);
   if (G.level && G.level.offload && G.mode === 'play'){
@@ -3121,6 +3296,7 @@ function renderCoach(){
     : 'Endless Tour: pick cases from any tile on the left and fill this truck. Finish a tile and a new one slides in. A failed pack still goes out, but it costs the gap to 60 and a strike. Three strikes ends the tour.');
   if (G.tool){
     if (G.tool.L != null && !G.tool.ok) return setCoach('bad', G.tool.reason);
+    if (isPhone()) return setCoach(G.tool.L != null ? 'good' : 'tip', G.tool.L != null ? `The ${G.tool.kind === 'bar' ? 'load bar' : 'strap'} goes ${fmtLen(G.tool.L * IN)} from the nose. Let go to set it, or drag it off the truck to put it back.` : `Drag the ${G.tool.kind === 'bar' ? 'load bar' : 'strap'} to the back face of a finished tier and let go.`);
     if (doorView()) return setCoach('good', `The ${G.tool.kind === 'bar' ? 'load bar' : 'strap'} goes across the ${G.tool.tier === 'high' ? 'upper tier' : 'tier'} ${fmtLen(G.tool.L * IN)} from the nose. Click to set it, <b>↑ ↓</b> to pick another tier, <b>Esc</b> puts it back.`);
     return setCoach(G.tool.L != null ? 'good' : 'tip', `Move the ${G.tool.kind === 'bar' ? 'load bar' : 'strap'} to the back face of a finished tier and click to set it. <b>Esc</b> puts it back.`);
   }
@@ -3147,7 +3323,7 @@ function fire(ev){
   if (ev === 'place' && !leftCount()) fire('allPlaced');
 }
 function toast(big, small){
-  const t = $('toast'); t.innerHTML = big + (small ? `<small>${small}</small>` : ''); t.classList.remove('show'); void t.offsetWidth; t.classList.add('show');
+  const t = $('toast'); t.innerHTML = phoneText(big) + (small ? `<small>${phoneText(small)}</small>` : ''); t.classList.remove('show'); void t.offsetWidth; t.classList.add('show');
 }
 
 /* ---------- hand: pick / move / place ---------- */
@@ -3264,7 +3440,8 @@ function renderStaging(){
   const stg = G.staging;
   if (!stg.length){
     ctx.fillStyle = '#8b8c84'; ctx.font = "700 13px 'Barlow Condensed', sans-serif"; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-    ctx.fillText('EMPTY DOCK SPOT', cw / 2, ch / 2);
+    if (cw < 100){ ctx.font = "700 11px 'Barlow Condensed', sans-serif"; ctx.fillText('EMPTY', cw / 2, ch / 2 - 6); ctx.fillText('DOCK SPOT', cw / 2, ch / 2 + 7); }
+    else ctx.fillText('EMPTY DOCK SPOT', cw / 2, ch / 2);
   } else {
     const bdef = itemOf(stg[0].uid).def, bd = Engine.dimsOf(bdef, stg[0].rot), bh = bdef.height;
     const bx = ox + (96 - bd.w * IN) / 2 * s;
@@ -3954,7 +4131,9 @@ function loopDepart(){
   L.nextDepth = next[0];
   G.mode = 'transit'; G.view = 'top';
   const Lh = G.L, off = -(Lh.oy + Lh.Dp + 80), t0 = performance.now();
+  const gone = () => G.loop !== L; // the player left the tour mid-animation
   const away = now => {
+    if (gone()){ G.loopShift = 0; return; }
     const k = Math.min(1, (now - t0) / 1100), e = k * k;
     G.loopShift = off * e; render();
     if (k < 1) return requestAnimationFrame(away);
@@ -3963,6 +4142,7 @@ function loopDepart(){
     loopSetTruck(next[0], next[1]);
     const t1 = performance.now(), start = G.L.ch;
     const arrive = now2 => {
+      if (gone()){ G.loopShift = 0; return; }
       const k2 = Math.min(1, (now2 - t1) / 1000), e2 = 1 - (1 - k2) * (1 - k2);
       G.loopShift = start * (1 - e2); render();
       if (k2 < 1) return requestAnimationFrame(arrive);
@@ -4128,7 +4308,21 @@ const DEMO_LEVEL = {
     {text:'You\'ve got the keys. Try <b>⌘Z / Ctrl+Z</b> to undo, <b>ESC</b> to cancel, and <b>ENTER</b> with empty hands for a practice transit.'}
   ]
 };
-function startDemo(){ closeModals(); loadLevelObj(DEMO_LEVEL, -1); }
+const DEMO_PHONE = {
+  lesson:'No score, no pressure. This is the smallest box truck: use it to get the touch controls under your fingers.',
+  objectives:['Drag a case into the truck', 'Twist two fingers to rotate one', 'Stack something, then set a load bar and a strap'],
+  hint:'Drag cases down from the strip. Twist two fingers to turn one, double-tap to take one out, swipe the full truck for the door view.',
+  coach:[
+    {until:'pick', text:'Drag a case down from the strip at the top into the truck.'},
+    {until:'rotate', text:'Keep your finger down and <b>twist two fingers</b> on the truck to rotate it.'},
+    {until:'place', text:'Let go where it shows <b>green</b> to set it down.'},
+    {until:'view', text:'Swipe <b>down</b> the full length of the truck (start beside the cases) for the door view.'},
+    {until:'stack', text:'Drag another case onto one in the truck to stack it on top.'},
+    {until:'device', text:'Swipe <b>up</b> for the top view, then drag the <b>load bar</b> button into the truck behind a tier.'},
+    {text:'You\'ve got it. Double-tap a case to take it out, and use the <b>≡ menu</b> for undo, hint and reset.'}
+  ]
+};
+function startDemo(){ closeModals(); loadLevelObj(isPhone() ? {...DEMO_LEVEL, ...DEMO_PHONE} : DEMO_LEVEL, -1); }
 $('titleDemo').onclick = () => homeGo(HOME.demo);
 $('titleHelp').onclick = () => homeGo(HOME.help);
 $('btnHelp').onclick = openHelp;
@@ -4217,8 +4411,185 @@ window.addEventListener('resize', () => layout());
 if (window.ResizeObserver){ let rw = 0, rh = 0; new ResizeObserver(([en]) => { const {width, height} = en.contentRect; if (Math.abs(width - rw) > 1 || Math.abs(height - rh) > 1){ rw = width; rh = height; if (G.level) layout(); } }).observe($('stage')); }
 
 enterHome();
-// Touch-only devices (no mouse or trackpad) and very narrow screens get the phone note; PLAY ANYWAY dismisses it for this visit.
+/* =====================================================================
+   PHONE CONTROLS (body.phone: touch-only devices and narrow screens)
+   drag from the strip + let go = place · drag a placed case = move · double-tap = remove (UNDO) ·
+   hold 1 s + flick up = flip on its side · two-finger twist = rotate · full-length swipe on the board = view
+   (up = top view, down = door view) · holding a case blocks every other gesture · ▲ ▼ scroll long trucks ·
+   drag the bar/strap button onto a tier · tap or drag the bottom bar = level goal / case info sheet
+   ===================================================================== */
+const PH = {pointers:new Map(), g:null, lastTap:null, undoTimer:null};
+function phoneHoldArm(g){ g.armed = true; G.coachOverride = null; flashCoach('tip', 'Flick up to flip it on its side.', 1500); if (navigator.vibrate) navigator.vibrate(20); }
+function phoneFlip(uid){
+  if (!G.hand){ if (!uid) return; pickFromTruck(uid); if (!G.hand) return; }
+  tipHand();
+  if (G.hand && G.hand.from === 'truck' && G.ghost && G.ghost.ok) placeHand();
+}
+function phoneRotate(mx, my){
+  if (G.hand){ rotateHand(); return; }
+  const r = $('truckCanvas').getBoundingClientRect(), uid = hitCase(mx - r.left, my - r.top); if (!uid) return;
+  pickFromTruck(uid); if (!G.hand) return;
+  rotateHand();
+  if (G.ghost && G.ghost.ok) placeHand(); else flashCoach('bad', (G.ghost && G.ghost.reason) || 'It doesn\'t fit turned that way here. Drag it somewhere it fits, or twist it back.', 3000);
+}
+function phoneUndoBanner(text){
+  $('phUndoText').textContent = text; $('phUndo').hidden = false;
+  clearTimeout(PH.undoTimer); PH.undoTimer = setTimeout(() => { $('phUndo').hidden = true; }, 6000);
+}
+function phoneScroll(dir){ const view = G.L.clipH - 50; G.scrollY = clamp((G.scrollY || 0) + dir * view * .6, 0, G.scrollMax || 0); layout(); }
+function phoneAutoScroll(clientY){
+  if (!G.scrollMax) return;
+  const r = $('stage').getBoundingClientRect(), y = clientY - r.top;
+  if (y < 46 && G.scrollY > 0){ G.scrollY = Math.max(0, G.scrollY - 8); layout(); }
+  else if (y > G.L.clipH - 30 && G.scrollY < G.scrollMax){ G.scrollY = Math.min(G.scrollMax, G.scrollY + 8); layout(); }
+}
+const phoneOverCanvas = e => { const r = $('truckCanvas').getBoundingClientRect(); return e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.top + (G.L.clipH || r.height); };
+function phoneDown(e){
+  if (!isPhone() || !G.level || G.mode !== 'play') return;
+  const card = e.target.closest('.manifest-item'), onCanvas = e.target.closest('#truckCanvas'), toolBtn = e.target.closest('#btnBar, #btnStrap'), stack = !e.target.closest('#btnClearStage') && G.staging.length && e.target.closest('#stagingBox');
+  if (!card && !onCanvas && !toolBtn && !stack) return;
+  PH.pointers.set(e.pointerId, {x:e.clientX, y:e.clientY});
+  if (PH.pointers.size === 2 && onCanvas){ // two fingers: twist to rotate
+    if (PH.g && PH.g.kind === 'drag' && G.hand) {} else { clearTimeout(PH.g && PH.g.holdTimer); PH.g = null; }
+    const [a, b] = [...PH.pointers.values()]; PH.twist = {angle:Math.atan2(b.y - a.y, b.x - a.x)};
+    e.preventDefault(); e.stopPropagation(); return;
+  }
+  if (PH.pointers.size > 1) return;
+  const now = performance.now(), g = {id:e.pointerId, x0:e.clientX, y0:e.clientY, t0:now, lx:e.clientX, ly:e.clientY, lt:now, moved:false};
+  if (card){ if (card.classList.contains('done') || G.level.offload) return; g.kind = 'card'; g.card = card; }
+  else if (stack){ g.kind = 'stack'; }
+  else if (toolBtn){ if (toolBtn.hidden) return; g.kind = 'tool'; g.tool = toolBtn.id === 'btnBar' ? 'bar' : 'strap'; }
+  else {
+    if (G.level.offload || G.tool) return; // unloading taps and tool taps use the regular handlers
+    const p = canvasPoint(e);
+    g.kind = 'canvas'; g.uid = G.hand ? null : hitCase(p.x, p.y); g.bar = (!G.hand && !doorView()) ? barAt(p.x, p.y) : null;
+    if (g.uid) g.holdTimer = setTimeout(() => { if (PH.g === g && !g.moved) phoneHoldArm(g); }, 1000);
+  }
+  PH.g = g; e.preventDefault(); e.stopPropagation();
+}
+function phoneMove(e){
+  if (!isPhone() || !PH.pointers.has(e.pointerId)) return;
+  PH.pointers.set(e.pointerId, {x:e.clientX, y:e.clientY});
+  if (PH.twist && PH.pointers.size === 2){
+    const [a, b] = [...PH.pointers.values()], ang = Math.atan2(b.y - a.y, b.x - a.x);
+    let d = ang - PH.twist.angle; while (d > Math.PI) d -= 2 * Math.PI; while (d < -Math.PI) d += 2 * Math.PI;
+    if (Math.abs(d) > .9){ phoneRotate((a.x + b.x) / 2, (a.y + b.y) / 2); PH.twist.angle = ang; }
+    e.preventDefault(); e.stopPropagation(); return;
+  }
+  const g = PH.g; if (!g || g.id !== e.pointerId) return;
+  const dx = e.clientX - g.x0, dy = e.clientY - g.y0, now = performance.now();
+  if (!g.moved && Math.hypot(dx, dy) > 9){
+    g.moved = true; clearTimeout(g.holdTimer);
+    if (g.kind === 'card'){
+      if (Math.abs(dy) < Math.abs(dx)){ PH.g = null; return; } // sideways: the strip scrolls
+      const c = g.card; if (G.level.loop){ if (c.dataset.uid) pickFromDockUid(c.dataset.uid); } else pickFromDock(c.dataset.type);
+      if (!G.hand){ PH.g = null; return; } g.kind = 'drag';
+    } else if (g.kind === 'stack'){ takeStack(); if (!G.hand){ PH.g = null; return; } g.kind = 'drag'; }
+    else if (g.kind === 'tool'){ startTool(g.tool); if (!G.tool){ PH.g = null; return; } g.kind = 'tooldrag'; }
+    else if (g.kind === 'canvas'){
+      if (g.armed){ g.kind = 'flick'; g.fy = e.clientY; }
+      else if (G.hand) g.kind = 'drag';
+      else if (g.uid){ pickFromTruck(g.uid); g.kind = G.hand ? 'drag' : 'none'; }
+      else g.kind = g.bar ? 'none' : 'swipe';
+    }
+  }
+  if (g.kind === 'drag'){
+    // hold still for a second while carrying a case = armed; then a quick flick up flips it
+    if (g.armed){ // armed: the first motion starts a short flick window
+      if (g.ft == null){ g.ft = now; g.fx = g.lx; g.fy = g.ly; }
+      const up = g.fy - e.clientY, side = Math.abs(e.clientX - g.fx);
+      if (up > 30 && up > side && now - g.ft < 350){ g.armed = false; g.ft = null; tipHand(); g.lx = e.clientX; g.ly = e.clientY; e.preventDefault(); e.stopPropagation(); return; }
+      if (now - g.ft >= 350 || -up > 30 || side > 30){ g.armed = false; g.ft = null; }
+      else { e.preventDefault(); e.stopPropagation(); return; } // hold the case still during the flick
+    }
+    if (Math.hypot(e.clientX - g.lx, e.clientY - g.ly) > 6){
+      g.lx = e.clientX; g.ly = e.clientY; clearTimeout(g.holdTimer);
+      g.holdTimer = setTimeout(() => { if (PH.g === g && G.hand) phoneHoldArm(g); }, 1000);
+    }
+    if (phoneOverCanvas(e)){ const p = canvasPoint(e); pointerGhost(p.x, p.y); phoneAutoScroll(e.clientY); }
+    renderCoach(); render();
+  } else if (g.kind === 'tooldrag'){
+    if (phoneOverCanvas(e)){ const p = canvasPoint(e); if (doorView()) setToolLine(doorToolLine()); else toolFromPointer(p.y); }
+    renderCoach(); render();
+  } else if (g.kind === 'flick'){
+    if (g.fy - e.clientY > 30){ g.kind = 'none'; phoneFlip(g.uid); }
+  }
+  e.preventDefault(); e.stopPropagation();
+}
+function phoneUp(e){
+  if (!isPhone() || !PH.pointers.has(e.pointerId)) return;
+  PH.pointers.delete(e.pointerId);
+  if (PH.twist){ if (PH.pointers.size < 2) PH.twist = null; if (!PH.g || PH.g.id === e.pointerId){ PH.g = null; } e.stopPropagation(); return; }
+  const g = PH.g; if (!g || g.id !== e.pointerId) return;
+  PH.g = null; clearTimeout(g.holdTimer);
+  const now = performance.now();
+  if (e.type === 'pointercancel'){ if (g.kind === 'drag' && G.hand) cancelHand(); else if (g.kind === 'tooldrag'){ G.tool = null; refresh(); } return; }
+  if (g.kind === 'drag' && G.hand){
+    const overStage = document.elementFromPoint(e.clientX, e.clientY), onStack = overStage && overStage.closest && overStage.closest('#stagingBox');
+    if (phoneOverCanvas(e) && G.ghost){ if (!placeHand()) cancelHand(); }
+    else if (onStack && G.hand.from === 'dock' && !G.hand.stack) stageHeld();
+    else cancelHand();
+  } else if (g.kind === 'tooldrag' && G.tool){
+    if (phoneOverCanvas(e) && G.tool.ok) placeTool(); else { if (phoneOverCanvas(e)) flashCoach('bad', G.tool.reason, 3000); G.tool = null; refresh(); }
+  } else if (g.kind === 'tool' && !g.moved){ startTool(g.tool); }
+  else if (g.kind === 'stack' && !g.moved){ takeStack(); }
+  else if (g.kind === 'card' && !g.moved){ flashCoach('tip', 'Drag the case down into the truck and let go to set it down.', 2500); }
+  else if (g.kind === 'canvas' && !g.moved && !g.armed){
+    if (G.hand){ const p = canvasPoint(e); pointerGhost(p.x, p.y); placeHand(); return; }
+    const key = g.uid || (g.bar ? 'bar:' + g.bar.y + g.bar.tier : null);
+    if (key && PH.lastTap && PH.lastTap.key === key && now - PH.lastTap.t < 340){ // double-tap = remove
+      PH.lastTap = null;
+      if (g.bar){ removeBar(g.bar); phoneUndoBanner(`${g.bar.kind === 'strap' ? 'Strap' : 'Load bar'} taken out`); }
+      else { const name = itemOf(g.uid).def.name; pickFromTruck(g.uid); if (G.hand){ returnToDock(); phoneUndoBanner(`${name} removed`); } }
+    } else PH.lastTap = key ? {key, t:now} : null;
+  } else if (g.kind === 'swipe'){
+    const dy = e.clientY - g.y0, dx = e.clientX - g.x0;
+    if (Math.abs(dy) > G.L.clipH * .5 && Math.abs(dy) > 2 * Math.abs(dx) && G.level.stacked){
+      if (dy < 0 && G.view === 'door') toggleView(); else if (dy > 0 && G.view === 'top') toggleView();
+    }
+  }
+}
+window.addEventListener('pointerdown', phoneDown, true);
+window.addEventListener('pointermove', phoneMove, true);
+window.addEventListener('pointerup', phoneUp, true);
+window.addEventListener('pointercancel', phoneUp, true);
+// the bottom bar: tap or drag up = level goal / case info (up to half the screen); tap or drag down closes
+(function phoneSheet(){
+  let y0 = null;
+  $('coach').addEventListener('pointerdown', e => { if (isPhone()){ y0 = e.clientY; e.preventDefault(); } });
+  $('coach').addEventListener('pointerup', e => {
+    if (!isPhone() || y0 == null) return; const dy = e.clientY - y0; y0 = null;
+    if (Math.abs(dy) < 10) document.body.classList.toggle('sheet-open');
+    else document.body.classList.toggle('sheet-open', dy < 0);
+  });
+  document.addEventListener('pointerdown', e => { if (isPhone() && document.body.classList.contains('sheet-open') && !e.target.closest('.panel.info, #coach')) document.body.classList.remove('sheet-open'); }, true);
+})();
+$('btnUp').onclick = () => phoneScroll(-1);
+$('btnDown').onclick = () => phoneScroll(1);
+$('btnMenu').onclick = () => { $('phoneMenu').hidden = false; };
+$('phUndoBtn').onclick = () => { $('phUndo').hidden = true; undo(); };
+$('phoneMenu').addEventListener('click', e => {
+  const b = e.target.closest('[data-act]'); if (!b && e.target.id !== 'phoneMenu') return;
+  $('phoneMenu').hidden = true;
+  const act = b ? b.dataset.act : 'close';
+  if (act === 'levels') openLevels(); else if (act === 'hint') $('btnHint').click(); else if (act === 'undo') undo(); else if (act === 'redo') redo();
+  else if (act === 'reset') resetLevel(); else if (act === 'help') openHelp(); else if (act === 'home') enterHome();
+});
+// phone mode: touch-only devices (no mouse or trackpad) and narrow screens; landscape phones are asked to turn upright
+function applyPhoneMode(){
+  const narrow = Math.min(innerWidth, screen.width) < 760, touchOnly = !matchMedia('(any-pointer: fine)').matches;
+  const on = narrow || (touchOnly && Math.min(innerWidth, innerHeight) < 900);
+  const was = document.body.classList.contains('phone');
+  document.body.classList.toggle('phone', on);
+  $('phoneRotate').hidden = !(on && touchOnly && innerWidth > innerHeight && innerHeight < 500);
+  $('pressEnter').textContent = on ? 'TAP TO START' : 'PRESS ENTER';
+  if (on !== was && G.level){ G.scrollY = 0; layout(); refresh(); }
+}
+addEventListener('resize', applyPhoneMode); addEventListener('orientationchange', applyPhoneMode);
+applyPhoneMode();
+// (old phone note: kept for reference, no longer shown now that phones have their own layout)
 (function phoneNote(){
+  return;
   const touchOnly = !matchMedia('(any-pointer: fine)').matches, narrow = Math.min(innerWidth, screen.width) < 760;
   let seen = false; try { seen = sessionStorage.getItem('truckPacker.playAnyway') === '1'; } catch(e){}
   if ((!touchOnly && !narrow) || seen) return;
