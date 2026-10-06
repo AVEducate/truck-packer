@@ -318,6 +318,10 @@ body.phone .hud .stat b{font-size:15px;line-height:1}
 body.phone #btnMenu{flex:0 0 46px;max-width:46px;font-size:20px;line-height:1;padding:0;min-height:0;justify-content:center;align-items:center}
 body.phone .board{display:flex;flex-direction:column;padding-bottom:58px}
 html:has(body.phone), body.phone{height:100dvh;overflow:hidden;overscroll-behavior:none}
+/* phones: a held finger must never start text selection (iOS's blue select-all and magnifier ate the drag) or the long-press menu */
+body.phone, body.phone *{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent}
+body.phone input, body.phone textarea{-webkit-user-select:text;user-select:text;-webkit-touch-callout:default}
+img{-webkit-user-drag:none}
 body.phone{position:fixed;inset:0}
 body.phone #game.active{bottom:auto;height:100dvh}
 body.phone .panel.manifest{flex:0 0 auto;flex-direction:row;align-items:flex-start;overflow-x:auto;overflow-y:hidden;padding:6px;gap:6px;border-right:0;border-bottom:3px solid var(--edge);touch-action:pan-x;scrollbar-width:none}
@@ -5978,6 +5982,9 @@ function phoneUp(e){
   }
 }
 window.addEventListener('pointerdown', phoneDown, true);
+// iOS can still try to start a selection on a long press: cancel it anywhere but a typing field
+document.addEventListener('selectstart', e => { if (isPhone() && !(e.target.closest && e.target.closest('input, textarea'))) e.preventDefault(); });
+document.addEventListener('contextmenu', e => { if (isPhone() && !(e.target.closest && e.target.closest('input, textarea'))) e.preventDefault(); });
 document.addEventListener('click', e => { if (isPhone() && G.mode === 'play' && e.target.closest('.manifest-item, #stageCanvas')){ e.preventDefault(); e.stopPropagation(); } }, true);
 window.addEventListener('pointermove', phoneMove, true);
 window.addEventListener('pointerup', phoneUp, true);
