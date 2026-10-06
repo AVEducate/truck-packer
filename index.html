@@ -264,11 +264,13 @@ body.phone .ab-help{text-align:center}
 .save-nudge{border:2px solid var(--accent);background:#3a2d20;padding:10px 12px;margin:10px 0;display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap}
 .save-nudge span{font-size:13.5px;flex:1 1 220px}
 .ach-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:10px;margin:8px 0 16px}
-.ach{background:var(--panel2);border:2px solid #0d0d0c;padding:10px;min-height:96px;display:flex;flex-direction:column;gap:6px}
+.ach{background:var(--panel2);border:2px solid #0d0d0c;padding:10px;min-height:96px;display:flex;flex-direction:column;align-items:center;text-align:center;gap:6px}
+.ach-art{width:118px;height:118px;display:block;filter:drop-shadow(0 4px 0 rgba(0,0,0,.45))}
+.ach.locked .ach-art{filter:grayscale(1) brightness(.55)}
 .ach .badge{align-self:flex-start;font-size:13px}
 .ach small{color:var(--cream-dim);font-size:12px;line-height:1.35}
 .ach .cnt{margin-top:auto;font-family:var(--pixel);font-weight:800;color:var(--accent);font-size:13px;letter-spacing:.04em}
-.ach.locked{opacity:.45} .ach.locked .badge{background:#77786f}
+.ach.locked small, .ach.locked .cnt{opacity:.55} .ach.locked .badge{background:#77786f}
 /* the better-pack view: a bar over the truck with the way back */
 .better-bar{position:fixed;left:50%;bottom:16px;transform:translateX(-50%);z-index:30;display:flex;gap:14px;align-items:center;background:var(--panel);border:3px solid var(--edge);box-shadow:4px 4px 0 #000;padding:10px 14px;width:min(620px,calc(100% - 20px))}
 .better-bar[hidden]{display:none}
@@ -276,6 +278,15 @@ body.phone .ab-help{text-align:center}
 .better-bar span{font-size:13px;color:var(--cream)}
 .better-bar .btn{flex:0 0 auto}
 body.phone .better-bar{bottom:10px;flex-direction:column;align-items:stretch;gap:8px}
+.ap-list{display:flex;flex-direction:column;gap:12px;margin:16px 0 6px}
+.ap-item{display:flex;align-items:center;gap:14px;animation:abpop .5s cubic-bezier(.2,1.6,.4,1) both}
+.ap-item .badge{font-size:19px;flex:0 0 auto}
+.ap-art{width:96px;height:96px;flex:0 0 auto;filter:drop-shadow(0 4px 0 rgba(0,0,0,.5))}
+body.phone .ap-art{width:72px;height:72px}
+.ap-item .badge.ms{background:var(--accent)}
+.ap-item small{color:var(--cream-dim);font-size:13.5px;line-height:1.4}
+.ap-item small b{color:var(--accent);font-weight:700;letter-spacing:.04em}
+#achPop .ab-card{cursor:pointer}
 .badge{font-family:var(--pixel);font-weight:800;letter-spacing:.04em;font-size:14px;background:var(--cream);color:#111;border:2px solid #0d0d0c;padding:4px 8px;box-shadow:3px 3px 0 #000}
 .feedback{list-style:none;margin:8px 0 0;padding:0}
 .feedback li{font-size:13.5px;line-height:1.45;padding:7px 10px 7px 34px;position:relative;border-bottom:1px solid #3c3d39}
@@ -654,6 +665,16 @@ body.phone .home-btn kbd, body.phone .link-btn kbd{display:none}
   <p class="ab-text" id="abText"></p>
   <canvas class="ab-demo" id="abDemo"></canvas>
   <div class="ab-row"><span class="ab-help">Watch it again any time in HELP</span><button class="ab-btn" id="abGo">GOT IT <kbd>ENTER</kbd></button></div>
+</div></div>
+<div class="modal-back ab-back" id="achPop"><div class="ab-card" role="dialog" aria-modal="true" aria-labelledby="apTitle">
+  <div class="ab-head">
+    <div class="ab-fig"><img id="apImg" alt=""></div>
+    <div class="ab-hd"><span class="crew-name" id="apName">CREW CHIEF</span></div>
+    <div class="ab-hd"><span class="tag ab-unlock">ACHIEVEMENT UNLOCKED</span></div>
+    <h2 class="ab-title" id="apTitle">BADGE EARNED</h2>
+  </div>
+  <div class="ap-list" id="apList"></div>
+  <div class="ab-row"><span class="ab-help">Collected on the achievements shelf</span><button class="ab-btn" id="apGo">SEE RESULTS <kbd>ENTER</kbd></button></div>
 </div></div>
 <div class="modal-back" id="account"><div class="modal acct-modal" role="dialog" aria-modal="true" aria-labelledby="acTitle">
   <h3>AV EDUCATE · TRUCK PACKOLOGY</h3>
@@ -3532,7 +3553,7 @@ const Engine = (() => {
     const final = total; // a missed lesson fails the level but the score stays honest
     if (LESSON && !LESSON.pass)
       fb.unshift(['bad', `<b>Lesson missed:</b> this level is about learning to ${LESSON.label}. The pack scored ${total}, but the level isn't passed until you follow the lesson.`]);
-    if (final >= 90 && !(handled && reh) && !transit.shifted.size && !(unload && unload.outOfOrder) && !stab.violations.length && !(stab.stackIssues || []).length && (!secure.active || secure.score01 >= .9)) badges.push('TOUR READY');
+    if (final >= 90 && !(handled && reh) && !transit.shifted.size && !(unload && unload.outOfOrder) && !stab.violations.length && !(stab.stackIssues || []).length && (!secure.active || secure.score01 >= .9)) badges.push('SHOW READY');
     return {total:final, rawTotal:total, lessonPassed:!LESSON || LESSON.pass, cats, badges, feedback:fb, space, stab, unload, secure, transit, rehandles:reh, rehPen, lesson:LESSON ? LESSON.label : null};
   }
 
@@ -3920,7 +3941,7 @@ const G = {
 const STORE_KEY = 'truckPackology.progress.v2' + (/[?&]test\b/.test(location.search) ? '.test' : '');
 function loadProgress(){
   try {
-    const v2 = JSON.parse(localStorage.getItem(STORE_KEY)); if (v2) return v2;
+    const v2 = JSON.parse(localStorage.getItem(STORE_KEY)); if (v2){ if (v2.badges) v2.badges = renameBadges(v2.badges); return v2; }
     const v1 = JSON.parse(localStorage.getItem('truckPackology.progress.v1')); // 15-level numbering
     if (v1){
       const m = o => Object.fromEntries(Object.entries(o || {}).map(([k, v]) => [2 * k - 1, v]));
@@ -4088,7 +4109,7 @@ const ACH_BADGES = [
   ['HIGH & TIGHT', 'No wasted space in the load'], ['NICE WALL', 'A full-width wall of cases'], ['ROCK SOLID', 'Nothing moved in transit'],
   ['CLEAN LOAD', 'Zero rehandles'], ['CLEAN BASE', 'Heavy cases made the base'], ['LOCKED IN', 'Every tier tied in'],
   ['SMART PACK', 'Comes off in the venue\'s order'], ['POCKETED', 'Hard cases trapped in pockets'], ['PINNED', 'Long cases pinned the tiers together'],
-  ['TOUR READY', 'A pack with nothing to fix'], ['SMART UNLOAD', 'An unload with no order mistakes'], ['FULL TRUCK', 'A full truck in Endless Tour']];
+  ['SHOW READY', 'A pack with nothing to fix'], ['SMART UNLOAD', 'An unload with no order mistakes'], ['FULL TRUCK', 'A full truck in Endless Tour']];
 function achMilestones(p){
   const bossIds = LEVELS.filter(l => l.boss).map(l => l.id), bosses = bossIds.filter(id => (p.best[id] || 0) >= 60).length;
   let three = 0; for (let i = 1; i <= 100; i++) if (levelStars(p, i) >= 3) three++;
@@ -4099,15 +4120,42 @@ function achMilestones(p){
     ['THREE STARS', `Levels with three stars (a perfect 100): ${three}`, three >= 10, three],
     ['PACKOLOGIST', 'Passed the final exam', !!(p.exam && p.exam.passed)], ['ON THE ROAD', 'Finished an Endless Tour', (p.loopBest || 0) > 0]];
 }
+const badgeArt = name => `assets/badges/${name.toLowerCase().replace(/ & /g, '-').replace(/\s+/g, '-')}.webp`; // HIGH & TIGHT -> high-tight
 function openAchievements(){
   const p = G.progress, b = p.badges || {};
-  $('achBadges').innerHTML = ACH_BADGES.map(([k, d]) => `<div class="ach ${b[k] ? '' : 'locked'}"><span class="badge">${k}</span><small>${d}</small><span class="cnt">${b[k] ? '×' + b[k] : 'NOT YET'}</span></div>`).join('');
+  $('achBadges').innerHTML = ACH_BADGES.map(([k, d]) => `<div class="ach ${b[k] ? '' : 'locked'}"><img class="ach-art" src="${badgeArt(k)}" alt="${k}" loading="lazy"><small>${d}</small><span class="cnt">${b[k] ? '×' + b[k] : 'NOT YET'}</span></div>`).join('');
   const ms = achMilestones(p);
-  $('achMiles').innerHTML = ms.map(([k, d, done, n]) => `<div class="ach ${done ? '' : 'locked'}"><span class="badge">${k}</span><small>${d}</small><span class="cnt">${done ? 'DONE' : n ? 'IN PROGRESS' : 'NOT YET'}</span></div>`).join('');
+  $('achMiles').innerHTML = ms.map(([k, d, done, n]) => `<div class="ach ${done ? '' : 'locked'}"><img class="ach-art" src="${badgeArt(k)}" alt="${k}" loading="lazy"><small>${d}</small><span class="cnt">${done ? 'DONE' : n ? 'IN PROGRESS' : 'NOT YET'}</span></div>`).join('');
   const got = ACH_BADGES.filter(([k]) => b[k]).length + ms.filter(m => m[2]).length;
   $('achSum').textContent = `${got} of ${ACH_BADGES.length + ms.length} earned. Badges count every time you pass a level with them.`;
   G.mode = 'achievements'; openModal('achievements');
 }
+// TOUR READY was renamed SHOW READY (2026-10-06): carry old counts over
+function renameBadges(b){ if (!b || !b['TOUR READY']) return b; const o = {...b}; o['SHOW READY'] = (o['SHOW READY'] || 0) + o['TOUR READY']; delete o['TOUR READY']; return o; }
+/* ---------- achievement pop-up: the first time a badge or milestone is earned, before the finish page ---------- */
+const achSnap = p => JSON.parse(JSON.stringify({badges:p.badges || {}, best:p.best || {}, bonus:p.bonus || {}, stars:p.stars || {}, unlocked:p.unlocked, exam:p.exam || null, loopBest:p.loopBest || 0}));
+function newAchievements(before){
+  if (!before) return [];
+  const p = G.progress, b0 = before.badges || {}, b1 = p.badges || {}, out = [];
+  for (const [k, d] of ACH_BADGES) if (!b0[k] && b1[k]) out.push({kind:'BADGE', name:k, desc:d});
+  const m0 = achMilestones(before), m1 = achMilestones(p);
+  m1.forEach((m, i) => { if (m[2] && !(m0[i] && m0[i][2])) out.push({kind:'MILESTONE', name:m[0], desc:m[1].replace(/: \d+$/, '')}); });
+  return out;
+}
+let achThen = null;
+function showAchievements(list, then, label = 'SEE RESULTS'){
+  if (!list.length){ then(); return; }
+  achThen = then;
+  const who = crewFor(G.level || {id:1});
+  $('apImg').src = `assets/crew/${who}-good.webp`; $('apName').textContent = CREW[who];
+  $('apTitle').textContent = list.length > 1 ? `${list.length} ACHIEVEMENTS` : list[0].kind === 'MILESTONE' ? 'MILESTONE REACHED' : 'BADGE EARNED';
+  $('apList').innerHTML = list.map((a, i) => `<div class="ap-item" style="animation-delay:${.35 + i * .18}s"><img class="ap-art" src="${badgeArt(a.name)}" alt="${a.name}"><small>${a.kind === 'MILESTONE' ? '<b>MILESTONE</b> · ' : ''}${a.desc}</small></div>`).join('');
+  $('apGo').innerHTML = `${label} <kbd>ENTER</kbd>`;
+  G.achPrev = G.mode; G.mode = 'achpop'; openModal('achPop'); setTimeout(() => sfx('star3'), 350);
+}
+function closeAchievements(){ if (G.mode !== 'achpop') return; const t = achThen; achThen = null; closeModals(); if (t) t(); }
+$('achPop').addEventListener('click', closeAchievements); // a click anywhere goes on to the finish page
+
 /* ---------- new abilities: a slide from the tier's crew the first time each one comes up ---------- */
 // ABILITY_INFO (titles + lines) and playAbilityDemo (looping demos) come from art-reference/ability-demos.js, pasted below
 function abilitiesFor(lv){ // every slide for this level, in ABILITY_INFO order
@@ -5173,6 +5221,7 @@ window.addEventListener('keydown', e => {
     return;
   }
   if (G.mode === 'ability'){ e.preventDefault(); if (k === 'Enter' || k === 'Escape' || k === ' ') closeAbility(); return; }
+  if (G.mode === 'achpop'){ e.preventDefault(); if (k === 'Enter' || k === 'Escape' || k === ' ') closeAchievements(); return; }
   if (G.mode === 'help'){
     e.preventDefault();
     if (k === 'Escape') closeHelp(); else showKey(codeOf(e), $('helpKeyDesc'), $('helpKeyboard'));
@@ -5367,13 +5416,13 @@ function showResults(rep){
   }
   const lv = G.level, stars = starsFor(lv, rep);
   const passed = passedRep(rep), lessonMissed = rep.lessonPassed === false && rep.total >= 60;
-  const prog = G.progress;
+  const prog = G.progress, ach0 = achSnap(prog);
   prog.best[lv.id] = Math.max(prog.best[lv.id] || 0, passed ? rep.total : Math.min(rep.total, 59)); // best >= 60 always means passed
   if (passed) prog.unlocked = Math.max(prog.unlocked, lv.id + 1);
   if (passed){ prog.badges = prog.badges || {}; for (const b of rep.badges){ const k = b.replace(/ ×\d+$/, ''); prog.badges[k] = (prog.badges[k] || 0) + 1; } }
   saveProgress();
   $('rsKicker').textContent = `LEVEL ${lv.id} · ${lv.title.toUpperCase()}`;
-  $('rsTitle').textContent = lv.offload ? (rep.badges.includes('SMART UNLOAD') ? 'SMART UNLOAD' : passed ? 'TRUCK EMPTY' : 'OUT OF ORDER') : lessonMissed ? 'LESSON MISSED' : rep.badges.includes('TOUR READY') ? 'TOUR READY' : passed ? 'TRUCK PACKED' : 'NOT ROAD READY';
+  $('rsTitle').textContent = lv.offload ? (rep.badges.includes('SMART UNLOAD') ? 'SMART UNLOAD' : passed ? 'TRUCK EMPTY' : 'OUT OF ORDER') : lessonMissed ? 'LESSON MISSED' : rep.badges.includes('SHOW READY') ? 'SHOW READY' : passed ? 'TRUCK PACKED' : 'NOT ROAD READY';
   const cats = rep.cats.map(c => `<div class="cat ${c.active ? '' : 'off'}"><span>${c.label}</span><span class="bar"><i style="width:${c.active ? Math.round(c.s * 100) : 0}%"></i></span><span class="pts">${c.active ? `${Math.round(c.pts)}/${c.max}` : 'LATER'}</span></div>`).join('');
   $('rsBody').innerHTML = `
     <div class="score-big"><b>${rep.total}</b><span>/ 100</span><span class="stars">${'★'.repeat(stars)}<span class="dim">${'★'.repeat(3 - stars)}</span></span></div>
@@ -5391,7 +5440,7 @@ function showResults(rep){
   stat('level_end', {level:lv.id, score:rep.total, stars, rehandles:rep.rehandles, passed});
   setTimeout(() => sfx(!passed ? 'fail' : stars === 3 ? 'star3' : 'pass'), 150);
   $('rsNext').textContent = next < LEVELS.length ? 'NEXT LEVEL' : 'STACKED LEVELS SOON';
-  G.mode = 'results'; openModal('results');
+  showAchievements(newAchievements(ach0), () => { G.mode = 'results'; openModal('results'); });
 }
 
 // ---- offloading: player actions ----
@@ -5471,9 +5520,11 @@ function examDone(){
     const go = () => {
       const name = $('exName').value.trim(); if (!name){ $('exName').focus(); return; }
       const now = new Date(), date = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+      const ach0 = achSnap(prog);
       prog.exam = {passed:true, score:ex.right, name, date, certNo:null}; stat('exam_end', {level:101, score:ex.right, passed:true});
       prog.stars[101] = 3; (prog.bonus = prog.bonus || {})[101] = 3; saveProgress();
-      issueCertNo(name, ex.right, date).then(no => { if (no){ prog.exam.certNo = no; saveProgress(); } showCertificate(name, ex.right, date, prog.exam.certNo); });
+      issueCertNo(name, ex.right, date).then(no => { if (no){ prog.exam.certNo = no; saveProgress(); }
+        showAchievements(newAchievements(ach0), () => showCertificate(name, ex.right, date, prog.exam.certNo), 'SEE MY CERTIFICATE'); });
     };
     $('exMake').onclick = go; $('exName').onkeydown = e => { e.stopPropagation(); if (e.key === 'Enter') go(); }; setTimeout(() => $('exName').focus(), 50);
   } else { $('exAgain').onclick = () => { G.exam = {i:0, right:0, wrong:[]}; examQuestion(); }; $('exBack2').onclick = () => { closeModals(); openLevels(); }; }
@@ -5518,7 +5569,7 @@ function mergeProgress(a, b){
   const mx = (x, y) => { const o = {...(x || {})}; for (const k in (y || {})) o[k] = Math.max(o[k] || 0, y[k]); return o; };
   const exam = (a.exam && a.exam.passed) ? (a.exam.certNo || !(b.exam && b.exam.certNo) ? a.exam : b.exam) : b.exam;
   return {...b, ...a, unlocked:Math.max(a.unlocked || 1, b.unlocked || 1), best:mx(a.best, b.best), stars:mx(a.stars, b.stars), bonus:mx(a.bonus, b.bonus),
-    badges:mx(a.badges, b.badges), loopBest:Math.max(a.loopBest || 0, b.loopBest || 0), ...(exam ? {exam} : {})};
+    badges:mx(renameBadges(a.badges), renameBadges(b.badges)), loopBest:Math.max(a.loopBest || 0, b.loopBest || 0), ...(exam ? {exam} : {})};
 }
 let cloudSaveT = null;
 function cloudSave(){
@@ -5700,6 +5751,7 @@ function loopSave(){
   try { localStorage.setItem(LOOP_KEY, JSON.stringify(data)); } catch(e){}
 }
 function startLoop(fresh){
+  G.loopAch0 = achSnap(G.progress); // what was already earned when this tour (or this sitting of it) began
   { const p = G.progress; p.abilities = p.abilities || {}; if (!p.abilities.tour && typeof ABILITY_INFO === 'object' && ABILITY_INFO.tour){ p.abilities.tour = true; saveProgress(); showAbility('tour', () => startLoop(fresh)); return; } }
   let saved = null; if (!fresh){ try { saved = JSON.parse(localStorage.getItem(LOOP_KEY)); } catch(e){} }
   closeModals();
@@ -5799,6 +5851,7 @@ function renderLoopGoal(){
 function loopScore(rep, kind){
   const L = G.loop, passed = rep.total >= 60, pts = passed ? rep.total : -(60 - rep.total);
   L.total += pts; if (!passed) L.strikes++;
+  if (passed && rep.badges && rep.badges.length){ const p = G.progress; p.badges = p.badges || {}; for (const b of rep.badges){ const k = b.replace(/ ×\d+$/, ''); p.badges[k] = (p.badges[k] || 0) + 1; } saveProgress(); }
   const h = {n:L.truckNo, kind, size:G.level.truck.name.split(' · ')[1] || '', score:rep.total, pts};
   L.history.push(h);
   L.last = rep.feedback.filter(f => f[0] !== 'good').slice(0, 3);
@@ -5885,7 +5938,8 @@ function loopFinish(restart, why){
   $('exRow').innerHTML = `<button class="btn" id="lfLevels">LEVELS</button><button class="btn primary" id="lfNew">NEW TOUR</button>`;
   $('lfLevels').onclick = () => { closeModals(); G.loop = null; openLevels(); };
   $('lfNew').onclick = () => startLoop(true);
-  G.mode = 'exam'; openModal('exam');
+  const ach0 = G.loopAch0; G.loopAch0 = null;
+  showAchievements(newAchievements(ach0), () => { G.mode = 'exam'; openModal('exam'); }, 'SEE THE TOUR');
 }
 
 /* ---------- levels modal ---------- */
@@ -6066,7 +6120,7 @@ function applyProgressCode(code){
   const pad = raw + '==='.slice((raw.length + 3) % 4);
   const p = JSON.parse(atob(pad));
   if (!p || typeof p.unlocked !== 'number') throw new Error('bad code');
-  G.progress = {...p, unlocked:Math.max(1, Math.min(101, p.unlocked)), best:p.best || {}, stars:p.stars || {}}; // keep everything (exam, tour best, badges, bonus stars)
+  G.progress = {...p, unlocked:Math.max(1, Math.min(101, p.unlocked)), best:p.best || {}, stars:p.stars || {}, badges:renameBadges(p.badges)}; // keep everything (exam, tour best, badges, bonus stars)
   saveProgress();
 }
 // (save/load codes replaced by accounts: SIGN IN / SIGN OUT on the level screen)
