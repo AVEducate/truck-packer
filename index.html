@@ -700,6 +700,14 @@ body.phone .home-btn kbd, body.phone .link-btn kbd{display:none}
     <kbd>BOTTOM BAR</kbd><span>Tap or pull up the crew bar at the bottom for the level goal and case info.</span>
     <kbd>≡ MENU</kbd><span>Undo, redo, hint, reset, help and the level list.</span>
   </div></div>
+  <div class="section-label">HOW SCORING WORKS</div>
+  <div class="howto">
+    <kbd>SCORE</kbd><span>Every pack is scored out of 100 on <b>space</b> (30), <b>stability</b> (25), <b>unload order</b> (20) and <b>securement</b> (15). A level only counts the parts it uses, so early levels score on space and stability.</span>
+    <kbd>REHANDLES</kbd><span>Every case you pull back out after loading is 1 point off, up to 10. No rehandles is the only way to a perfect 100.</span>
+    <kbd>PASS</kbd><span>Score <b>60 or better</b> and follow the level's lesson. Break the lesson and the level fails, even with a good score. The score still shows so you can see how the pack did.</span>
+    <kbd>STARS</kbd><span><b>100</b> = ★★★ · <b>90 to 99</b> = ★★ · <b>60 to 89</b> = ★</span>
+    <kbd>BADGES</kbd><span>HIGH &amp; TIGHT, ROCK SOLID, CLEAN LOAD and more. Earn them on any passed level. They collect on the achievements shelf.</span>
+  </div>
   <div class="ab-list-wrap" id="abListWrap"><div class="section-label">HOW-TOS AND ABILITIES · WATCH AGAIN</div><div class="ab-list" id="abList"></div></div>
   <div class="desk-only">
   <div class="section-label">MOUSE</div>
@@ -734,12 +742,24 @@ const ABILITY_INFO = {
   load:   {level:1,  title:'LOAD THE TRUCK', tag:'HOW TO PLAY',
            phone:'Start at the nose. Drag a case down from the strip and set it against the front wall at the top of the truck, far from the doors. Fill that row wall to wall, then work back toward the rear doors.',
            desktop:'Start at the nose. Drag a case from the manifest and set it against the front wall at the top of the truck, far from the doors. Fill that row wall to wall, then work back toward the rear doors.'},
+  rehandle:{level:2,  title:'REHANDLES', tag:'HOW SCORING WORKS',
+           phone:'Every rehandle is 1 point off. A rehandle is a case you pull back out after loading it. Each one costs a point, up to 10, so only a pack with zero rehandles can score a perfect 100.',
+           desktop:'Every rehandle is 1 point off. A rehandle is a case you pull back out after loading it. Each one costs a point, up to 10, so only a pack with zero rehandles can score a perfect 100.'},
   wide:   {level:3,  title:'FILL THE WIDTH', tag:'HOW TO PLAY',
            phone:'Fill the width before you move back. Build each row wall to wall across the truck. Holes near the nose make the load longer, and a longer load wastes truck.',
            desktop:'Fill the width before you move back. Build each row wall to wall across the truck. Holes near the nose make the load longer, and a longer load wastes truck.'},
+  stars:  {level:4,  title:'HOW STARS WORK', tag:'HOW SCORING WORKS',
+           phone:'Your score sets your stars. 100 is three stars, 90 to 99 is two, and 60 to 89 is one. Below 60 the level isn\'t passed yet, so pack it again.',
+           desktop:'Your score sets your stars. 100 is three stars, 90 to 99 is two, and 60 to 89 is one. Below 60 the level isn\'t passed yet, so pack it again.'},
   heavy:  {level:5,  title:'HEAVY IN THE NOSE', tag:'HOW TO PLAY',
            phone:'Heaviest cases go in first. Count the weight pips on each case: 4 is very heavy, 1 is light. Heavy cases go against the nose, lighter gear rides behind them toward the doors.',
            desktop:'Heaviest cases go in first. Count the weight pips on each case: 4 is very heavy, 1 is light. Heavy cases go against the nose, lighter gear rides behind them toward the doors.'},
+  drive:  {level:6,  title:'THE DRIVE TEST', tag:'HOW SCORING WORKS',
+           phone:'Every truck takes a test drive. When you send it, the truck brakes, turns and pulls away. Any case with room to move slides, and that costs stability points.',
+           desktop:'Every truck takes a test drive. When you send it, the truck brakes, turns and pulls away. Any case with room to move slides, and that costs stability points.'},
+  lesson: {level:8,  title:'THE LESSON CHECK', tag:'HOW SCORING WORKS',
+           phone:'Every lesson has one rule. Break it and the level fails, even with a good score. The score still shows, so you can see the pack was good and what to fix.',
+           desktop:'Every lesson has one rule. Break it and the level fails, even with a good score. The score still shows, so you can see the pack was good and what to fix.'},
   turn:   {level:7,  title:'TURN A CASE',
            phone:'Unlocked at level 7. From here on, you can turn any case 90°: twist two fingers on it.',
            desktop:'Unlocked at level 7. From here on, you can turn any case 90°: press R or right-click.'},
@@ -1641,6 +1661,104 @@ const playAbilityDemo = (function(){
     }
     caption(c, E, t, [[.6, 2.2, 'NEEDED LAST: IN FIRST'], [2.2, 3.8, 'THEN POWER'], [3.8, 5.8, 'NEEDED FIRST: IN LAST', null, 'good'], [5.8, 99, 'LAST ON, FIRST OFF', null, 'good']],
       T.ox + T.Wp / 2, T.oy + 101 * s);
+  }};
+
+  /* =====================================================================
+     HOW SCORING WORKS (practice levels 2, 4, 6, 8)
+     ===================================================================== */
+  function scoreBox(c, E, cx, cy, val, o = {}){ // big score readout, with an optional floating "−1"
+    const u = E.u, w = 64 * u, h = 44 * u;
+    c.fillStyle = C.panel; c.fillRect(cx - w / 2, cy - h / 2, w, h); c.strokeStyle = o.hi ? C.bad : '#0d0d0c'; c.lineWidth = 2; c.strokeRect(cx - w / 2, cy - h / 2, w, h);
+    c.fillStyle = C.dim; c.font = cond(9 * u); c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText(o.label || 'SCORE', cx, cy - 12 * u);
+    c.fillStyle = o.col || C.cream; c.font = cond(22 * u); c.fillText(String(val), cx, cy + 7 * u);
+    if (o.pop > 0 && o.pop < 1){ c.save(); c.globalAlpha = 1 - o.pop; c.fillStyle = C.bad; c.font = cond(16 * u); c.fillText(o.popText || '−1', cx + w / 2 + 4 * u, cy - h / 2 - 10 * u * o.pop); c.restore(); }
+  }
+  ABILITY_DEMOS.rehandle = {dur:9.4, still:8.6, draw(c, t, E){
+    const u = E.u; bg(c, E);
+    const D = 64, T = truck(E, {D, top:12 * u, bottom:12 * u, left:0, right:90 * u, gutter:E.phone ? 12 : 24}), s = T.s;
+    drawTruck(c, E, T, {doors:true}); ends(c, E, T, false);
+    for (let i = 0; i < 3; i++) put(c, T, CASE.trunk, 24 * i, 0);
+    // the fourth trunk: in, out (rehandle), in, out, in for good
+    const slot = T.P(84, 15), dock = [T.ox + T.Wp / 2 + 10 * u, T.oy + T.Dp + 30 * u];
+    const legs = [[.3, 1.1, dock, slot], [1.6, 2.4, slot, dock], [2.8, 3.6, dock, slot], [4.0, 4.8, slot, dock], [5.4, 6.2, dock, slot]];
+    let pos = dock, held = false;
+    for (const [a, b, p0, p1] of legs){ if (t >= a){ pos = path([p0, p1], es(t, a, b)); held = t < b; } }
+    caseAt(c, pos[0], pos[1], 24 * s, 30 * s, CASE.trunk, {elev:held, outline:held ? 'rgba(232,137,47,.9)' : null, lw:2});
+    hand(c, E, pos[0], pos[1], held ? 1 : 0, {down:held});
+    const outs = [2.4, 4.8].filter(a => t >= a).length, sc = 100 - outs;
+    const bx = E.W - 50 * u, by = T.oy + 30 * u;
+    scoreBox(c, E, bx, by, sc, {col:outs ? C.warn : C.cream, pop:Math.max(seg(t, 2.4, 3.2) * (t < 3.2 ? 1 : 0), seg(t, 4.8, 5.6) * (t < 5.6 ? 1 : 0))});
+    c.fillStyle = C.dim; c.font = cond(9.5 * u); c.textAlign = 'center'; c.fillText(`REHANDLES: ${outs}`, bx, by + 32 * u);
+    caption(c, E, t, [[1.6, 2.6, 'PULLED BACK OUT: −1', null, 'bad'], [4.0, 5.0, 'AGAIN: −1', null, 'bad'], [5.4, 7.2, 'EVERY REHANDLE: −1, UP TO 10'], [7.2, 99, 'PLAN THE ROW BEFORE YOU LOAD IT', null, 'good']],
+      T.ox + T.Wp / 2, T.oy + 45 * s);
+  }};
+
+  ABILITY_DEMOS.stars = {dur:8.6, still:7.6, draw(c, t, E){
+    const u = E.u; bg(c, E);
+    const x0 = 24 * u, x1 = E.W - 24 * u, y = E.H * .6, bw = x1 - x0, bh = 16 * u, X = n => x0 + bw * n / 100;
+    const val = t < .4 ? 0 : t < 6.0 ? Math.min(100, Math.round(100 * es(t, .4, 5.6))) : 100;
+    // bar
+    c.fillStyle = '#121211'; c.fillRect(x0, y - bh / 2, bw, bh); c.strokeStyle = '#0d0d0c'; c.lineWidth = 2; c.strokeRect(x0, y - bh / 2, bw, bh);
+    c.fillStyle = val >= 100 ? C.good : val >= 90 ? C.good : val >= 60 ? C.warn : C.bad; c.fillRect(x0 + 1, y - bh / 2 + 1, Math.max(0, bw * val / 100 - 2), bh - 2);
+    // thresholds
+    const marks = [[60, '★', '60 TO 89'], [90, '★★', '90 TO 99'], [100, '★★★', '100']];
+    for (const [n] of marks){ const x = X(n); c.strokeStyle = C.cream; c.lineWidth = 2; c.beginPath(); c.moveTo(x, y - bh / 2 - 4 * u); c.lineTo(x, y + bh / 2 + 4 * u); c.stroke(); }
+    c.fillStyle = C.dim; c.font = cond(10 * u); c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText('60', X(60), y + bh / 2 + 12 * u); c.fillText('90', X(90), y + bh / 2 + 12 * u);
+    c.textAlign = 'right'; c.fillText('100', X(100) + 2 * u, y + bh / 2 + 12 * u);
+    // star key above the bar: three chips that light up as the score reaches them
+    const cw2 = (bw - 12 * u) / 3;
+    marks.forEach(([n, st, lab], i) => {
+      const on = val >= n && (i === 2 || val < marks[i + 1][0]), got = val >= n, cx = x0 + i * (cw2 + 6 * u), cy = y - bh / 2 - 34 * u, ch2 = 24 * u;
+      c.fillStyle = on ? '#46392b' : C.panel; c.fillRect(cx, cy, cw2, ch2); c.strokeStyle = on ? C.accent : '#0d0d0c'; c.lineWidth = 2; c.strokeRect(cx, cy, cw2, ch2);
+      c.textAlign = 'left'; c.fillStyle = got ? C.warn : 'rgba(233,225,200,.25)'; c.font = cond(13 * u); c.fillText(st, cx + 6 * u, cy + ch2 / 2 + 1);
+      c.textAlign = 'right'; c.fillStyle = on ? C.cream : C.dim; c.font = cond(10 * u); c.fillText(lab, cx + cw2 - 6 * u, cy + ch2 / 2 + 1);
+    });
+    c.fillStyle = C.dim; c.font = cond(10 * u); c.textAlign = 'left'; c.fillText('0', x0, y + bh / 2 + 12 * u);
+    c.fillStyle = C.cream; c.font = cond(26 * u); c.textAlign = 'left'; c.textBaseline = 'top'; c.fillText(String(val), x0, 8 * u); const vw = c.measureText(String(val)).width;
+    c.fillStyle = C.dim; c.font = cond(10 * u); c.fillText('/ 100', x0 + vw + 5 * u, 20 * u);
+    caption(c, E, t, [[.6, 2.6, 'UNDER 60: TRY AGAIN', null, 'bad'], [2.6, 4.5, '60 TO 89: ★'], [4.5, 5.6, '90 TO 99: ★★'], [5.6, 99, 'A PERFECT 100: ★★★', null, 'good']], E.W / 2, E.H - 18 * u);
+  }};
+
+  ABILITY_DEMOS.drive = {dur:9.6, still:8.6, draw(c, t, E){
+    const u = E.u; bg(c, E);
+    const D = 88, fixed = t >= 4.8, jolt = (a, b) => pulse(t, a, b) * Math.sin(seg(t, a, b) * Math.PI);
+    const shake = (jolt(1.4, 2.4) + jolt(6.0, 7.0)) * 4 * u;
+    const T = truck(E, {D, top:12 * u, bottom:12 * u, right:90 * u, gutter:E.phone ? 12 : 24}), s = T.s;
+    c.save(); c.translate(0, -shake);
+    drawTruck(c, E, T, {doors:true}); ends(c, E, T, false);
+    for (let i = 0; i < 4; i++) put(c, T, CASE.trunk, 24 * i, 0);
+    // second row: before the fix, one case sits 12" back with a gap in front of it; it slides forward under braking
+    put(c, T, CASE.trunk, 0, 30); put(c, T, CASE.trunk, 24, 30); put(c, T, CASE.trunk, 72, 30);
+    const slid = fixed ? 0 : es(t, 1.5, 2.1), back = fixed ? 0 : 12 * (1 - slid);
+    if (!fixed){ zone(c, T, 48, 30, 24, 12, C.bad, seg(t, .4, .7) * (1 - slid), null); }
+    put(c, T, CASE.trunk, 48, fixed ? 30 : 30 + back, {outline:!fixed && slid > 0 ? C.bad : null, angle:!fixed ? Math.sin(slid * Math.PI) * .12 : 0});
+    c.restore();
+    const bx = E.W - 50 * u, by = T.oy + 30 * u, stab = fixed ? 25 : t >= 2.1 ? 19 : 25;
+    scoreBox(c, E, bx, by, `${stab}/25`, {label:'STABILITY', col:stab < 25 ? C.warn : C.good, pop:!fixed ? seg(t, 2.1, 2.9) * (t < 2.9 ? 1 : 0) : 0, popText:'−6'});
+    if (fixed && t > 7.0) pill(c, E, 'ROCK SOLID', bx, by + 40 * u, 'good', seg(t, 7.0, 7.3));
+    caption(c, E, t, [[.4, 1.4, 'A GAP IN FRONT OF THIS CASE', null, 'warn'], [1.4, 3.4, 'BRAKES: IT SLIDES', null, 'bad'], [4.8, 6.0, 'NO GAP THIS TIME'], [6.0, 99, 'BRAKES: NOTHING MOVES', null, 'good']],
+      T.ox + T.Wp / 2, T.oy + 80 * s);
+  }};
+
+  ABILITY_DEMOS.lesson = {dur:9.0, still:7.8, draw(c, t, E){
+    const u = E.u; bg(c, E);
+    const second = t >= 4.4, k = second ? seg(t, 4.4, 4.8) : seg(t, .2, .6);
+    const w = Math.min(E.W - 40 * u, 230 * u), h = E.H - 52 * u, x = (E.W - w) / 2, y = 10 * u;
+    c.save(); c.globalAlpha = k;
+    c.fillStyle = C.panel; c.fillRect(x, y, w, h); c.strokeStyle = '#0d0d0c'; c.lineWidth = 2; c.strokeRect(x, y, w, h);
+    c.textAlign = 'left'; c.textBaseline = 'top';
+    c.fillStyle = C.dim; c.font = cond(9 * u); c.fillText(second ? 'PACKED AGAIN, LESSON FOLLOWED' : 'LESSON: HEAVY IN THE NOSE', x + 10 * u, y + 8 * u);
+    c.fillStyle = second ? C.cream : C.bad; c.font = cond(20 * u); c.fillText(second ? 'TRUCK PACKED' : 'LESSON MISSED', x + 10 * u, y + 20 * u);
+    c.fillStyle = C.cream; c.font = cond(30 * u); c.fillText('86', x + 10 * u, y + 44 * u);
+    c.fillStyle = C.dim; c.font = cond(11 * u); c.fillText('/ 100', x + 46 * u, y + 58 * u);
+    c.font = cond(20 * u); c.textAlign = 'right';
+    c.fillStyle = second ? C.warn : 'rgba(233,225,200,.22)'; c.fillText('★', x + w - 46 * u, y + 48 * u);
+    c.fillStyle = 'rgba(233,225,200,.22)'; c.fillText('★★', x + w - 10 * u, y + 48 * u);
+    c.textAlign = 'left'; c.font = `600 ${10 * u}px ${SANS}`; c.fillStyle = second ? C.good : C.bad;
+    c.fillText(second ? 'Passed. Next level unlocked.' : 'Good pack, but a heavy case rides', x + 10 * u, y + 82 * u);
+    if (!second) c.fillText('behind a light one. Not passed yet.', x + 10 * u, y + 95 * u);
+    c.restore();
+    caption(c, E, t, [[.8, 4.3, 'GOOD SCORE, LESSON MISSED = FAIL', null, 'bad'], [4.8, 99, 'FOLLOW THE LESSON = PASS', null, 'good']], E.W / 2, E.H - 18 * u);
   }};
 
   /* ---------------- player ---------------- */
@@ -3311,12 +3429,12 @@ const Engine = (() => {
       {key:'space', label:'Space Efficiency', max:30, s:space.score01, active:true},
       {key:'stability', label:'Stability', max:25, s:stab.score01, active:true},
       {key:'unload', label:'Unload Order', max:20, s:unload ? unload.score01 : 0, active:!!unload},
-      {key:'securement', label:'Securement', max:15, s:secure.active ? secure.score01 : 0, active:secure.active},
-      {key:'handling', label:level.timer ? 'Handling / Time' : 'Handling', max:10, s:level.timer ? 0 : Math.max(0, 1 - reh / 10), active:!!level.timer || handled}
+      {key:'securement', label:'Securement', max:15, s:secure.active ? secure.score01 : 0, active:secure.active}
     ];
     let got = 0, max = 0;
     for (const c of cats){ c.pts = Math.round(c.max * c.s * 10) / 10; if (c.active){ got += c.pts; max += c.max; } }
-    const total = max ? Math.round(got / max * 100) : 0;
+    const rehPen = handled ? Math.min(10, reh) : 0; // the rule of ten: every rehandle is 1 point off the final score, 10 at most
+    const total = Math.max(0, (max ? Math.round(got / max * 100) : 0) - rehPen);
 
     const badges = [], fb = [];
     const ft = c => fmtLen(c * IN);
@@ -3397,7 +3515,7 @@ const Engine = (() => {
     // handling: every case that comes back out of the truck is a rehandle (wasted time on a real load-out)
     if (handled){
       if (!reh){ badges.push('CLEAN LOAD'); fb.push(['good', 'Clean load: every case went in once and stayed there. No rehandles.']); }
-      else fb.push(['bad', `${reh} rehandle${reh > 1 ? 's' : ''}: ${reh > 1 ? 'cases were' : 'a case was'} pulled back out after loading. On a real load-out that's time and backs. Plan the row before you load it.`]);
+      else fb.push(['bad', `${reh} rehandle${reh > 1 ? 's' : ''} (−${Math.min(10, reh)}): ${reh > 1 ? 'cases were' : 'a case was'} pulled back out after loading. On a real load-out that's time and backs. Plan the row before you load it.`]);
     }
     // Lesson check: each level teaches one thing. Ignore it and the truck isn't road ready.
     const LESSON = {
@@ -3411,13 +3529,11 @@ const Engine = (() => {
       pocket:    {pass:!looseHard.length && transit.shifted.size <= 1, label:'trap the small hard cases in pockets, closed in by the next row'},
       all:       {pass:(!unload || unload.outOfOrder <= 2) && transit.shifted.size <= 1 && (!secure.active || secure.accelHeld >= .9) && !(stab.stackIssues || []).length && !looseHard.length, label:'put it all together: tight, secured, and in unload order'}
     }[level.focus];
-    let final = total;
-    if (LESSON && !LESSON.pass){
-      final = Math.min(total, 59);
-      fb.unshift(['bad', `<b>Lesson check:</b> this level is about learning to ${LESSON.label}. The truck fits, but it isn't road ready yet.`]);
-    }
+    const final = total; // a missed lesson fails the level but the score stays honest
+    if (LESSON && !LESSON.pass)
+      fb.unshift(['bad', `<b>Lesson missed:</b> this level is about learning to ${LESSON.label}. The pack scored ${total}, but the level isn't passed until you follow the lesson.`]);
     if (final >= 90 && !(handled && reh) && !transit.shifted.size && !(unload && unload.outOfOrder) && !stab.violations.length && !(stab.stackIssues || []).length && (!secure.active || secure.score01 >= .9)) badges.push('TOUR READY');
-    return {total:final, rawTotal:total, lessonPassed:!LESSON || LESSON.pass, cats, badges, feedback:fb, space, stab, unload, secure, transit, rehandles:reh};
+    return {total:final, rawTotal:total, lessonPassed:!LESSON || LESSON.pass, cats, badges, feedback:fb, space, stab, unload, secure, transit, rehandles:reh, rehPen, lesson:LESSON ? LESSON.label : null};
   }
 
   // A legal spot can still be a bad idea; explain why before the player commits.
@@ -3932,12 +4048,10 @@ function phoneHowTo(h){
   for (const [a, b] of rows) h = h.replace(a, b);
   return h;
 }
-/* ---------- bonus stars: three objectives per level; stars count only on a passed run ---------- */
+/* ---------- badges to earn (the old bonus objectives) + stars from the score ---------- */
 function bonusGoals(lv){
   if (!lv || lv.loop || lv.demo || lv.exam) return null;
   if (lv.offload) return [
-    {label:'Score 75 or better', test:r => r.total >= 75},
-    {label:'Score 90 or better', test:r => r.total >= 90},
     {label:'SMART UNLOAD: no order mistakes', test:r => r.badges.includes('SMART UNLOAD')}];
   const mid = lv.unloadSequence ? {label:'SMART PACK: it comes off in the venue\'s order', test:r => r.badges.includes('SMART PACK')}
     : Engine.secureActive(lv) ? {label:'LOCKED IN: every tier tied in', test:r => r.badges.includes('LOCKED IN')}
@@ -3945,12 +4059,16 @@ function bonusGoals(lv){
   return [{label:lv.stacked ? 'HIGH &amp; TIGHT: fill the space floor to ceiling' : 'HIGH &amp; TIGHT: no wasted floor in the load', test:r => r.badges.includes('HIGH & TIGHT')},
     mid, {label:'CLEAN LOAD: zero rehandles', reh:true, test:r => r.rehandles === 0}];
 }
-function bonusHtml(lv, rep){
+function bonusHtml(lv, rep){ // the bonus goals are badges now; stars come from the score
   const g = bonusGoals(lv); if (!g) return '';
-  const passed = rep && rep.total >= 60;
-  return `<div class="section-label">BONUS STARS</div><ul class="bonus-list">${g.map(b => `<li class="${rep ? (passed && b.test(rep) ? 'met' : 'miss') : ''}">${b.label}${b.reh && !rep ? ' <span class="reh">· rehandles: <b class="rehCount">0</b></span>' : ''}</li>`).join('')}</ul>`;
+  const passed = rep && passedRep(rep);
+  return `<div class="section-label">BADGES TO EARN</div><ul class="bonus-list">${g.map(b => `<li class="${rep ? (passed && b.test(rep) ? 'met' : 'miss') : ''}">${b.label}${b.reh && !rep ? ' <span class="reh">· rehandles: <b class="rehCount">0</b></span>' : ''}</li>`).join('')}</ul>`;
 }
-const starsFor = (lv, rep) => { const g = bonusGoals(lv); return rep.total >= 60 && g ? g.filter(b => b.test(rep)).length : 0; };
+// Pass = 60 or more AND the level's lesson followed. Stars: 100 = 3, 90-99 = 2, 60-89 = 1.
+const passedRep = rep => rep.total >= 60 && rep.lessonPassed !== false;
+const starsOfScore = n => n >= 100 ? 3 : n >= 90 ? 2 : n >= 60 ? 1 : 0;
+const starsFor = (lv, rep) => passedRep(rep) ? starsOfScore(rep.total) : 0;
+const levelStars = (prog, i) => i > 100 ? ((prog.bonus || {})[i] || 0) : starsOfScore(prog.best[i] || 0); // best only holds passing scores at 60+
 
 /* ---------- see a better pack: the stored expert solution, shown in the truck ---------- */
 function showBetter(){
@@ -3973,12 +4091,12 @@ const ACH_BADGES = [
   ['TOUR READY', 'A pack with nothing to fix'], ['SMART UNLOAD', 'An unload with no order mistakes'], ['FULL TRUCK', 'A full truck in Endless Tour']];
 function achMilestones(p){
   const bossIds = LEVELS.filter(l => l.boss).map(l => l.id), bosses = bossIds.filter(id => (p.best[id] || 0) >= 60).length;
-  const three = Object.entries(p.bonus || {}).filter(([k, v]) => +k <= 100 && v >= 3).length;
+  let three = 0; for (let i = 1; i <= 100; i++) if (levelStars(p, i) >= 3) three++;
   return [
     ['FLOOR CREW', 'Finished levels 1–30', p.unlocked > 30], ['STACKER', 'Finished levels 31–60', p.unlocked > 60],
     ['RIGGER', 'Finished levels 61–90', p.unlocked > 90], ['DOCK READY', 'Finished levels 91–100', p.unlocked > 100],
     ...(bossIds.length ? [['BOSS LOADS', `Boss loads cleared: ${bosses} of ${bossIds.length}`, bosses >= bossIds.length, bosses]] : []),
-    ['THREE STARS', `Levels with all three bonus stars: ${three}`, three >= 10, three],
+    ['THREE STARS', `Levels with three stars (a perfect 100): ${three}`, three >= 10, three],
     ['PACKOLOGIST', 'Passed the final exam', !!(p.exam && p.exam.passed)], ['ON THE ROAD', 'Finished an Endless Tour', (p.loopBest || 0) > 0]];
 }
 function openAchievements(){
@@ -5248,22 +5366,21 @@ function showResults(rep){
     G.mode = 'results'; openModal('results'); return;
   }
   const lv = G.level, stars = starsFor(lv, rep);
-  const passed = rep.total >= 60;
+  const passed = passedRep(rep), lessonMissed = rep.lessonPassed === false && rep.total >= 60;
   const prog = G.progress;
-  prog.best[lv.id] = Math.max(prog.best[lv.id] || 0, rep.total);
-  prog.bonus = prog.bonus || {}; prog.bonus[lv.id] = Math.max(prog.bonus[lv.id] || 0, stars); // bonus stars (earned from the three objectives)
+  prog.best[lv.id] = Math.max(prog.best[lv.id] || 0, passed ? rep.total : Math.min(rep.total, 59)); // best >= 60 always means passed
   if (passed) prog.unlocked = Math.max(prog.unlocked, lv.id + 1);
   if (passed){ prog.badges = prog.badges || {}; for (const b of rep.badges){ const k = b.replace(/ ×\d+$/, ''); prog.badges[k] = (prog.badges[k] || 0) + 1; } }
   saveProgress();
   $('rsKicker').textContent = `LEVEL ${lv.id} · ${lv.title.toUpperCase()}`;
-  $('rsTitle').textContent = lv.offload ? (rep.badges.includes('SMART UNLOAD') ? 'SMART UNLOAD' : passed ? 'TRUCK EMPTY' : 'OUT OF ORDER') : rep.badges.includes('TOUR READY') ? 'TOUR READY' : passed ? 'TRUCK PACKED' : 'NOT ROAD READY';
+  $('rsTitle').textContent = lv.offload ? (rep.badges.includes('SMART UNLOAD') ? 'SMART UNLOAD' : passed ? 'TRUCK EMPTY' : 'OUT OF ORDER') : lessonMissed ? 'LESSON MISSED' : rep.badges.includes('TOUR READY') ? 'TOUR READY' : passed ? 'TRUCK PACKED' : 'NOT ROAD READY';
   const cats = rep.cats.map(c => `<div class="cat ${c.active ? '' : 'off'}"><span>${c.label}</span><span class="bar"><i style="width:${c.active ? Math.round(c.s * 100) : 0}%"></i></span><span class="pts">${c.active ? `${Math.round(c.pts)}/${c.max}` : 'LATER'}</span></div>`).join('');
   $('rsBody').innerHTML = `
     <div class="score-big"><b>${rep.total}</b><span>/ 100</span><span class="stars">${'★'.repeat(stars)}<span class="dim">${'★'.repeat(3 - stars)}</span></span></div>
-    ${passed ? '' : '<p style="color:var(--bad)">Score 60 or better to unlock the next level.</p>'}
+    ${passed ? '' : lessonMissed ? `<p style="color:var(--bad)">Good pack, but this level is about learning to ${rep.lesson || 'follow its lesson'}. Follow the lesson to pass and unlock the next level.</p>` : '<p style="color:var(--bad)">Score 60 or better to unlock the next level.</p>'}
     ${passed && (lv.id === 3 || lv.id === 6) && !ACCOUNT.get() ? `<div class="save-nudge"><span><b>Your progress is saved only in this browser.</b> Clear it, switch phones or computers, and it's gone. Make a free account to keep it.</span><button class="btn primary" id="rsSave">SAVE PROGRESS</button></div>` : ''}
     ${bonusHtml(lv, rep)}
-    ${cats}
+    ${cats}${rep.rehPen ? `<div class="cat"><span>Rehandles</span><span class="bar"><i style="width:0"></i></span><span class="pts">−${rep.rehPen}</span></div>` : ''}
     ${rep.badges.length ? `<div class="badges">${rep.badges.map(b => `<span class="badge">${b}</span>`).join('')}</div>` : ''}
     <div class="section-label">WHAT THE CREW SAYS</div>
     <ul class="feedback">${rep.feedback.map(([k, t]) => `<li class="${k}">${t}</li>`).join('')}</ul>`;
@@ -5779,7 +5896,7 @@ function openLevels(){
     const tier = TIERS.find(t => t.from === i);
     if (i === 1) h += `<div class="mode-head">CAMPAIGN<small>Levels 1–100 + the final exam</small></div>`;
     if (tier) h += `${i > 1 ? '</div>' : ''}<div class="tier-head">${tier.name}<small>${tier.from === tier.to ? `Level ${tier.from}` : `Levels ${tier.from}–${tier.to}`} · ${tier.note}</small></div><div class="levels-grid">`;
-    const lv = LEVELS[i - 1], open = lv && prog.unlocked >= i && (i < 101 || examReady(prog)), st = (prog.bonus || {})[i] || 0;
+    const lv = LEVELS[i - 1], open = lv && prog.unlocked >= i && (i < 101 || examReady(prog)), st = levelStars(prog, i);
     if (i === 101){ h += `<button class="lvl" ${open ? `data-i="${i - 1}"` : 'disabled'}><b>${i}</b><span class="tag">FINAL EXAM</span><small>3★ or 95%+ on all 100 levels</small><span class="st">${masteredCount(prog)}/100</span></button>`; continue; }
     h += `<button class="lvl${lv && lv.boss ? ' boss' : ''}" ${open ? `data-i="${i - 1}"` : 'disabled'}><b>${i}</b><span class="tag">${lv ? (lv.boss ? 'BOSS LOAD' : lv.practice ? 'PRACTICE' : 'LESSON') : ''}</span><small>${lv ? lv.title : 'COMING SOON'}</small><span class="st">${lv ? `${'★'.repeat(st)}${'☆'.repeat(3 - st)}` : '&nbsp;'}</span></button>`;
   }
