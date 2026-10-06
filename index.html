@@ -648,7 +648,7 @@ body.phone .home-btn kbd, body.phone .link-btn kbd{display:none}
   <div class="ab-head">
     <div class="ab-fig"><img id="abImg" alt=""></div>
     <div class="ab-hd"><span class="crew-name" id="abName">CREW CHIEF</span></div>
-    <div class="ab-hd"><span class="tag ab-unlock" id="abTag"><svg class="lock" viewBox="0 0 16 18" aria-hidden="true"><path class="shackle" d="M4.5 8 V5.5 a3.5 3.5 0 0 1 7 0 V8" fill="none" stroke="#1a1209" stroke-width="2.2"/><rect x="2" y="8" width="12" height="9" rx="1.5" fill="#1a1209"/><rect x="7" y="11" width="2" height="3.2" fill="#e8892f"/></svg>NEW ABILITY UNLOCKED</span></div>
+    <div class="ab-hd"><span class="tag ab-unlock" id="abTag"><svg class="lock" viewBox="0 0 16 18" aria-hidden="true"><path class="shackle" d="M4.5 8 V5.5 a3.5 3.5 0 0 1 7 0 V8" fill="none" stroke="#1a1209" stroke-width="2.2"/><rect x="2" y="8" width="12" height="9" rx="1.5" fill="#1a1209"/><rect x="7" y="11" width="2" height="3.2" fill="#e8892f"/></svg><span class="ab-tag-txt">NEW ABILITY UNLOCKED</span></span></div>
     <h2 class="ab-title" id="abTitle">TURN A CASE</h2>
   </div>
   <p class="ab-text" id="abText"></p>
@@ -700,7 +700,7 @@ body.phone .home-btn kbd, body.phone .link-btn kbd{display:none}
     <kbd>BOTTOM BAR</kbd><span>Tap or pull up the crew bar at the bottom for the level goal and case info.</span>
     <kbd>≡ MENU</kbd><span>Undo, redo, hint, reset, help and the level list.</span>
   </div></div>
-  <div class="ab-list-wrap" id="abListWrap"><div class="section-label">ABILITIES YOU'VE UNLOCKED</div><div class="ab-list" id="abList"></div></div>
+  <div class="ab-list-wrap" id="abListWrap"><div class="section-label">HOW-TOS AND ABILITIES · WATCH AGAIN</div><div class="ab-list" id="abList"></div></div>
   <div class="desk-only">
   <div class="section-label">MOUSE</div>
   <div class="howto">
@@ -731,9 +731,21 @@ body.phone .home-btn kbd, body.phone .link-btn kbd{display:none}
  * still frame of the end state instead. Needs the page to load Barlow Condensed / Barlow (the game does).
  */
 const ABILITY_INFO = {
+  load:   {level:1,  title:'LOAD THE TRUCK', tag:'HOW TO PLAY',
+           phone:'Start at the nose. Drag a case down from the strip and set it against the front wall at the top of the truck, far from the doors. Fill that row wall to wall, then work back toward the rear doors.',
+           desktop:'Start at the nose. Drag a case from the manifest and set it against the front wall at the top of the truck, far from the doors. Fill that row wall to wall, then work back toward the rear doors.'},
+  wide:   {level:3,  title:'FILL THE WIDTH', tag:'HOW TO PLAY',
+           phone:'Fill the width before you move back. Build each row wall to wall across the truck. Holes near the nose make the load longer, and a longer load wastes truck.',
+           desktop:'Fill the width before you move back. Build each row wall to wall across the truck. Holes near the nose make the load longer, and a longer load wastes truck.'},
+  heavy:  {level:5,  title:'HEAVY IN THE NOSE', tag:'HOW TO PLAY',
+           phone:'Heaviest cases go in first. Count the weight pips on each case: 4 is very heavy, 1 is light. Heavy cases go against the nose, lighter gear rides behind them toward the doors.',
+           desktop:'Heaviest cases go in first. Count the weight pips on each case: 4 is very heavy, 1 is light. Heavy cases go against the nose, lighter gear rides behind them toward the doors.'},
   turn:   {level:7,  title:'TURN A CASE',
            phone:'Unlocked at level 7. From here on, you can turn any case 90°: twist two fingers on it.',
            desktop:'Unlocked at level 7. From here on, you can turn any case 90°: press R or right-click.'},
+  order:  {level:9,  title:'LAST ON, FIRST OFF', tag:'HOW TO PLAY',
+           phone:'What the venue needs first goes on last. Check the venue\'s load-in order: the first department off the truck rides by the doors, and the last one rides at the nose.',
+           desktop:'What the venue needs first goes on last. Check the venue\'s load-in order: the first department off the truck rides by the doors, and the last one rides at the nose.'},
   bar:    {level:11, title:'LOAD BAR',
            phone:'Unlocked at level 11. From here on, you can drop a load bar behind a full tier: drag the LOAD BAR button onto the truck and let go.',
            desktop:'Unlocked at level 11. From here on, you can drop a load bar behind a full tier: click LOAD BAR (or press B), then click the line behind the tier.'},
@@ -779,8 +791,9 @@ const playAbilityDemo = (function(){
 
   /* ---------------- the game's look ---------------- */
   const STYLES = {teal:{a:'#5b8e9b', b:'#3e6c78'}, black:{a:'#2c2e30', b:'#151617'}, orange:{a:'#f47c4d', b:'#d8552c'},
-    shamrock:{a:'#5fc152', b:'#3f9a36'}, yellow:{a:'#f6dc5a', b:'#e2bd2c', light:true}, white:{a:'#f5f4f0', b:'#d8d7d1', light:true}};
-  const DEPT = {GENERAL:'#a3a69f', VIDEO:'#5aa7dc', AUDIO:'#a48ad9', RIGGING:'#ec8a33', POWER:'#e4553f', LIGHTING:'#e5c14d'};
+    shamrock:{a:'#5fc152', b:'#3f9a36'}, yellow:{a:'#f6dc5a', b:'#e2bd2c', light:true}, white:{a:'#f5f4f0', b:'#d8d7d1', light:true},
+    blush:{a:'#f8d4de', b:'#e8b0c1', light:true}};
+  const DEPT = {GENERAL:'#a3a69f', VIDEO:'#5aa7dc', AUDIO:'#a48ad9', RIGGING:'#ec8a33', POWER:'#e4553f', LIGHTING:'#e5c14d', COMMS:'#86bccf', CAMERA:'#e06d82'};
   const CASE = {
     trunk:{st:'teal',   dept:'GENERAL', name:'Utility Trunk',          w:24, d:30, h:30, pips:2, wheels:true},
     big:  {st:'teal',   dept:'GENERAL', name:'Large Utility Trunk',    w:48, d:30, h:30, pips:2, wheels:true},
@@ -788,7 +801,16 @@ const playAbilityDemo = (function(){
     video:{st:'black',  dept:'VIDEO',   name:'Video Rack',             w:24, d:30, h:48, pips:3, wheels:true},
     audio:{st:'black',  dept:'AUDIO',   name:'Audio Rack',             w:24, d:30, h:40, pips:3, wheels:true},
     distro:{st:'shamrock', dept:'POWER', name:'Distro',                w:24, d:30, h:30, pips:3, wheels:true},
-    hard: {st:'black',  dept:'GENERAL', name:'Medium Hard Case',       w:18, d:24, h:12, pips:1, wheels:false}
+    hard: {st:'black',  dept:'GENERAL', name:'Medium Hard Case',       w:18, d:24, h:12, pips:1, wheels:false},
+    cable:{st:'black',  dept:'GENERAL', name:'Cable Trunk',            w:48, d:30, h:30, pips:4, wheels:true},
+    monitor:{st:'white', dept:'VIDEO',  name:'Monitor Case',           w:24, d:60, h:42, pips:2, wheels:true},
+    comms:{st:'white',  dept:'COMMS',   name:'Comms Case',             w:24, d:30, h:24, pips:1, wheels:true},
+    switcher:{st:'white', dept:'VIDEO', name:'Switcher Case',          w:24, d:30, h:24, pips:2, wheels:true},
+    camera:{st:'blush', dept:'CAMERA',  name:'Camera Case',            w:24, d:30, h:24, pips:2, wheels:true},
+    pelican:{st:'black', dept:'GENERAL', name:'Misc Pelican Case',     w:18, d:24, h:12, pips:1, wheels:false},
+    lens: {st:'blush',  dept:'CAMERA',  name:'Lens Case',              w:18, d:24, h:12, pips:1, wheels:false},
+    feeder:{st:'shamrock', dept:'POWER', name:'Feeder Cable Trunk',    w:48, d:30, h:30, pips:4, wheels:true},
+    motor:{st:'orange', dept:'RIGGING', name:'Chain Motor Case',       w:24, d:30, h:30, pips:3, wheels:true}
   };
   const C = {bg:'#1d1e1b', cream:'#ebe3cb', dim:'#b5ae98', accent:'#e8892f', good:'#8fcf6a', bad:'#e8604a', warn:'#f0c04a', panel:'#2f302d', btn:'#3d3e3a'};
 
@@ -1447,6 +1469,178 @@ const playAbilityDemo = (function(){
     hand(c, E, ready.cx, ready.cy, seg(t, 3.3, 3.5) * (1 - seg(t, 3.9, 4.1)), {down:t > 3.65 && t < 3.85});
     if (P) ripple(c, ready.cx, ready.cy, 11 * u, seg(t, 3.7, 4.1));
     caption(c, E, t, [[.2, 3.4, 'FILL THE TRUCK'], [3.4, 4.7, 'TAP READY', 'CLICK READY'], [4.7, 99, 'NEXT TRUCK BACKS IN', null, 'good']], T.ox + T.Wp / 2, E.H - 14 * u);
+  }};
+
+  /* =====================================================================
+     0. HOW TO PLAY (L1): drag a case in, start at the nose, not by the doors
+     ===================================================================== */
+  // shared by the HOW TO PLAY demos
+  function ends(c, E, T, noseHi){ // nose + doors labels
+    c.font = cond(10 * E.u); c.textAlign = 'center'; c.textBaseline = 'middle';
+    c.fillStyle = noseHi ? C.accent : C.cream; c.fillText('▲ NOSE · FRONT WALL ▲', T.ox + T.Wp / 2, T.oy - T.wall - 6 * E.u);
+    c.fillStyle = C.dim; c.fillText('▼ REAR DOORS ▼', T.ox + T.Wp / 2, T.oy + T.Dp + T.wall + 6 * E.u);
+  }
+  // a case by its top-left corner in inches (as the levels store them); o.turned = 90° turned footprint
+  function put(c, T, spec, x, y, o = {}){
+    const w = o.turned ? spec.d : spec.w, d = o.turned ? spec.w : spec.d, [cx, cy] = T.P(x + w / 2, y + d / 2);
+    caseAt(c, cx + (o.dx || 0), cy + (o.dy || 0), spec.w * T.s, spec.d * T.s, spec, {alpha:o.alpha, angle:(o.turned ? Math.PI / 2 : 0) + (o.angle || 0), outline:o.outline, lw:2, elev:o.elev});
+  }
+  function zone(c, T, x, y, w, d, col, a, label){
+    if (a <= .01) return;
+    const [px, py] = T.P(x, y), pw = w * T.s, pd = d * T.s;
+    c.save(); c.globalAlpha *= a; c.fillStyle = col === C.bad ? 'rgba(232,96,74,.2)' : 'rgba(143,207,106,.18)'; c.fillRect(px, py, pw, pd);
+    c.setLineDash([5, 4]); c.strokeStyle = col; c.lineWidth = 2; c.strokeRect(px + 1, py + 1, pw - 2, pd - 2); c.setLineDash([]);
+    if (label){ c.font = cond(10 * T.u); c.textAlign = 'center'; c.textBaseline = 'middle'; const lw = c.measureText(label).width + 8 * T.u;
+      c.fillStyle = 'rgba(29,30,27,.85)'; c.fillRect(px + pw / 2 - lw / 2, py + pd / 2 - 7 * T.u, lw, 14 * T.u); c.fillStyle = col; c.fillText(label, px + pw / 2, py + pd / 2 + 1); }
+    c.restore();
+  }
+
+  ABILITY_DEMOS.load = {dur:9.6, still:8.6, draw(c, t, E){
+    const u = E.u, P = E.phone; bg(c, E);
+    const leftCol = P ? 0 : 104 * u, stripH = P ? 34 * u : 0, D = 100;
+    const T = truck(E, {D, left:leftCol, top:stripH + 12 * u, bottom:12 * u, gutter:P ? 30 : 14}), s = T.s;
+    drawTruck(c, E, T, {doors:true, wallLabels:true});
+    const cw = 24 * s, ch = 30 * s, slot = i => T.P(12 + 24 * i, 15), doorPt = T.P(48, D - 17);
+    ends(c, E, T, t > 2.4 && t < 4.4); // the nose lights up while the first case goes in
+    // the manifest card the cases come from
+    const starts = [.7, 4.4, 5.15, 5.9], left = 4 - starts.filter(a => t >= a).length;
+    let card;
+    { const w = P ? 62 * u : leftCol - 14 * u, h = P ? stripH - 6 * u : 70 * u, x = P ? 8 * u : 8 * u, y = P ? 4 * u : T.oy;
+      if (!P){ c.fillStyle = C.dim; c.font = cond(9 * u); c.textAlign = 'left'; c.textBaseline = 'alphabetic'; c.fillText('MANIFEST', x, y - 4 * u); }
+      c.fillStyle = C.panel; c.fillRect(x, y, w, h); c.strokeStyle = left ? C.accent : '#0d0d0c'; c.lineWidth = 2; c.strokeRect(x, y, w, h);
+      const k = P ? (h - 6 * u) / 30 : Math.min((w - 20 * u) / 24, (h - 26 * u) / 30), ix = P ? x + 4 * u + 12 * k : x + w / 2, iy = P ? y + h / 2 : y + 6 * u + 15 * k;
+      if (left) caseAt(c, ix, iy, 24 * k, 30 * k, CASE.trunk, {noText:true});
+      c.fillStyle = C.cream; c.font = cond(P ? 9 * u : 10 * u); c.textAlign = P ? 'left' : 'center'; c.textBaseline = 'middle';
+      if (P){ c.fillText('TRUNK', ix + 12 * k + 4 * u, y + h / 2 - 5 * u); c.fillText(`× ${left}`, ix + 12 * k + 4 * u, y + h / 2 + 6 * u); }
+      else { c.fillText('UTILITY TRUNK', x + w / 2, y + h - 14 * u); c.fillText(`× ${left}`, x + w / 2, y + h - 5 * u); }
+      card = [ix, iy];
+    }
+    // cases already set down
+    const placedAt = [3.3, 5.0, 5.75, 6.5];
+    placedAt.forEach((a, i) => { if (t >= a){ const [x, y] = slot(i), k = seg(t, a, a + .25); caseAt(c, x, y, cw, ch, CASE.trunk, {outline:k < 1 ? `rgba(143,207,106,${1 - k})` : null}); } });
+    // the case in the hand
+    let hx = -99, hy = -99, ha = 0, cur = null, ok = false;
+    if (t >= .4 && t < 3.3){
+      if (t < .7) [hx, hy] = card;
+      else if (t < 1.6) [hx, hy] = path([card, doorPt], es(t, .7, 1.6));
+      else if (t < 2.4){ hx = doorPt[0] + Math.sin((t - 1.6) * 14) * 2 * u * (1 - seg(t, 2.1, 2.4)); hy = doorPt[1]; }
+      else { [hx, hy] = path([doorPt, slot(0)], es(t, 2.4, 3.2)); ok = t > 3.0; }
+      ha = seg(t, .4, .6); if (t >= .7) cur = [hx, hy];
+    }
+    for (let i = 1; i < 4; i++){
+      const a = starts[i];
+      if (t >= a - .25 && t < placedAt[i]){ [hx, hy] = t < a ? card : path([card, slot(i)], es(t, a, placedAt[i] - .1)); ha = 1; if (t >= a) cur = [hx, hy]; ok = t > placedAt[i] - .25; }
+    }
+    if (t >= 6.5 && t < 6.9){ [hx, hy] = slot(3); ha = 1 - seg(t, 6.5, 6.9); }
+    // no-go zone by the doors while the case hovers there
+    const bad = seg(t, 1.5, 1.7) * (1 - seg(t, 2.3, 2.5));
+    if (bad > 0){
+      c.save(); c.globalAlpha = bad; const zy = T.oy + (D - 34) * s;
+      c.fillStyle = 'rgba(232,96,74,.18)'; c.fillRect(T.ox, zy, T.Wp, T.Dp - (D - 34) * s);
+      c.setLineDash([5, 4]); c.strokeStyle = C.bad; c.lineWidth = 2; c.strokeRect(T.ox + 1, zy, T.Wp - 2, T.Dp - (D - 34) * s - 1); c.restore();
+    }
+    if (cur) caseAt(c, cur[0], cur[1], cw, ch, CASE.trunk, {elev:true, outline:bad > .5 ? C.bad : ok ? C.good : 'rgba(232,137,47,.9)', lw:2});
+    for (let i = 0; i < 4; i++) ripple(c, ...slot(i), 12 * u, seg(t, placedAt[i], placedAt[i] + .45));
+    // after the row: an arrow from the row back toward the doors
+    const arr = es(t, 6.9, 7.6);
+    if (arr > 0){
+      const x = T.ox + T.Wp / 2, y0 = T.oy + 34 * s, y1 = lerp(y0, T.oy + T.Dp - 6 * s, arr);
+      c.save(); c.strokeStyle = C.good; c.fillStyle = C.good; c.lineWidth = 3 * u; c.setLineDash([7 * u, 5 * u]);
+      c.beginPath(); c.moveTo(x, y0); c.lineTo(x, y1 - 6 * u); c.stroke(); c.setLineDash([]);
+      c.beginPath(); c.moveTo(x - 7 * u, y1 - 8 * u); c.lineTo(x + 7 * u, y1 - 8 * u); c.lineTo(x, y1); c.closePath(); c.fill(); c.restore();
+    }
+    hand(c, E, hx, hy, ha, {down:!!cur});
+    const mid = T.oy + T.Dp * .55, cx = T.ox + T.Wp / 2;
+    caption(c, E, t, [[.4, 1.5, 'DRAG A CASE IN']], cx, mid);
+    caption(c, E, t, [[1.6, 2.4, 'NOT BY THE DOORS', null, 'bad']], cx, T.oy + (D - 40) * s);
+    caption(c, E, t, [[2.4, 4.4, 'START AT THE NOSE', null, 'good'], [4.4, 6.9, 'FILL THE ROW WALL TO WALL'], [6.9, 99, 'THEN WORK BACK TO THE DOORS', null, 'good']], cx, mid);
+  }};
+
+  /* =====================================================================
+     0b. FILL THE WIDTH (L3): holes at the nose make a longer load
+     ===================================================================== */
+  ABILITY_DEMOS.wide = {dur:9.4, still:8.4, draw(c, t, E){
+    const u = E.u; bg(c, E);
+    const D = 126, T = truck(E, {D, top:12 * u, bottom:12 * u, gutter:E.phone ? 44 : 60}), s = T.s;
+    drawTruck(c, E, T, {doors:true}); ends(c, E, T, false);
+    const L = [['big', 0, 0, 0, 0], ['big', 0, 30, 48, 0], ['monitor', 0, 60, 0, 30], ['monitor', 24, 60, 24, 30],
+      ['trunk', 48, 60, 48, 30], ['trunk', 72, 60, 72, 30], ['trunk', 48, 90, 48, 60], ['trunk', 72, 90, 72, 60]]; // [case, bad x, y, good x, y]
+    const m = es(t, 4.6, 5.8);
+    L.forEach(([k, bx, by, gx, gy], i) => { const a = seg(t, .2 + .25 * i, .4 + .25 * i); if (a > 0) put(c, T, CASE[k], lerp(bx, gx, m), lerp(by, gy, m), {alpha:a}); });
+    zone(c, T, 48, 0, 48, 60, C.bad, seg(t, 2.4, 2.7) * (1 - seg(t, 4.4, 4.7)), 'HOLE');
+    zone(c, T, 0, 90, 96, D - 90, C.good, seg(t, 6.0, 6.4));
+    // load length, measured from the nose
+    const la = seg(t, 2.4, 2.7); if (la > 0){
+      const len = lerp(120, 90, m), col = m >= 1 ? C.good : C.bad, x = T.ox + T.Wp + T.wall + 9 * u, y1 = T.oy + len * s;
+      c.save(); c.globalAlpha = la; c.strokeStyle = col; c.lineWidth = 2; c.beginPath(); c.moveTo(x, T.oy); c.lineTo(x, y1); c.stroke();
+      for (const yy of [T.oy, y1]){ c.beginPath(); c.moveTo(x - 4 * u, yy); c.lineTo(x + 4 * u, yy); c.stroke(); }
+      c.fillStyle = col; c.font = cond(11 * u); c.textAlign = 'left'; c.textBaseline = 'middle'; c.fillText(`${Math.round(len)}"`, x + 6 * u, y1 - 6 * u); c.restore();
+    }
+    const cx = T.ox + T.Wp / 2;
+    caption(c, E, t, [[2.4, 4.5, 'HOLES MAKE A LONGER LOAD', null, 'bad'], [4.5, 6.0, 'FILL THE WIDTH FIRST'], [6.0, 99, 'WALL TO WALL: 90" LOAD', null, 'good']], cx, T.oy + T.Dp * .82);
+  }};
+
+  /* =====================================================================
+     0c. HEAVY IN THE NOSE (L5): count the weight pips
+     ===================================================================== */
+  ABILITY_DEMOS.heavy = {dur:9.2, still:8.2, draw(c, t, E){
+    const u = E.u, P = E.phone; bg(c, E);
+    const leftCol = P ? 0 : 108 * u, D = 112, T = truck(E, {D, left:leftCol, top:12 * u, bottom:12 * u, gutter:P ? 30 : 14}), s = T.s;
+    drawTruck(c, E, T, {doors:true}); ends(c, E, T, t > .4 && t < 2.6);
+    const rows = [[['cable', 0], ['cable', 48]], [['distro', 0], ['distro', 24], ['audio', 48], ['audio', 72]], [['trunk', 0], ['trunk', 24], ['comms', 48], ['comms', 72]]];
+    const starts = [.4, 2.6, 4.8];
+    rows.forEach((r, ri) => r.forEach(([k, x], j) => {
+      const a = starts[ri] + j * .1, k2 = es(t, a, a + .8); if (k2 <= 0) return;
+      put(c, T, CASE[k], x, ri * 30, {dy:(1 - k2) * (D - ri * 30) * s, alpha:Math.min(1, k2 * 3)});
+    }));
+    if (!P){ // pip legend
+      const x = 10 * u, rowNow = t < 2.6 ? 0 : t < 4.8 ? 1 : t < 7 ? 2 : -1, list = [[4, 'VERY HEAVY', [0]], [3, 'HEAVY', [1]], [2, 'MEDIUM', [2]], [1, 'LIGHT', [2]]];
+      let y = T.oy + 4 * u; c.fillStyle = C.dim; c.font = cond(9 * u); c.textAlign = 'left'; c.textBaseline = 'middle'; c.fillText('WEIGHT PIPS', x, y); y += 16 * u;
+      for (const [n, label, rs] of list){
+        const on = rs.includes(rowNow), ps = 7 * u;
+        for (let i = 0; i < 4; i++){ c.fillStyle = i < n ? (on ? C.accent : C.cream) : 'rgba(233,225,200,.18)'; c.fillRect(x + i * (ps + 2 * u), y - ps / 2, ps, ps); }
+        c.fillStyle = on ? C.accent : C.cream; c.font = cond(10 * u); c.fillText(label, x + 4 * (ps + 2 * u) + 5 * u, y + .5); y += 17 * u;
+      }
+    }
+    caption(c, E, t, [[.4, 2.6, '4 PIPS: AGAINST THE NOSE'], [2.6, 4.8, '3 PIPS: RIGHT BEHIND THEM'], [4.8, 7.0, 'LIGHT GEAR BY THE DOORS'], [7.0, 99, 'HEAVY IN FRONT, LIGHT BEHIND', null, 'good']],
+      T.ox + T.Wp / 2, T.oy + 101 * s);
+  }};
+
+  /* =====================================================================
+     0e. LAST ON, FIRST OFF (L9): load in reverse of the venue's order
+     ===================================================================== */
+  ABILITY_DEMOS.order = {dur:9.8, still:5.4, draw(c, t, E){
+    const u = E.u, P = E.phone; bg(c, E);
+    const leftCol = P ? 0 : 108 * u, stripH = P ? 22 * u : 0, D = 112;
+    const T = truck(E, {D, left:leftCol, top:stripH + 12 * u, bottom:12 * u, gutter:P ? 30 : 14}), s = T.s;
+    drawTruck(c, E, T, {doors:true}); ends(c, E, T, false);
+    const rows = [{dept:'VIDEO', cases:[['video', 0], ['video', 24], ['video', 48], ['video', 72]]},
+      {dept:'POWER', cases:[['distro', 0], ['distro', 24], ['feeder', 48]]}, {dept:'RIGGING', cases:[['motor', 0], ['motor', 24], ['rig', 48]]}];
+    const inAt = [.6, 2.2, 3.8], outAt = [8.2, 7.0, 5.8]; // rigging comes off first
+    rows.forEach((r, ri) => r.cases.forEach(([k, x], j) => {
+      const a = inAt[ri] + j * .1, kin = es(t, a, a + .8), kout = es(t, outAt[ri], outAt[ri] + .8);
+      if (kin <= 0 || kout >= 1) return;
+      put(c, T, CASE[k], x, ri * 30, {dy:((1 - kin) + kout) * (D - ri * 30 + 10) * s, alpha:Math.min(1, kin * 3) * (1 - kout)});
+    }));
+    // the venue's load-in order
+    const order = ['RIGGING', 'POWER', 'VIDEO'], now = t < 2.2 ? 'VIDEO' : t < 3.8 ? 'POWER' : t < 5.6 ? 'RIGGING' : null;
+    const off = d => t > outAt[2 - order.indexOf(d)] + .8;
+    if (P){
+      c.font = cond(9.5 * u); c.textBaseline = 'middle'; c.textAlign = 'left';
+      const parts = order.map((d, i) => `${i + 1} ${d}`), gap = 10 * u, tw = parts.reduce((a, p) => a + c.measureText(p).width, 0) + gap * 2;
+      let x = (E.W - tw) / 2; const y = 10 * u;
+      parts.forEach((p, i) => { const d = order[i]; c.fillStyle = off(d) ? C.good : d === now ? C.accent : C.cream; c.fillText(p, x, y); x += c.measureText(p).width + gap; });
+    } else {
+      let x = 10 * u, y = T.oy + 4 * u; c.fillStyle = C.dim; c.font = cond(9 * u); c.textAlign = 'left'; c.textBaseline = 'middle'; c.fillText('VENUE LOAD-IN ORDER', x, y); y += 18 * u;
+      order.forEach((d, i) => {
+        const hi = d === now, done = off(d), w = leftCol - 22 * u, h = 20 * u;
+        c.fillStyle = hi ? '#46392b' : C.panel; c.fillRect(x, y - h / 2, w, h); c.strokeStyle = hi ? C.accent : done ? C.good : '#0d0d0c'; c.lineWidth = 2; c.strokeRect(x, y - h / 2, w, h);
+        c.fillStyle = DEPT[d]; c.fillRect(x + 4 * u, y - 5 * u, 6 * u, 10 * u);
+        c.fillStyle = done ? C.good : C.cream; c.font = cond(10.5 * u); c.fillText(`${i + 1} · ${d}${done ? ' ✓' : ''}`, x + 14 * u, y + .5); y += h + 6 * u;
+      });
+    }
+    caption(c, E, t, [[.6, 2.2, 'NEEDED LAST: IN FIRST'], [2.2, 3.8, 'THEN POWER'], [3.8, 5.8, 'NEEDED FIRST: IN LAST', null, 'good'], [5.8, 99, 'LAST ON, FIRST OFF', null, 'good']],
+      T.ox + T.Wp / 2, T.oy + 101 * s);
   }};
 
   /* ---------------- player ---------------- */
@@ -3798,19 +3992,19 @@ function openAchievements(){
 }
 /* ---------- new abilities: a slide from the tier's crew the first time each one comes up ---------- */
 // ABILITY_INFO (titles + lines) and playAbilityDemo (looping demos) come from art-reference/ability-demos.js, pasted below
-function abilityFor(lv){
-  if (!lv || lv.demo) return null;
-  if (lv.loop) return 'tour';
-  for (const [k, a] of Object.entries(typeof ABILITY_INFO === 'object' ? ABILITY_INFO : {})) if (a.level === lv.id) return k;
-  return null;
+function abilitiesFor(lv){ // every slide for this level, in ABILITY_INFO order
+  if (!lv || lv.demo) return [];
+  if (lv.loop) return ['tour'];
+  return Object.entries(typeof ABILITY_INFO === 'object' ? ABILITY_INFO : {}).filter(([, a]) => a.level === lv.id).map(([k]) => k);
 }
 let abStop = null, abNext = null;
 function showAbility(key, then){
   const a = ABILITY_INFO[key]; if (!a){ if (then) then(); return; }
   const lvId = a.level === 'Endless Tour' ? 61 : a.level, who = crewFor(key === 'tour' ? {loop:true} : {id:lvId});
   $('abImg').src = `assets/crew/${who}-good.webp`; $('abName').textContent = CREW[who];
-  $('abTitle').textContent = a.title; $('abText').innerHTML = (isPhone() ? a.phone : a.desktop).replace(/^(Unlocked[^.]*\.)/, '<b>$1</b>');
+  $('abTitle').textContent = a.title; $('abText').innerHTML = (isPhone() ? a.phone : a.desktop).replace(/^([^.]*\.)/, '<b>$1</b>');
   const tag = $('abTag'), clone = tag.cloneNode(true); tag.replaceWith(clone); // replay the unlock flourish
+  clone.querySelector('.ab-tag-txt').textContent = a.tag || 'NEW ABILITY UNLOCKED'; clone.querySelector('.lock').style.display = a.tag ? 'none' : '';
   abNext = then || null; G.abilityPrev = G.mode; G.mode = 'ability'; openModal('ability');
   if (abStop) abStop(); abStop = typeof playAbilityDemo === 'function' ? playAbilityDemo($('abDemo'), key, isPhone()) : null;
 }
@@ -3820,10 +4014,12 @@ function closeAbility(){
   if (next) next(); else { G.mode = G.abilityPrev || 'help'; if (G.mode === 'help') openModal('help'); }
 }
 function abilityThenBriefing(lv){ // called where the briefing would open
-  const key = abilityFor(lv), p = G.progress; p.abilities = p.abilities || {};
-  if (!key || p.abilities[key]) return false;
-  p.abilities[key] = true; saveProgress();
-  showAbility(key, () => { G.mode = 'briefing'; openModal('briefing'); });
+  const p = G.progress; p.abilities = p.abilities || {};
+  const keys = abilitiesFor(lv).filter(k => !p.abilities[k]);
+  if (!keys.length) return false;
+  for (const k of keys) p.abilities[k] = true; saveProgress();
+  const next = i => { if (i < keys.length) showAbility(keys[i], () => next(i + 1)); else { G.mode = 'briefing'; openModal('briefing'); } };
+  next(0);
   return true;
 }
 function renderAbilityList(){
