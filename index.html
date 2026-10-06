@@ -502,7 +502,8 @@ body.phone .home-btn kbd, body.phone .link-btn kbd{display:none}
     <button class="pn-btn" data-act="help">HELP</button>
     <button class="pn-btn" data-act="sound" id="pmSound">SOUND: ON</button>
     <button class="pn-btn" data-act="home">HOME SCREEN</button>
-    <button class="pn-btn" data-act="account" id="pmAccount">SAVE PROGRESS</button>
+    <button class="pn-btn" data-act="account" id="pmAccount">SIGN IN</button>
+    <button class="pn-btn" data-act="signout" id="pmSignOut">SIGN OUT</button>
     <button class="pn-btn" data-act="report">REPORT A PROBLEM / IDEA</button>
     <button class="pn-btn primary" data-act="close">BACK TO THE TRUCK</button>
   </div>
@@ -636,10 +637,9 @@ body.phone .home-btn kbd, body.phone .link-btn kbd{display:none}
   <p style="margin-top:14px;font-size:13px;color:var(--cream-dim)">Every lesson is followed by a practice level that tests it a different way. Earn 3 stars (or 95%+) on all 100 levels to unlock the final exam and your AV Educate certificate.</p>
   <div class="save-codes">
     <button class="btn" id="lvAch">ACHIEVEMENTS</button>
-    <button class="btn" id="lvAccount">SAVE PROGRESS</button>
-    <button class="btn" id="lvSaveCode">SAVE CODE</button>
-    <button class="btn" id="lvLoadCode">LOAD CODE</button>
-    <span id="saveCodeOut" class="save-code-out">Back up your progress: SAVE CODE copies a code you can paste back in with LOAD CODE, on any browser or computer.</span>
+    <button class="btn" id="lvAccount">SIGN IN</button>
+    <button class="btn" id="lvSignOut">SIGN OUT</button>
+    <span id="saveCodeOut" class="save-code-out">Sign in to save your progress to your account and pick up on any device. No password: we email you a code.</span>
   </div>
   <div class="row"><button class="btn" id="lvHelp">HELP</button><button class="btn" id="lvTitleBtn">TITLE SCREEN</button><button class="btn primary" id="lvClose">CLOSE</button></div>
 </div></div>
@@ -713,7 +713,7 @@ body.phone .home-btn kbd, body.phone .link-btn kbd{display:none}
   <div id="helpKeyboard"></div>
   <div class="kb-desc" id="helpKeyDesc">Click a highlighted key, or press it on your keyboard, to see what it does.</div>
   </div>
-  <p class="hp-privacy">Your progress is saved in this browser. Make a free account (SAVE PROGRESS on the level screen) to keep it safe and play on other devices. The game also sends anonymous play stats (level, score, phone or computer) so we can see which levels need work. Nothing personal.</p>
+  <p class="hp-privacy">Your progress is saved in this browser. Make a free account (SIGN IN on the level screen) to keep it safe and play on other devices. The game also sends anonymous play stats (level, score, phone or computer) so we can see which levels need work. Nothing personal.</p>
   <div class="row"><button class="btn" id="hpReport">REPORT A PROBLEM / IDEA</button><button class="btn" id="hpDemo">TRY THE PRACTICE BAY</button><button class="btn primary" id="hpClose">CLOSE <kbd>ESC</kbd></button></div>
 </div></div>
 
@@ -5193,8 +5193,11 @@ const ACCOUNT = {
   set(a){ try { a ? localStorage.setItem(this.key, JSON.stringify(a)) : localStorage.removeItem(this.key); } catch(e){} accountButtons(); }
 };
 function accountButtons(){
-  const a = ACCOUNT.get(), label = a ? `ACCOUNT · ${(a.name || a.email).toUpperCase().split(/[\s@]/)[0].slice(0, 10)}` : 'SAVE PROGRESS';
+  const a = ACCOUNT.get(), label = a ? `ACCOUNT · ${(a.name || a.email).toUpperCase().split(/[\s@]/)[0].slice(0, 10)}` : 'SIGN IN';
   for (const id of ['lvAccount', 'pmAccount']) if ($(id)) $(id).textContent = label;
+  if ($('lvSignOut')) $('lvSignOut').disabled = !a;
+  if ($('pmSignOut')) $('pmSignOut').hidden = !a;
+  if ($('saveCodeOut')) $('saveCodeOut').textContent = a ? `Signed in as ${a.email}. Your progress saves to your account.` : 'Sign in to save your progress to your account and pick up on any device. No password: we email you a code.';
 }
 // merge two saves: the best of both, nothing lost
 function mergeProgress(a, b){
@@ -5730,6 +5733,8 @@ $('titleDemo').onclick = () => homeGo(HOME.demo);
 $('titleHelp').onclick = () => homeGo(HOME.help);
 $('btnHelp').onclick = openHelp;
 $('lvAccount').onclick = () => { closeModals(); G.mode = 'levels'; openAccount(); };
+function signOut(){ if (!ACCOUNT.get()) return; ACCOUNT.set(null); toast('SIGNED OUT', 'Your progress stays in this browser too'); }
+$('lvSignOut').onclick = signOut;
 $('hpReport').onclick = () => { G.mode = 'help'; openReport(); };
 $('certRegister').onclick = () => openAccount('start');
 accountButtons(); cloudPull();
@@ -5751,17 +5756,7 @@ function applyProgressCode(code){
   G.progress = {...p, unlocked:Math.max(1, Math.min(101, p.unlocked)), best:p.best || {}, stars:p.stars || {}}; // keep everything (exam, tour best, badges, bonus stars)
   saveProgress();
 }
-$('lvSaveCode').onclick = () => {
-  const code = progressCode();
-  const done = ok => { $('saveCodeOut').innerHTML = `${ok ? 'Copied! ' : ''}Your code: <b>${code}</b>`; };
-  if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(code).then(() => done(true), () => done(false)); else done(false);
-};
-$('lvLoadCode').onclick = () => {
-  const code = window.prompt('Paste your Truck Packology save code:');
-  if (!code) return;
-  try { applyProgressCode(code); openLevels(); $('saveCodeOut').innerHTML = `<b>Progress restored.</b> Level ${G.progress.unlocked} is unlocked.`; }
-  catch(e){ $('saveCodeOut').innerHTML = "<b>That code didn't work.</b> Check that the whole code was pasted, starting with TP1-."; }
-};
+// (save/load codes replaced by accounts: SIGN IN / SIGN OUT on the level screen)
 
 /* ---------- home: the menu strip sits over the live game (next level, Level Select open), blurred ---------- */
 let homeBusy = false;
@@ -6013,7 +6008,7 @@ $('phoneMenu').addEventListener('click', e => {
   $('phoneMenu').hidden = true;
   const act = b ? b.dataset.act : 'close';
   if (act === 'levels') openLevels(); else if (act === 'hint') $('btnHint').click(); else if (act === 'undo') undo(); else if (act === 'redo') redo();
-  else if (act === 'reset') resetLevel(); else if (act === 'help') openHelp(); else if (act === 'home') enterHome(); else if (act === 'sound') setSound(!SOUND.on); else if (act === 'account'){ G.acctPrev = G.mode; openAccount(); } else if (act === 'report') openReport();
+  else if (act === 'reset') resetLevel(); else if (act === 'help') openHelp(); else if (act === 'home') enterHome(); else if (act === 'sound') setSound(!SOUND.on); else if (act === 'account'){ G.acctPrev = G.mode; openAccount(); } else if (act === 'signout') signOut(); else if (act === 'report') openReport();
 });
 // phone mode: touch-only devices (no mouse or trackpad) and narrow screens; landscape phones are asked to turn upright
 function applyPhoneMode(){
