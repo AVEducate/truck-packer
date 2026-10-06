@@ -767,8 +767,8 @@ const ABILITY_INFO = {
            phone:'Every rehandle is 1 point off. A rehandle is a case you pull back out after loading it. Each one costs a point, up to 10, so only a pack with zero rehandles can score a perfect 100.',
            desktop:'Every rehandle is 1 point off. A rehandle is a case you pull back out after loading it. Each one costs a point, up to 10, so only a pack with zero rehandles can score a perfect 100.'},
   wide:   {level:3,  title:'FILL THE WIDTH', tag:'HOW TO PLAY',
-           phone:'Fill the width before you move back. Build each row wall to wall across the truck. Holes near the nose make the load longer, and a longer load wastes truck.',
-           desktop:'Fill the width before you move back. Build each row wall to wall across the truck. Holes near the nose make the load longer, and a longer load wastes truck.'},
+           phone:'Fill the width before you move back. Build each row wall to wall across the truck. Empty space can\'t be secured: a hole lets cases shift and slide around while the truck is moving.',
+           desktop:'Fill the width before you move back. Build each row wall to wall across the truck. Empty space can\'t be secured: a hole lets cases shift and slide around while the truck is moving.'},
   stars:  {level:4,  title:'HOW STARS WORK', tag:'HOW SCORING WORKS',
            phone:'Your score sets your stars. 100 is three stars, 90 to 99 is two, and 60 to 89 is one. Below 60 the level isn\'t passed yet, so pack it again.',
            desktop:'Your score sets your stars. 100 is three stars, 90 to 99 is two, and 60 to 89 is one. Below 60 the level isn\'t passed yet, so pack it again.'},
@@ -1600,25 +1600,29 @@ const playAbilityDemo = (function(){
   /* =====================================================================
      0b. FILL THE WIDTH (L3): holes at the nose make a longer load
      ===================================================================== */
-  ABILITY_DEMOS.wide = {dur:9.4, still:8.4, draw(c, t, E){
+  ABILITY_DEMOS.wide = {dur:10.2, still:9.2, draw(c, t, E){
     const u = E.u; bg(c, E);
     const D = 126, T = truck(E, {D, top:12 * u, bottom:12 * u, gutter:E.phone ? 44 : 60}), s = T.s;
     drawTruck(c, E, T, {doors:true}); ends(c, E, T, false);
     const L = [['big', 0, 0, 0, 0], ['big', 0, 30, 48, 0], ['monitor', 0, 60, 0, 30], ['monitor', 24, 60, 24, 30],
       ['trunk', 48, 60, 48, 30], ['trunk', 72, 60, 72, 30], ['trunk', 48, 90, 48, 60], ['trunk', 72, 90, 72, 60]]; // [case, bad x, y, good x, y]
-    const m = es(t, 4.6, 5.8);
-    L.forEach(([k, bx, by, gx, gy], i) => { const a = seg(t, .2 + .25 * i, .4 + .25 * i); if (a > 0) put(c, T, CASE[k], lerp(bx, gx, m), lerp(by, gy, m), {alpha:a}); });
-    zone(c, T, 48, 0, 48, 60, C.bad, seg(t, 2.4, 2.7) * (1 - seg(t, 4.4, 4.7)), 'HOLE');
-    zone(c, T, 0, 90, 96, D - 90, C.good, seg(t, 6.0, 6.4));
+    const out = seg(t, 4.5, 4.9), m = seg(t, 6.6, 6.7); // the bad pack comes out, then it's reloaded nose first
+    L.forEach(([k, bx, by], i) => { const a = seg(t, .2 + .25 * i, .4 + .25 * i) * (1 - out); if (a > 0) put(c, T, CASE[k], bx, by, {alpha:a}); });
+    [...L].sort((p, q) => p[4] - q[4] || p[3] - q[3]).forEach(([k, , , gx, gy], i) => { // each case rolls in from the doors, straight up its lane
+      const a0 = 5.0 + .2 * i, k2 = es(t, a0, a0 + .5); if (k2 <= 0) return;
+      put(c, T, CASE[k], gx, lerp(D + 10, gy, k2), {alpha:Math.min(1, k2 * 3)});
+    });
+    zone(c, T, 48, 0, 48, 60, C.bad, seg(t, 2.4, 2.7) * (1 - seg(t, 4.3, 4.6)), 'HOLE');
+    zone(c, T, 0, 90, 96, D - 90, C.good, seg(t, 6.7, 7.1));
     // load length, measured from the nose
-    const la = seg(t, 2.4, 2.7); if (la > 0){
-      const len = lerp(120, 90, m), col = m >= 1 ? C.good : C.bad, x = T.ox + T.Wp + T.wall + 9 * u, y1 = T.oy + len * s;
+    const la = seg(t, 2.4, 2.7) * (1 - out) + seg(t, 6.6, 6.9); if (la > 0){
+      const len = m > 0 ? 90 : 120, col = m > 0 ? C.good : C.bad, x = T.ox + T.Wp + T.wall + 9 * u, y1 = T.oy + len * s;
       c.save(); c.globalAlpha = la; c.strokeStyle = col; c.lineWidth = 2; c.beginPath(); c.moveTo(x, T.oy); c.lineTo(x, y1); c.stroke();
       for (const yy of [T.oy, y1]){ c.beginPath(); c.moveTo(x - 4 * u, yy); c.lineTo(x + 4 * u, yy); c.stroke(); }
       c.fillStyle = col; c.font = cond(11 * u); c.textAlign = 'left'; c.textBaseline = 'middle'; c.fillText(`${Math.round(len)}"`, x + 6 * u, y1 - 6 * u); c.restore();
     }
     const cx = T.ox + T.Wp / 2;
-    caption(c, E, t, [[2.4, 4.5, 'HOLES MAKE A LONGER LOAD', null, 'bad'], [4.5, 6.0, 'FILL THE WIDTH FIRST'], [6.0, 99, 'WALL TO WALL: 90" LOAD', null, 'good']], cx, T.oy + T.Dp * .82);
+    caption(c, E, t, [[2.4, 4.5, 'A HOLE CAN\'T BE SECURED', null, 'bad'], [4.5, 6.7, 'RELOAD: FILL THE WIDTH FIRST'], [6.7, 99, 'WALL TO WALL: NOTHING TO SLIDE', null, 'good']], cx, T.oy + T.Dp * .82);
   }};
 
   /* =====================================================================
