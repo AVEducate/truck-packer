@@ -544,7 +544,7 @@ body.phone .home-btn kbd, body.phone .link-btn kbd{display:none}
     <h1 class="logo">TRUCK<br>PACKOLOGY</h1>
     <div class="tagline">PACK IT HIGH.<br>PACK IT TIGHT.<br>PACK IT SMART.</div>
     <div class="home-menu">
-      <button id="pressEnter" class="home-btn primary">PRESS ENTER</button>
+      <button id="pressEnter" class="home-btn primary">START</button>
       <button id="titleLevels" class="home-btn">LEVEL SELECT</button>
       <button id="titleHelp" class="home-btn">HELP</button>
       <button id="titleDemo" class="home-btn">PRACTICE BAY</button>
@@ -6420,7 +6420,7 @@ function applyPhoneMode(){
   const was = document.body.classList.contains('phone');
   document.body.classList.toggle('phone', on);
   $('phoneRotate').hidden = !(on && touchOnly && innerWidth > innerHeight && innerHeight < 500);
-  $('pressEnter').textContent = on ? 'TAP TO START' : 'PRESS ENTER';
+  $('pressEnter').textContent = 'START';
   if (on !== was && G.level){ G.scrollY = 0; layout(); refresh(); }
 }
 addEventListener('resize', applyPhoneMode); addEventListener('orientationchange', applyPhoneMode);
