@@ -3061,7 +3061,7 @@ const Engine = (() => {
   // Can a case get to (tx,ty,trot)? It may turn wherever it has room.
   // New cases roll in from the doors; a case picked up out of the truck moves within the space it is already in.
   function canReach(free, W, D, def, target, from){
-    const tip = target.rot & 2, rots = (def.floorRotate ? [0, 1] : [0]).map(r => r | tip), dims = r => dimsOf(def, r); // a tipped case rolls in tipped
+    const tip = (target ? target.rot : from.rot) & 2, rots = (def.floorRotate ? [0, 1] : [0]).map(r => r | tip), dims = r => dimsOf(def, r); // a tipped case rolls in tipped
     const seen = new Uint8Array(W * D * 2), q = [];
     const push = (x, y, r) => {
       const {w, d} = dims(r);
@@ -3074,7 +3074,7 @@ const Engine = (() => {
     else for (const r of rots){ const {w, d} = dims(r); for (let x = 0; x + w <= W; x++) push(x, D - d, r); }
     while (q.length){
       const [x, y, r] = q.pop();
-      if (x === target.x && y === target.y && r === target.rot) return true;
+      if (target ? (x === target.x && y === target.y && r === target.rot) : y + dims(r).d === D) return true; // no target: out through the rear doors
       push(x + 1, y, r); push(x - 1, y, r); push(x, y + 1, r); push(x, y - 1, r);
       if (rots.length > 1){ // spin in place: try the turned footprint around the same spot
         const a = dims(r), r2 = r ^ 1, b = dims(r2), cx = x + a.w / 2, cy = y + a.d / 2;
@@ -3083,6 +3083,22 @@ const Engine = (() => {
       }
     }
     return false;
+  }
+  // Taking a loaded case back out: it has to get to the rear doors the way it came in. null = it can.
+  function leaveBlock(state, p, placements){
+    placements = placements || state.placements;
+    const def = state.items.get(p.uid).def, {W, D} = cellsOf(state.truck), {w, d} = dimsOf(def, p.rot);
+    if (p.z > 0){ // a top case is lifted out over the tier in front of it, if nothing in its lane stands between it and the doors
+      const lane = rects(state, placements).filter(r => r.uid !== p.uid && r.y >= p.y + d && r.x < p.x + w && p.x < r.x + r.w);
+      if (!lane.length) return null;
+      const over = Math.max(...lane.map(r => r.y + r.d)) - (p.y + d);
+      if (def.hardCase && over <= LIFT_OVER) return null;
+      return `You can't reach the ${def.name} to pull it out: the ${lane[0].def.name} is between it and the doors. Take that out first, or use <b>UNDO</b>.`;
+    }
+    const occ = occupancy(state, placements, p.uid), bars = state.bars || [];
+    if (canReach(freeWithBars(occ, bars), W, D, def, null, p)) return null;
+    if (bars.length && canReach(freeChecker(occ), W, D, def, null, p)) return `A load bar or strap is in the way. The ${def.name} can't come out past it. Take the bar or strap out first, or use <b>UNDO</b>.`;
+    return `The ${def.name} is boxed in. Cases come out through the rear doors, so the cases between it and the doors have to come out first. Or use <b>UNDO</b>.`;
   }
   // orientation: 'upright' (spun on the floor) or 'side' (tipped). Tipping arrives with stacked levels.
   function canRotateCase(def, rot){
@@ -3601,7 +3617,7 @@ const Engine = (() => {
     return null;
   }
 
-  return {dimsOf, cellsOf, rects, rectOf, occupancy, freeChecker, canPlaceCase, canRotateCase, calculateSupport, simulateTransit,
+  return {dimsOf, cellsOf, rects, rectOf, occupancy, freeChecker, canPlaceCase, leaveBlock, canRotateCase, calculateSupport, simulateTransit,
     calculateSpaceEfficiency, calculateStability, calculateUnloadAccessibility, calculateSecurement, calculateFinalScore,
     getPlacementWarning, priorityOf, casesBlocking, canPlaceDevice, tierLines, secureActive, heightMap, hOf, planOverlap,
     stageAdd, turnStack, canPlaceStack, stackPlacements, restingOn, trappedSet, PHASES};
@@ -4874,7 +4890,7 @@ function cancelHand(silent){
 }
 function removeFromTruck(){
   const name = itemOf(G.hand.uid).def.name;
-  returnToDock();
+  if (!returnToDock()) return;
   flashCoach('tip', `The ${name} is back on the dock. <b>UNDO</b> puts it back in the truck.`, 3500);
 }
 // Delete while hovering a case in the truck takes it off (top cases first).
@@ -4884,15 +4900,20 @@ function removeHovered(){
     const rs = Engine.rects(state()), on = Engine.restingOn(rs, rs.find(r => r.uid === uid));
     if (on.length){ flashCoach('bad', `Take the ${on[0].def.name} off the top first. Cases always come off top to bottom.`); return; }
   }
+  { const why = Engine.leaveBlock(state(), G.placements.find(p => p.uid === uid)); if (why){ flashCoach('bad', why, 4000); return; } }
   G.hist.push(snap()); G.fut = [];
   G.placements = G.placements.filter(p => p.uid !== uid); G.hover = null; G.rehandles = (G.rehandles || 0) + 1; sfx('out');
   flashCoach('tip', `The ${itemOf(uid).def.name} is back on the dock. <b>UNDO</b> puts it back in the truck.`, 3500);
   refresh();
 }
-function returnToDock(){
-  if (!G.hand) return;
+function returnToDock(){ // true = it went back to the dock
+  if (!G.hand) return false;
+  if (G.hand.from === 'truck' && G.hand.orig){ // it has to get out through the doors
+    const st = state(), why = Engine.leaveBlock(st, G.hand.orig, [...st.placements, G.hand.orig]);
+    if (why){ cancelHand(); flashCoach('bad', why, 4000); return false; }
+  }
   if (G.hand.from === 'truck'){ G.hist.push(G.hand.pre); G.fut = []; G.rehandles = (G.rehandles || 0) + 1; sfx('out'); } // a loaded case came back out
-  G.hand = null; G.ghost = null; refresh();
+  G.hand = null; G.ghost = null; refresh(); return true;
 }
 function setGhost(x, y){
   const h = G.hand; if (!h) return;
@@ -6336,7 +6357,7 @@ function phoneUp(e){
     if (key && PH.lastTap && PH.lastTap.key === key && now - PH.lastTap.t < 340){ // double-tap = remove
       PH.lastTap = null;
       if (g.bar){ removeBar(g.bar); phoneUndoBanner(`${g.bar.kind === 'strap' ? 'Strap' : 'Load bar'} taken out`); }
-      else { const name = itemOf(g.uid).def.name; pickFromTruck(g.uid); if (G.hand){ returnToDock(); phoneUndoBanner(`${name} removed`); } }
+      else { const name = itemOf(g.uid).def.name; pickFromTruck(g.uid); if (G.hand && returnToDock()) phoneUndoBanner(`${name} removed`); }
     } else PH.lastTap = key ? {key, t:now} : null;
   } else if (g.kind === 'strip'){ // let the strip coast a little after a flick
     let v = clamp(g.vx * 16, -30, 30); const el = g.strip;
