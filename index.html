@@ -5167,11 +5167,14 @@ const gradeOf = pct => pct >= 97 ? 'A+' : pct >= 94 ? 'A' : pct >= 90 ? 'A-' : p
 // e.g. 20261004001 (001 is Omar Colom's). The count comes from AV Educate's online registry; until it's set up the number shows as pending.
 // AV Educate's online registry (a Google Sheet + Apps Script web app, see server/registry.gs): accounts, certificate
 // numbers, problem reports and anonymous play stats. Empty = offline (reports fall back to email).
-const CLOUD_URL = '';
+const CLOUD_URL = 'https://script.google.com/macros/s/AKfycbwE4PTuIesRmHrwGGwSVseZqAqfT2nUcIA04DUG0X-iTzl92waVBdMujCFlbYEfuTga3g/exec';
 const certDate = date => date.replace(/-/g, '');
 async function cloud(action, data){
   if (!CLOUD_URL) return {ok:false, error:'offline'};
-  try { const r = await fetch(CLOUD_URL, {method:'POST', body:JSON.stringify({action, ...data})}); return await r.json(); }
+  // no cookies: a player signed in to Google would otherwise get bounced through an account redirect that drops the POST
+  const send = async () => { try { const r = await fetch(CLOUD_URL, {method:'POST', credentials:'omit', redirect:'follow', body:JSON.stringify({action, ...data})}); return JSON.parse(await r.text()); } catch(e){ return null; } };
+  try { let j = await send(); if (!j || j.service) j = await send(); // Google sometimes answers with a hiccup page: one retry
+    return !j || j.service ? {ok:false, error:'The server didn\'t answer. Try again.'} : j; }
   catch(e){ return {ok:false, error:'Can\'t reach the server. Check your connection and try again.'}; }
 }
 async function issueCertNo(name, score, date){
@@ -5294,8 +5297,7 @@ function playerId(){
 function stat(event, data){
   if (!CLOUD_URL) return;
   const body = JSON.stringify({action:'stat', event, playerId:playerId(), device:deviceKind(), ...data});
-  try { if (navigator.sendBeacon && navigator.sendBeacon(CLOUD_URL, body)) return; } catch(e){}
-  try { fetch(CLOUD_URL, {method:'POST', body, keepalive:true, mode:'no-cors'}); } catch(e){}
+  try { fetch(CLOUD_URL, {method:'POST', body, keepalive:true, mode:'no-cors', credentials:'omit'}); } catch(e){}
 }
 function showCertificate(name, score, date, certNo){
   const pct = score / EXAM.length * 100, pctTxt = String(Math.round(pct * 100) / 100), grade = gradeOf(pct);
