@@ -218,6 +218,42 @@ body.crew-quiet:not(.phone) .coach::before{content:'';position:absolute;top:5px;
 /* achievements shelf: equal tiles */
 .ach-modal{width:min(820px,100%)}
 .acct-modal{width:min(480px,100%)}
+/* new ability unlocked: the crew member stands on the card's top-left edge, thumbs up */
+.ab-card{position:relative;width:min(540px,100%);background:var(--panel);border:3px solid #0d0d0c;box-shadow:0 0 0 3px #4b4c47,10px 12px 0 rgba(0,0,0,.5);padding:0 24px 16px;margin-top:70px}
+.ab-head{position:relative;display:flex;flex-direction:column;justify-content:flex-end;gap:4px;border-bottom:2px solid var(--line);padding:18px 0 12px 150px;min-height:118px}
+.ab-fig{position:absolute;left:-14px;bottom:0;width:140px;--o:var(--cream);clip-path:inset(-80px -60px 4px -60px);
+  filter:drop-shadow(3px 0 0 var(--o)) drop-shadow(-3px 0 0 var(--o)) drop-shadow(0 3px 0 var(--o)) drop-shadow(0 -3px 0 var(--o)) drop-shadow(0 6px 8px rgba(0,0,0,.45))}
+.ab-fig img{display:block;width:100%;height:auto}
+.ab-hd{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.ab-head .crew-name{font-size:17px}
+.ab-unlock{display:inline-flex;align-items:center;gap:5px;font-size:13px;letter-spacing:.05em;background:var(--accent);color:#1a1209;animation:abpop .5s cubic-bezier(.2,1.6,.4,1) .9s both}
+.ab-unlock .lock{width:14px;height:16px;flex:0 0 auto;overflow:visible}
+.ab-unlock .shackle{transform-origin:11.5px 8px;animation:abunlatch .45s ease-out .55s both}
+@keyframes abunlatch{from{transform:none}to{transform:translate(4px,-1.5px) rotate(28deg)}}
+@keyframes abpop{0%{transform:scale(1)}40%{transform:scale(1.14)}100%{transform:scale(1)}}
+@media (prefers-reduced-motion:reduce){.ab-unlock,.ab-unlock .shackle{animation-duration:.01s;animation-delay:0s}}
+.ab-title{font-family:var(--pixel);font-weight:800;letter-spacing:.02em;line-height:1;margin:0;color:var(--cream);font-size:40px}
+.ab-text{margin:10px 0;color:var(--cream);font-size:14.5px;line-height:1.5}
+.ab-text b{color:var(--warn);font-weight:700}
+.ab-demo{display:block;margin:0 auto;width:420px;height:230px;max-width:100%;background:#1d1e1b;border:2px solid var(--edge);box-shadow:inset 0 0 0 1px #3a3b37}
+.ab-row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:12px}
+.ab-help{font-size:12px;color:var(--cream-dim)}
+.ab-btn{font-family:var(--pixel);font-weight:800;letter-spacing:.08em;background:var(--accent);color:#1a1209;border:2px solid #1a1209;cursor:pointer;box-shadow:3px 3px 0 #000;height:44px;padding:0 22px;font-size:17px}
+.ab-btn kbd{font-family:var(--pixel);font-size:11px;font-weight:700;opacity:.7;margin-left:6px}
+body.phone .ab-back{align-items:flex-end;padding:12px}
+body.phone .ab-card{padding:0 14px 14px;margin-top:0}
+body.phone .ab-head{padding:12px 0 10px 102px;min-height:76px}
+body.phone .ab-fig{left:2px;width:90px}
+body.phone .ab-head .crew-name{font-size:15px}
+body.phone .ab-unlock{font-size:11px} body.phone .ab-unlock .lock{width:12px;height:14px}
+body.phone .ab-title{font-size:30px;margin-top:6px}
+body.phone .ab-text{font-size:13.5px;line-height:1.4}
+body.phone .ab-demo{width:300px;height:170px}
+body.phone .ab-row{flex-direction:column-reverse;align-items:stretch;gap:7px}
+body.phone .ab-btn{width:100%;height:48px;font-size:18px} body.phone .ab-btn kbd{display:none}
+body.phone .ab-help{text-align:center}
+.ab-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;margin:6px 0 14px}
+.ab-list .btn{text-align:left;justify-content:flex-start}
 .acct-modal label{display:block;font-family:var(--pixel);font-weight:800;font-size:13px;letter-spacing:.06em;color:var(--cream-dim);margin:10px 0 4px}
 .acct-modal input, .acct-modal textarea{width:100%;font:inherit;font-size:16px;padding:9px 10px;background:#1c1d1b;color:var(--cream);border:2px solid var(--edge);border-radius:0}
 .acct-modal input.code{font-family:var(--pixel);font-weight:800;font-size:26px;letter-spacing:.3em;text-align:center}
@@ -604,6 +640,17 @@ body.phone .home-btn kbd, body.phone .link-btn kbd{display:none}
   <div class="row"><button class="btn" id="lvHelp">HELP</button><button class="btn" id="lvTitleBtn">TITLE SCREEN</button><button class="btn primary" id="lvClose">CLOSE</button></div>
 </div></div>
 
+<div class="modal-back ab-back" id="ability"><div class="ab-card" role="dialog" aria-modal="true" aria-labelledby="abTitle">
+  <div class="ab-head">
+    <div class="ab-fig"><img id="abImg" alt=""></div>
+    <div class="ab-hd"><span class="crew-name" id="abName">CREW CHIEF</span></div>
+    <div class="ab-hd"><span class="tag ab-unlock" id="abTag"><svg class="lock" viewBox="0 0 16 18" aria-hidden="true"><path class="shackle" d="M4.5 8 V5.5 a3.5 3.5 0 0 1 7 0 V8" fill="none" stroke="#1a1209" stroke-width="2.2"/><rect x="2" y="8" width="12" height="9" rx="1.5" fill="#1a1209"/><rect x="7" y="11" width="2" height="3.2" fill="#e8892f"/></svg>NEW ABILITY UNLOCKED</span></div>
+    <h2 class="ab-title" id="abTitle">TURN A CASE</h2>
+  </div>
+  <p class="ab-text" id="abText"></p>
+  <canvas class="ab-demo" id="abDemo"></canvas>
+  <div class="ab-row"><span class="ab-help">Watch it again any time in HELP</span><button class="ab-btn" id="abGo">GOT IT <kbd>ENTER</kbd></button></div>
+</div></div>
 <div class="modal-back" id="account"><div class="modal acct-modal" role="dialog" aria-modal="true" aria-labelledby="acTitle">
   <h3>AV EDUCATE · TRUCK PACKOLOGY</h3>
   <h2 id="acTitle">SAVE YOUR PROGRESS</h2>
@@ -649,6 +696,7 @@ body.phone .home-btn kbd, body.phone .link-btn kbd{display:none}
     <kbd>BOTTOM BAR</kbd><span>Tap or pull up the crew bar at the bottom for the level goal and case info.</span>
     <kbd>≡ MENU</kbd><span>Undo, redo, hint, reset, help and the level list.</span>
   </div></div>
+  <div class="ab-list-wrap" id="abListWrap"><div class="section-label">ABILITIES YOU'VE UNLOCKED</div><div class="ab-list" id="abList"></div></div>
   <div class="desk-only">
   <div class="section-label">MOUSE</div>
   <div class="howto">
@@ -665,6 +713,781 @@ body.phone .home-btn kbd, body.phone .link-btn kbd{display:none}
   <div class="row"><button class="btn" id="hpReport">REPORT A PROBLEM / IDEA</button><button class="btn" id="hpDemo">TRY THE PRACTICE BAY</button><button class="btn primary" id="hpClose">CLOSE <kbd>ESC</kbd></button></div>
 </div></div>
 
+<script>
+/* ===== ability demos (from art-reference/ability-demos.js): the looping NEW ABILITY UNLOCKED animations ===== */
+/* Truck Packology: looping "NEW ABILITY UNLOCKED" demos.
+ *
+ *   ABILITY_DEMOS  = { turn, bar, strap, stack, dock, tip, pocket, pin, unload, tour }   // {dur, still, draw}
+ *   ABILITY_INFO   = { key: {level, title, phone, desktop} }                              // slide text
+ *   playAbilityDemo(canvas, key, phone) -> stop()
+ *
+ * Self-contained: no game globals are read or written (everything lives inside one closure; only the three
+ * names above are declared). Draws at the canvas's CSS size x devicePixelRatio and re-measures if that size
+ * changes. Loops with requestAnimationFrame until stop(). No audio. With prefers-reduced-motion it draws one
+ * still frame of the end state instead. Needs the page to load Barlow Condensed / Barlow (the game does).
+ */
+const ABILITY_INFO = {
+  turn:   {level:7,  title:'TURN A CASE',
+           phone:'Unlocked at level 7. From here on, you can turn any case 90°: twist two fingers on it.',
+           desktop:'Unlocked at level 7. From here on, you can turn any case 90°: press R or right-click.'},
+  bar:    {level:11, title:'LOAD BAR',
+           phone:'Unlocked at level 11. From here on, you can drop a load bar behind a full tier: drag the LOAD BAR button onto the truck and let go.',
+           desktop:'Unlocked at level 11. From here on, you can drop a load bar behind a full tier: click LOAD BAR (or press B), then click the line behind the tier.'},
+  strap:  {level:15, title:'STRAP',
+           phone:'Unlocked at level 15. From here on, you can ratchet-strap a tier: drag the STRAP button onto the line behind it.',
+           desktop:'Unlocked at level 15. From here on, you can ratchet-strap a tier: click STRAP (or press S), then click the line behind it.'},
+  stack:  {level:31, title:'STACKING + DOOR VIEW',
+           phone:'Unlocked at level 31. From here on, you can stack a case on a flat, fully covered lid: drag it onto a case in the truck. Tap VIEW to look in from the doors.',
+           desktop:'Unlocked at level 31. From here on, you can stack a case on a flat, fully covered lid: drop it on top of a case. Press V for the door view.'},
+  dock:   {level:33, title:'DOCK STACK',
+           phone:'Unlocked at level 33. From here on, you can build a stack on the dock: drag cases onto the DOCK STACK card, then drag the card into the truck.',
+           desktop:'Unlocked at level 33. From here on, you can build a stack on the dock: ADD TO STACK, then PICK UP STACK and place it in one piece.'},
+  tip:    {level:61, title:'LAY A CASE ON ITS SIDE',
+           phone:'Unlocked at level 61. From here on, you can lay a case on its side: hold it still for 1 second, then flick up.',
+           desktop:'Unlocked at level 61. From here on, you can lay a case on its side: press T. Width and height swap.'},
+  pocket: {level:62, title:'HARD CASES IN POCKETS',
+           phone:'Unlocked at level 62. From here on, small hard cases can ride on the lids: drag one into a pocket and let the next row close it in.',
+           desktop:'Unlocked at level 62. From here on, small hard cases can ride on the lids: drop one into a pocket and let the next row close it in.'},
+  pin:    {level:79, title:'PIN THE TIERS',
+           phone:'Unlocked at level 79. From here on, you can pin tiers together: lay a long case across the line between two tiers.',
+           desktop:'Unlocked at level 79. From here on, you can pin tiers together: lay a long case across the line between two tiers.'},
+  unload: {level:91, title:'UNLOADING',
+           phone:'Unlocked at level 91. From here on, you unload at the venue: tap the case you can reach. What the venue needs first comes off first.',
+           desktop:'Unlocked at level 91. From here on, you unload at the venue: click the case you can reach. What the venue needs first comes off first.'},
+  tour:   {level:'Endless Tour', title:'ENDLESS TOUR',
+           phone:'Unlocked with the Endless Tour. Fill truck after truck: tap READY and the next truck backs in. Three strikes ends the tour.',
+           desktop:'Unlocked with the Endless Tour. Fill truck after truck: click READY and the next truck backs in. Three strikes ends the tour.'}
+};
+
+const ABILITY_DEMOS = {};
+
+const playAbilityDemo = (function(){
+  'use strict';
+  /* ---------------- maths + timing ---------------- */
+  const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+  const lerp = (a, b, k) => a + (b - a) * k;
+  const ease = k => k < .5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2;
+  const seg = (t, a, b) => clamp((t - a) / (b - a), 0, 1);
+  const es = (t, a, b) => ease(seg(t, a, b));
+  const pulse = (t, a, b) => (t >= a && t < b) ? 1 : 0;
+  const COND = "'Barlow Condensed', 'Arial Narrow', sans-serif", SANS = "'Barlow', -apple-system, sans-serif";
+  const cond = (px, w = 800) => `${w} ${px}px ${COND}`;
+
+  /* ---------------- the game's look ---------------- */
+  const STYLES = {teal:{a:'#5b8e9b', b:'#3e6c78'}, black:{a:'#2c2e30', b:'#151617'}, orange:{a:'#f47c4d', b:'#d8552c'},
+    shamrock:{a:'#5fc152', b:'#3f9a36'}, yellow:{a:'#f6dc5a', b:'#e2bd2c', light:true}, white:{a:'#f5f4f0', b:'#d8d7d1', light:true}};
+  const DEPT = {GENERAL:'#a3a69f', VIDEO:'#5aa7dc', AUDIO:'#a48ad9', RIGGING:'#ec8a33', POWER:'#e4553f', LIGHTING:'#e5c14d'};
+  const CASE = {
+    trunk:{st:'teal',   dept:'GENERAL', name:'Utility Trunk',          w:24, d:30, h:30, pips:2, wheels:true},
+    big:  {st:'teal',   dept:'GENERAL', name:'Large Utility Trunk',    w:48, d:30, h:30, pips:2, wheels:true},
+    rig:  {st:'orange', dept:'RIGGING', name:'Rigging Hardware Trunk', w:48, d:30, h:30, pips:3, wheels:true},
+    video:{st:'black',  dept:'VIDEO',   name:'Video Rack',             w:24, d:30, h:48, pips:3, wheels:true},
+    audio:{st:'black',  dept:'AUDIO',   name:'Audio Rack',             w:24, d:30, h:40, pips:3, wheels:true},
+    distro:{st:'shamrock', dept:'POWER', name:'Distro',                w:24, d:30, h:30, pips:3, wheels:true},
+    hard: {st:'black',  dept:'GENERAL', name:'Medium Hard Case',       w:18, d:24, h:12, pips:1, wheels:false}
+  };
+  const C = {bg:'#1d1e1b', cream:'#ebe3cb', dim:'#b5ae98', accent:'#e8892f', good:'#8fcf6a', bad:'#e8604a', warn:'#f0c04a', panel:'#2f302d', btn:'#3d3e3a'};
+
+  function rr(c, x, y, w, h, r){ r = Math.max(0, Math.min(r, w / 2, h / 2)); c.beginPath(); c.moveTo(x + r, y); c.arcTo(x + w, y, x + w, y + h, r); c.arcTo(x + w, y + h, x, y + h, r); c.arcTo(x, y + h, x, y, r); c.arcTo(x, y, x + w, y, r); c.closePath(); }
+  function metal(c, x0, y0, x1, y1){ const g = c.createLinearGradient(x0, y0, x1, y1); g.addColorStop(0, '#dfe2de'); g.addColorStop(.45, '#a7aba6'); g.addColorStop(1, '#7c807b'); return g; }
+  function ball(c, cx, cy, r){ r = Math.max(.5, r); const g = c.createRadialGradient(cx - r * .35, cy - r * .35, r * .1, cx, cy, r); g.addColorStop(0, '#f4f5f2'); g.addColorStop(.5, '#a9ada8'); g.addColorStop(1, '#5d615c'); c.fillStyle = g; c.beginPath(); c.arc(cx, cy, r, 0, 7); c.fill(); c.strokeStyle = 'rgba(0,0,0,.55)'; c.lineWidth = 1; c.stroke(); }
+
+  // Road case seen from above (lid), centred on 0,0 after the caller's translate/rotate.
+  function lid(c, w, h, spec, o = {}){
+    const st = STYLES[spec.st], x = -w / 2, y = -h / 2, e = clamp(Math.min(w, h) * .075, 2, 7);
+    const lift = o.elev ? Math.max(2, w * .04) : 0;
+    c.fillStyle = `rgba(0,0,0,${o.elev ? .5 : .36})`; rr(c, x + 2 + lift, y + 3 + lift, w, h, e); c.fill();
+    const g = c.createLinearGradient(x, y, x + w, y + h); g.addColorStop(0, st.a); g.addColorStop(1, st.b);
+    c.fillStyle = g; rr(c, x, y, w, h, e * .6); c.fill();
+    c.lineWidth = e; c.strokeStyle = metal(c, x, y, x + w, y + h); rr(c, x + e / 2, y + e / 2, w - e, h - e, e * .4); c.stroke();
+    c.lineWidth = 1; c.strokeStyle = 'rgba(0,0,0,.6)'; c.strokeRect(x + e + .5, y + e + .5, w - 2 * e - 1, h - 2 * e - 1);
+    // lid valances on long cases
+    c.fillStyle = metal(c, x, y, x + w, y + h);
+    if (w > h * 1.45) for (let i = 1, n = Math.round(w / h); i < n; i++) c.fillRect(x + w * i / n - e * .35, y + e, e * .7, h - 2 * e);
+    if (h > w * 1.45) for (let i = 1, n = Math.round(h / w); i < n; i++) c.fillRect(x + e, y + h * i / n - e * .35, w - 2 * e, e * .7);
+    // handle dishes
+    if (Math.min(w, h) > 30 && spec.wheels){
+      const hw = clamp(Math.min(w, h) * .28, 7, 22), hh = hw * .42, along = w >= h;
+      const spots = along ? [[0, y + e * 1.9 + hh / 2], [0, y + h - e * 1.9 - hh / 2]] : [[x + e * 1.9 + hh / 2, 0], [x + w - e * 1.9 - hh / 2, 0]];
+      for (const [cx, cy] of spots){
+        const ww = along ? hw : hh, hhh = along ? hh : hw;
+        c.fillStyle = metal(c, cx - ww / 2, cy - hhh / 2, cx + ww / 2, cy + hhh / 2); rr(c, cx - ww / 2, cy - hhh / 2, ww, hhh, 2); c.fill();
+        c.fillStyle = '#121314'; rr(c, cx - ww / 2 + 1.5, cy - hhh / 2 + 1.5, ww - 3, hhh - 3, 1.2); c.fill();
+      }
+    }
+    const br = e * .95;
+    for (const [cx, cy] of [[x + e * .7, y + e * .7], [x + w - e * .7, y + e * .7], [x + e * .7, y + h - e * .7], [x + w - e * .7, y + h - e * .7]]) ball(c, cx, cy, br);
+    // department tag
+    const tw = Math.max(5, w * .14), th = Math.max(3, e * .9);
+    c.fillStyle = DEPT[spec.dept]; c.fillRect(x + w - e - tw - 2, y + e + 2, tw, th);
+    // white label plate: DEPARTMENT / name
+    if (!o.noText && w >= 30 && h >= 24){
+      let fs = clamp(Math.min(w, h) * .2, 7, 14);
+      const pw = Math.min(w - 2 * e - 4, Math.max(30, w * .72));
+      c.font = cond(fs); const tw2 = c.measureText(spec.dept).width; if (tw2 > pw - 6){ fs *= (pw - 6) / tw2; c.font = cond(fs); }
+      const showName = h > fs * 3.4 && pw > 40, ph = showName ? fs * 2.5 : fs * 1.5;
+      c.fillStyle = '#f7f6f1'; rr(c, -pw / 2, -ph / 2, pw, ph, 2); c.fill(); c.strokeStyle = '#1b1b1b'; c.lineWidth = 1; c.stroke();
+      c.fillStyle = '#1b1b1b'; c.textAlign = 'center'; c.textBaseline = 'middle';
+      c.fillText(spec.dept, 0, showName ? -fs * .5 : .5);
+      if (showName){
+        let name = spec.name; c.font = `600 ${fs * .66}px ${SANS}`; c.fillStyle = '#4a4a46';
+        while (c.measureText(name).width > pw - 6 && name.length > 3) name = name.slice(0, -2) + '…';
+        c.fillText(name, 0, fs * .62);
+      }
+      const ink = st.light ? '#1b1b1b' : '#e9e1c8', ps = clamp(fs * .42, 2.5, 4.5);
+      for (let i = 0; i < 4; i++){ c.fillStyle = i < spec.pips ? ink : (st.light ? 'rgba(0,0,0,.18)' : 'rgba(233,225,200,.22)'); c.fillRect(x + e + 3 + i * (ps + 1.5), y + h - e - 3 - ps, ps, ps); }
+    }
+  }
+  // top-down case at a centre point; w/h in px
+  function caseAt(c, cx, cy, w, h, spec, o = {}){
+    c.save(); if (o.alpha != null) c.globalAlpha *= o.alpha;
+    c.translate(cx - (o.elev ? 1.5 : 0), cy - (o.elev ? 2 : 0)); if (o.angle) c.rotate(o.angle);
+    lid(c, w, h, spec, o);
+    if (o.outline){ c.lineWidth = o.lw || 3; c.strokeStyle = o.outline; if (o.dash) c.setLineDash([5, 4]); rr(c, -w / 2 - 3, -h / 2 - 3, w + 6, h + 6, 4); c.stroke(); c.setLineDash([]); }
+    c.restore();
+    if (o.badge) elevBadge(c, cx + w / 2 - 3, cy + h / 2 - 3, o.badge, o.u || 1, o.alpha);
+  }
+  function elevBadge(c, rx, by, text, u, a = 1){
+    c.save(); c.globalAlpha *= a; c.font = cond(10 * u); const tw = c.measureText(text).width + 7 * u, th = 13 * u;
+    c.fillStyle = C.warn; c.fillRect(rx - tw, by - th, tw, th); c.strokeStyle = '#111'; c.lineWidth = 1; c.strokeRect(rx - tw, by - th, tw, th);
+    c.fillStyle = '#111'; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText(text, rx - tw / 2, by - th / 2 + .5); c.restore();
+  }
+  // case seen from the doors (front face); x,y = top-left
+  function front(c, x, y, w, h, spec, o = {}){
+    const st = STYLES[spec.st], wheels = o.wheels != null ? o.wheels : spec.wheels;
+    const wh = wheels ? Math.min(h * .14, 9) : 0, bh = h - wh, e = clamp(Math.min(w, bh) * .07, 2, 6);
+    if (wheels) for (const cx of [x + w * .2, x + w * .8]){
+      c.fillStyle = '#6f736e'; c.fillRect(cx - 2, y + bh, 4, wh * .4);
+      c.fillStyle = '#1a1a1a'; c.beginPath(); c.arc(cx, y + bh + wh * .62, Math.max(.5, wh * .38), 0, 7); c.fill();
+    }
+    const g = c.createLinearGradient(x, y, x, y + bh); g.addColorStop(0, st.a); g.addColorStop(1, st.b);
+    c.fillStyle = g; c.fillRect(x, y, w, bh);
+    c.lineWidth = e; c.strokeStyle = metal(c, x, y, x + w, y + bh); c.strokeRect(x + e / 2, y + e / 2, w - e, bh - e);
+    const seam = y + bh * .24; c.fillStyle = metal(c, x, y, x + w, y + bh); c.fillRect(x + e, seam - e * .35, w - 2 * e, e * .7);
+    const lw = clamp(w * .12, 4, 14), lh = lw * 1.1;
+    for (const cx of [x + w * .25, x + w * .75]){ c.fillStyle = metal(c, cx - lw / 2, 0, cx + lw / 2, 0); rr(c, cx - lw / 2, seam - lh / 2, lw, lh, 2); c.fill(); c.fillStyle = '#1a1b1c'; c.fillRect(cx - lw * .18, seam - lh * .3, lw * .36, lh * .6); }
+    if (!o.noLabel) frontPlate(c, x + w / 2, y + bh * .62, w, bh, spec.dept);
+    if (o.fade) { c.fillStyle = `rgba(12,12,11,${o.fade})`; c.fillRect(x, y, w, h); }
+  }
+  function frontPlate(c, cx, cy, w, bh, text){
+    if (bh < 20 || w < 26) return;
+    let fs = clamp(Math.min(w, bh) * .2, 7, 13); c.font = cond(fs);
+    const pw = Math.min(w * .74, c.measureText(text).width + fs), ph = fs * 1.5;
+    if (c.measureText(text).width > pw - 4){ fs *= (pw - 4) / c.measureText(text).width; c.font = cond(fs); }
+    c.fillStyle = '#f7f6f1'; rr(c, cx - pw / 2, cy - ph / 2, pw, ph, 2); c.fill(); c.strokeStyle = '#1b1b1b'; c.lineWidth = 1; c.stroke();
+    c.fillStyle = '#1b1b1b'; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText(text, cx, cy + .5);
+  }
+
+  /* ---------------- truck floor (top-down, nose at the top) ---------------- */
+  function truck(E, o){
+    const u = E.u, pad = 6 * u, top = (o.top || 0) + pad, bot = (o.bottom || 0) + pad;
+    const left = o.left || 0, right = o.right || 0, gut = (o.gutter != null ? o.gutter : 24) * u;
+    let s = (E.H - top - bot) / o.D;
+    const maxW = E.W - left - right - 2 * gut; if (96 * s > maxW) s = maxW / 96;
+    const Wp = 96 * s, Dp = o.D * s;
+    const ox = Math.round(left + (E.W - left - right - Wp) / 2), oy = Math.round(top + (E.H - top - bot - Dp) / 2);
+    return {s, Wp, Dp, ox, oy, D:o.D, wall:Math.max(4, 2 * s), P:(x, y) => [ox + x * s, oy + y * s], u};
+  }
+  function floorImg(E, Wp, Dp, s){
+    const key = `${Math.round(Wp)}x${Math.round(Dp)}x${E.dpr}`;
+    if (E.cache[key]) return E.cache[key];
+    const f = document.createElement('canvas'); f.width = Math.ceil(Wp * E.dpr); f.height = Math.ceil(Dp * E.dpr);
+    const x = f.getContext('2d'); x.scale(E.dpr, E.dpr); x.fillStyle = '#b08856'; x.fillRect(0, 0, Wp, Dp);
+    const plank = 5.5 * s; let seed = 7; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+    for (let px = 0; px < Wp; px += plank){
+      let py = -rnd() * 60 * s;
+      while (py < Dp){
+        const len = (50 + rnd() * 70) * s, sh = .95 + rnd() * .09;
+        x.fillStyle = `rgb(${Math.round(176 * sh)},${Math.round(136 * sh)},${Math.round(86 * sh)})`; x.fillRect(px, py, plank, len);
+        x.fillStyle = 'rgba(80,50,20,.5)'; x.fillRect(px, py, plank, 1);
+        x.fillStyle = 'rgba(80,50,20,.08)'; for (let k = 0; k < 3; k++) x.fillRect(px + rnd() * plank, py, 1, len);
+        py += len;
+      }
+      x.fillStyle = 'rgba(70,42,16,.55)'; x.fillRect(px, 0, 1, Dp);
+    }
+    return (E.cache[key] = f);
+  }
+  function drawTruck(c, E, T, o = {}){
+    const {ox, oy, Wp, Dp, s, wall} = T, dy = o.dy || 0;
+    c.drawImage(floorImg(E, Wp, Dp, s), ox, oy + dy, Wp, Dp);
+    c.fillStyle = metal(c, ox - wall, 0, ox, 0); c.fillRect(ox - wall, oy + dy, wall, Dp);
+    c.fillStyle = metal(c, ox + Wp, 0, ox + Wp + wall, 0); c.fillRect(ox + Wp, oy + dy, wall, Dp);
+    if (o.nose !== false){ c.fillStyle = '#6e706b'; c.fillRect(ox - wall, oy + dy - wall, Wp + 2 * wall, wall); }
+    if (o.doors){ c.fillStyle = metal(c, 0, oy + Dp, 0, oy + Dp + wall); c.fillRect(ox - wall, oy + dy + Dp, Wp + 2 * wall, wall * .8); }
+    if (o.wallLabels){
+      c.fillStyle = C.dim; c.font = cond(9 * E.u); c.textAlign = 'center'; c.textBaseline = 'middle';
+      for (const [xx, a] of [[ox - wall - 8 * E.u, -1], [ox + Wp + wall + 8 * E.u, 1]]){ c.save(); c.translate(xx, oy + dy + Dp / 2); c.rotate(a * Math.PI / 2); c.fillText('WALL', 0, 0); c.restore(); }
+    }
+  }
+  // load bar / strap across the truck at floor line yIn (top-down), drawn like the game's drawDevice
+  function device(c, T, kind, yIn, o = {}){
+    const {ox, Wp, s, wall} = T, y = T.oy + yIn * s + (o.dy || 0);
+    c.save(); if (o.alpha != null) c.globalAlpha *= o.alpha;
+    if (kind === 'bar'){
+      const t = Math.max(5 * T.u, 2.6 * s) * (o.k || 1);
+      c.fillStyle = 'rgba(0,0,0,.35)'; c.fillRect(ox - wall * .6 + 2, y - t / 2 + 3, Wp + wall * 1.2, t);
+      const g = c.createLinearGradient(0, y - t / 2, 0, y + t / 2); g.addColorStop(0, '#eef0ec'); g.addColorStop(.5, '#a3a7a2'); g.addColorStop(1, '#676b66');
+      c.fillStyle = g; rr(c, ox - wall * .6, y - t / 2, Wp + wall * 1.2, t, t / 2); c.fill(); c.strokeStyle = '#1a1a1a'; c.lineWidth = 1.5; c.stroke();
+      c.fillStyle = '#1b1b1b'; c.fillRect(ox - wall * .9, y - t * .9, wall * .5, t * 1.8); c.fillRect(ox + Wp + wall * .4, y - t * .9, wall * .5, t * 1.8);
+    } else {
+      const t = Math.max(4.5 * T.u, 2 * s) * (o.k || 1);
+      c.fillStyle = 'rgba(0,0,0,.3)'; c.fillRect(ox - wall * .5, y - t / 2 + 2, Wp + wall, t);
+      c.fillStyle = '#e6a21c'; c.fillRect(ox - wall * .5, y - t / 2, Wp + wall, t);
+      c.strokeStyle = 'rgba(120,70,0,.55)'; c.lineWidth = 1;
+      for (let xx = ox - wall * .5; xx < ox + Wp + wall * .5 - 3; xx += 6){ c.beginPath(); c.moveTo(xx, y - t / 2); c.lineTo(xx + 3, y + t / 2); c.stroke(); }
+      const bw = Math.max(14 * T.u, 7 * s);
+      c.fillStyle = metal(c, 0, y - t, 0, y + t); rr(c, ox + Wp / 2 - bw / 2, y - t, bw, t * 2, 2); c.fill(); c.strokeStyle = '#222'; c.stroke();
+      c.fillStyle = '#8f938e'; c.fillRect(ox - wall * .8, y - t * .7, wall * .4, t * 1.4); c.fillRect(ox + Wp + wall * .4, y - t * .7, wall * .4, t * 1.4);
+    }
+    if (o.ghost){ c.globalAlpha = 1; c.strokeStyle = o.ghost; c.lineWidth = 2; c.setLineDash([6, 4]); c.strokeRect(ox - wall - 2, y - 10 * T.u, Wp + wall * 2 + 4, 20 * T.u); c.setLineDash([]); }
+    c.restore();
+  }
+
+  /* ---------------- hands, keys, buttons, captions ---------------- */
+  function finger(c, x, y, r, a, ring){
+    if (a <= .01) return;
+    c.save(); c.globalAlpha *= a;
+    c.fillStyle = 'rgba(235,227,203,.42)'; c.beginPath(); c.arc(x, y, r, 0, 7); c.fill();
+    c.lineWidth = 2.5; c.strokeStyle = C.cream; c.stroke();
+    c.lineWidth = 1; c.strokeStyle = 'rgba(0,0,0,.45)'; c.beginPath(); c.arc(x, y, r + 1.8, 0, 7); c.stroke();
+    if (ring != null){ c.lineWidth = 3; c.strokeStyle = C.accent; c.beginPath(); c.arc(x, y, r + 5, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * ring); c.stroke(); }
+    c.restore();
+  }
+  function ripple(c, x, y, r, k){ if (k <= 0 || k >= 1) return; c.save(); c.globalAlpha *= 1 - k; c.strokeStyle = C.cream; c.lineWidth = 2; c.beginPath(); c.arc(x, y, r * (1 + k * 1.4), 0, 7); c.stroke(); c.restore(); }
+  function pointer(c, x, y, k, a, down){
+    if (a <= .01) return;
+    c.save(); c.globalAlpha *= a; c.translate(x, y); c.scale(k, k);
+    if (down){ c.strokeStyle = C.accent; c.lineWidth = 2; c.beginPath(); c.arc(0, 0, 7, 0, 7); c.stroke(); }
+    c.beginPath(); c.moveTo(0, 0); c.lineTo(0, 17); c.lineTo(4.2, 13); c.lineTo(7.2, 19.5); c.lineTo(10, 18.3); c.lineTo(7.1, 12); c.lineTo(12.5, 12); c.closePath();
+    c.fillStyle = '#fff'; c.fill(); c.lineWidth = 1.4; c.strokeStyle = '#111'; c.stroke();
+    c.restore();
+  }
+  // the right "hand" for the platform: a fingertip on the phone, the mouse pointer on desktop
+  function hand(c, E, x, y, a, o = {}){
+    if (E.phone) finger(c, x, y, 11 * E.u, a, o.ring);
+    else pointer(c, x + 1, y + 2, 1.05 * E.u, a, o.down);
+  }
+  function key(c, cx, cy, size, label, down, a = 1){
+    c.save(); c.globalAlpha *= a; c.font = cond(size * .5);
+    const w = Math.max(size, c.measureText(label).width + size * .5), d = down ? size * .09 : 0;
+    c.fillStyle = '#0d0d0c'; rr(c, cx - w / 2, cy - size / 2 + size * .1, w, size, 5); c.fill();
+    c.fillStyle = down ? C.accent : C.cream; rr(c, cx - w / 2, cy - size / 2 + d, w, size * .9, 5); c.fill();
+    c.strokeStyle = '#0d0d0c'; c.lineWidth = 2; c.stroke();
+    c.fillStyle = '#111'; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText(label, cx, cy - size * .05 + d);
+    c.restore();
+  }
+  function note(c, E, lines, cx, y0, a = 1){
+    c.save(); c.globalAlpha *= a; c.fillStyle = C.dim; c.font = cond(9.5 * E.u, 700); c.textAlign = 'center'; c.textBaseline = 'top';
+    lines.forEach((l, i) => c.fillText(l, cx, y0 + i * 11 * E.u)); c.restore();
+  }
+  function button(c, E, x, y, w, h, label, o = {}){
+    c.save(); if (o.alpha != null) c.globalAlpha *= o.alpha;
+    const pressed = o.pressed, prim = o.primary;
+    c.fillStyle = pressed ? C.accent : prim ? C.accent : o.hi ? '#46392b' : C.btn; c.fillRect(x, y, w, h);
+    c.strokeStyle = o.hi && !pressed ? C.accent : '#0d0d0c'; c.lineWidth = 2; c.strokeRect(x, y, w, h);
+    if (!pressed && !prim){ c.strokeStyle = 'rgba(255,255,255,.12)'; c.lineWidth = 1; c.strokeRect(x + 2, y + 2, w - 4, h - 4); }
+    let fs = (o.fs || 10.5) * E.u; c.font = cond(fs); const tw = c.measureText(label).width; if (tw > w - 6){ fs *= (w - 6) / tw; c.font = cond(fs); }
+    c.fillStyle = pressed || prim ? '#1a1209' : C.cream; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText(label, x + w / 2, y + h / 2 + .5);
+    c.restore();
+    return {x, y, w, h, cx:x + w / 2, cy:y + h / 2};
+  }
+  // phone bottom button row
+  function phoneRow(c, E, labels, o = {}){
+    const u = E.u, h = 26 * u, y = E.H - h - 4 * u, gap = 6 * u, n = labels.length, w = Math.min(78 * u, (E.W - 12 * u - gap * (n - 1)) / n);
+    const x0 = (E.W - (w * n + gap * (n - 1))) / 2, out = {};
+    c.fillStyle = '#1c1d1b'; c.fillRect(0, y - 4 * u, E.W, h + 8 * u); c.fillStyle = '#121211'; c.fillRect(0, y - 4 * u, E.W, 2);
+    labels.forEach((l, i) => { out[l] = button(c, E, x0 + i * (w + gap), y, w, h, l, {hi:o.hi === l, pressed:o.pressed === l, fs:10}); });
+    return out;
+  }
+  const ROW_H = 34; // px (x u) reserved for phoneRow
+  function pill(c, E, text, cx, cy, kind, a = 1){
+    if (a <= .01 || !text) return;
+    const fs = 11.5 * E.u; c.save(); c.globalAlpha *= a; c.font = cond(fs);
+    const w = c.measureText(text).width + fs * 1.1, h = fs * 1.55;
+    c.fillStyle = kind === 'good' ? C.good : kind === 'warn' ? C.warn : kind === 'bad' ? C.bad : C.cream;
+    c.fillRect(cx - w / 2, cy - h / 2, w, h); c.strokeStyle = '#0d0d0c'; c.lineWidth = 2; c.strokeRect(cx - w / 2, cy - h / 2, w, h);
+    c.fillStyle = '#111'; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText(text, cx, cy + 1); c.restore();
+  }
+  // captions: [[t0, t1, phoneText, desktopText?, kind?]]
+  function caption(c, E, t, list, cx, cy){
+    for (const [a, b, p, d, kind] of list){
+      if (t < a || t >= b) continue;
+      const k = Math.min(seg(t, a, a + .2), 1 - seg(t, b - .12, b) * (b >= 99 ? 0 : 1));
+      pill(c, E, E.phone ? p : (d || p), cx, cy, kind, k);
+    }
+  }
+  const capY = T => T.oy + T.Dp - 11 * T.u;
+  const bg = (c, E) => { c.fillStyle = C.bg; c.fillRect(0, 0, E.W, E.H); };
+  const path = (pts, k) => { // piecewise-linear along points with eased overall progress
+    if (k <= 0) return pts[0]; if (k >= 1) return pts[pts.length - 1];
+    const n = pts.length - 1, f = k * n, i = Math.floor(f), r = f - i;
+    return [lerp(pts[i][0], pts[i + 1][0], r), lerp(pts[i][1], pts[i + 1][1], r)];
+  };
+
+  /* =====================================================================
+     1. TURN A CASE (L7)
+     ===================================================================== */
+  ABILITY_DEMOS.turn = {dur:7.2, still:5.2, draw(c, t, E){
+    const u = E.u; bg(c, E);
+    const T = truck(E, {D:78, gutter:E.phone ? 24 : 42}), s = T.s, cw = 24 * s, ch = 30 * s;
+    drawTruck(c, E, T, {wallLabels:E.phone});
+    const slot = T.P(84, 15), start = T.P(48, 52);
+    const grab = seg(t, .5, .9), turn = es(t, 1.1, 2.3), lift = seg(t, 2.6, 2.9), slide = es(t, 3.2, 4.3), done = seg(t, 4.4, 4.8);
+    for (const ix of [12, 36, 60]){ const [x, y] = T.P(ix, 15); caseAt(c, x, y, cw, ch, CASE.trunk); }
+    if (done < 1){
+      c.save(); c.globalAlpha = 1 - done; c.setLineDash([5, 4]); c.lineWidth = 2; c.strokeStyle = C.cream;
+      c.strokeRect(slot[0] - cw / 2 + 2, slot[1] - ch / 2 + 2, cw - 4, ch - 4); c.setLineDash([]);
+      const lw = 26 * u; c.fillStyle = 'rgba(29,30,27,.75)'; c.fillRect(slot[0] - lw / 2, slot[1] - 7 * u, lw, 14 * u);
+      c.fillStyle = C.cream; c.font = cond(11 * u); c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText('24"', slot[0], slot[1] + 1); c.restore();
+    }
+    const ang = -Math.PI / 2 * (1 - turn), cx = lerp(start[0], slot[0], slide), cy = lerp(start[1], slot[1], slide);
+    caseAt(c, cx, cy, cw, ch, CASE.trunk, {angle:ang, outline:grab > 0 && done < 1 ? `rgba(232,137,47,${.9 * grab * (1 - done)})` : null});
+    if (done > 0){
+      c.save(); c.globalAlpha = done; const yy = T.oy + 31.5 * s;
+      c.strokeStyle = C.warn; c.lineWidth = 2; c.beginPath(); c.moveTo(T.ox + 1, yy); c.lineTo(T.ox + T.Wp - 1, yy); c.stroke();
+      for (let i = 0; i <= 4; i++){ const xx = clamp(T.ox + i * 24 * s, T.ox + 1, T.ox + T.Wp - 1); c.beginPath(); c.moveTo(xx, yy - 4); c.lineTo(xx, yy + 4); c.stroke(); }
+      c.font = cond(10 * u); c.textAlign = 'center'; c.textBaseline = 'top';
+      for (let i = 0; i < 4; i++){ const xx = T.ox + (i + .5) * 24 * s; c.fillStyle = 'rgba(29,30,27,.8)'; c.fillRect(xx - 11 * u, yy + 5, 22 * u, 13 * u); c.fillStyle = C.warn; c.fillText('24"', xx, yy + 6); }
+      c.restore();
+    }
+    if (E.phone){
+      const dx = cw * .3, dy = ch * .3, twA = grab * (1 - lift), r = 11 * u;
+      for (const sg of [-1, 1]){ const px = sg * dx, py = sg * dy; finger(c, cx + px * Math.cos(ang) - py * Math.sin(ang), cy + px * Math.sin(ang) + py * Math.cos(ang), r, twA); }
+      if (twA > .05 && turn > 0 && turn < 1){ c.save(); c.globalAlpha = twA; c.strokeStyle = C.cream; c.lineWidth = 2.5; c.beginPath(); c.arc(cx, cy, Math.hypot(dx, dy) + r + 5, ang + Math.PI * 1.15, ang + Math.PI * 1.45); c.stroke(); c.restore(); }
+      finger(c, cx, cy, r, seg(t, 2.9, 3.15) * (1 - done));
+    } else {
+      pointer(c, cx + 1, cy + 2, 1.05 * u, grab * (1 - done), true);
+      const kx = T.ox + T.Wp + (E.W - T.ox - T.Wp) / 2 + 2, ky = T.oy + 28 * s, ks = Math.min(34 * u, (E.W - T.ox - T.Wp) * .55);
+      key(c, kx, ky, ks, 'R', t > 1 && t < 1.45);
+      note(c, E, ['or', 'RIGHT-', 'CLICK'], kx, ky + ks * .6 + 4);
+    }
+    caption(c, E, t, [[.5, 2.9, 'TWO-FINGER TWIST', 'PRESS R TO TURN'], [2.9, 4.4, 'DRAG IT IN'], [4.4, 99, '4 × 24" = 96" ROW', null, 'good']], T.ox + T.Wp / 2, capY(T));
+  }};
+
+  /* =====================================================================
+     2/3. LOAD BAR (L11) and STRAP (L15): same motion, different device
+     ===================================================================== */
+  function deviceDemo(kind){
+    const LABEL = kind === 'bar' ? 'LOAD BAR' : 'STRAP', KEY = kind === 'bar' ? 'B' : 'S';
+    const tier = kind === 'bar' ? [['trunk', 12], ['trunk', 36], ['trunk', 60], ['trunk', 84]] : [['big', 24], ['big', 72]];
+    return {dur:6.6, still:4.6, draw(c, t, E){
+      const u = E.u; bg(c, E);
+      const T = truck(E, {D:62, bottom:E.phone ? ROW_H * u : 0, gutter:E.phone ? 24 : 46}), s = T.s;
+      drawTruck(c, E, T, {wallLabels:E.phone});
+      for (const [k, ix] of tier){ const sp = CASE[k], [x, y] = T.P(ix, 15); caseAt(c, x, y, sp.w * s, sp.d * s, sp); }
+      const lineY = T.oy + 30 * s, midX = T.ox + T.Wp / 2;
+      // where the line is
+      const placed = t >= 2.7, hint = seg(t, .3, .6) * (1 - seg(t, 2.6, 2.8));
+      if (!placed){ c.save(); c.globalAlpha = .4 + .5 * hint; c.setLineDash([4, 4]); c.strokeStyle = C.cream; c.lineWidth = 1.5; c.beginPath(); c.moveTo(T.ox, lineY); c.lineTo(T.ox + T.Wp, lineY); c.stroke(); c.restore(); }
+      let hx, hy, ha, down = false, src;
+      if (E.phone){
+        const row = phoneRow(c, E, [LABEL, kind === 'bar' ? 'STRAP' : 'LOAD BAR', 'VIEW'], {hi:LABEL, pressed:t > .5 && t < .8 ? LABEL : null});
+        src = row[LABEL];
+        const k = es(t, .8, 2.2); [hx, hy] = path([[src.cx, src.cy], [midX, lineY + 22 * u], [midX, lineY]], k);
+        ha = seg(t, .3, .5) * (1 - seg(t, 2.5, 2.8));
+      } else {
+        const gx = T.ox + T.Wp + T.wall + 5 * u, gw = E.W - gx - 5 * u, bh = 24 * u;
+        src = button(c, E, gx, T.oy + 8 * u, gw, bh, LABEL, {pressed:t > .8 && t < 1.05, hi:true, fs:10});
+        key(c, gx + gw / 2, src.y + bh + 26 * u, 22 * u, KEY, false);
+        note(c, E, ['or press'], gx + gw / 2, src.y + bh + 6 * u);
+        const k1 = es(t, .3, .8), k2 = es(t, 1.1, 2.3);
+        const start = [midX + 30 * u, T.oy + T.Dp - 10 * u];
+        [hx, hy] = t < 1.1 ? path([start, [src.cx, src.cy]], k1) : path([[src.cx, src.cy], [midX + 20 * u, lineY + 14 * u], [midX + 20 * u, lineY]], k2);
+        ha = seg(t, .2, .4) * (1 - seg(t, 3.0, 3.3)); down = (t > .8 && t < 1.05) || (t > 2.5 && t < 2.75);
+      }
+      // ghost device following the hand once it is over the floor
+      const carrying = E.phone ? (t > .8 && t < 2.7) : (t > 1.05 && t < 2.7);
+      if (carrying && hy < T.oy + T.Dp){
+        const yIn = clamp((hy - T.oy) / s, 1, T.D - 1), ok = Math.abs(yIn - 30) < 3;
+        device(c, T, kind, ok ? 30 : yIn, {alpha:.85, ghost:ok ? C.good : C.cream});
+      }
+      if (placed){ const k = seg(t, 2.7, 2.95); device(c, T, kind, 30, {k:1 + .35 * Math.sin(k * Math.PI)}); }
+      hand(c, E, hx, hy, ha, {down});
+      caption(c, E, t, [[.3, 2.45, 'DRAG IT ONTO THE TRUCK', `CLICK ${LABEL}, THEN THE LINE`], [2.45, 2.7, 'LET GO', `CLICK ${LABEL}, THEN THE LINE`],
+        [2.7, 99, kind === 'bar' ? 'LOAD BAR: WALL TO WALL' : 'STRAP RATCHETED TIGHT', null, 'good']], midX, capY(T));
+    }};
+  }
+  ABILITY_DEMOS.bar = deviceDemo('bar');
+  ABILITY_DEMOS.strap = deviceDemo('strap');
+
+  /* ---------------- door view (looking in from the rear doors) ---------------- */
+  function doorView(c, E, cases, o = {}){
+    const u = E.u, top = (o.top || 0) + 26 * u, bot = (o.bottom || 0) + 8 * u, Hin = 66;
+    const s = Math.min((E.H - top - bot) / Hin, (E.W - 64 * u) / 96), Wp = 96 * s, Hp = Hin * s;
+    const ox = Math.round((E.W - Wp) / 2), floorY = Math.round(top + (E.H - top - bot - Hp) / 2 + Hp);
+    const t0 = floorY - Hp;
+    c.fillStyle = '#121211'; c.fillRect(ox - 10 * u, t0 - 10 * u, Wp + 20 * u, Hp + 16 * u);
+    // back wall: one wood panel, grain across
+    c.fillStyle = '#9a7748'; c.fillRect(ox, t0, Wp, Hp);
+    c.fillStyle = 'rgba(70,42,16,.18)'; for (let i = 0; i < 9; i++) c.fillRect(ox, t0 + Hp * (i + .5) / 9, Wp, 1);
+    c.fillStyle = '#d8d8d5'; c.strokeStyle = '#111'; c.lineWidth = 1.5;
+    for (const fx of [ox - 8 * u, ox + Wp]){ c.fillRect(fx, t0, 8 * u, Hp); c.strokeRect(fx, t0, 8 * u, Hp); }
+    c.fillRect(ox - 8 * u, t0 - 9 * u, Wp + 16 * u, 9 * u); c.strokeRect(ox - 8 * u, t0 - 9 * u, Wp + 16 * u, 9 * u);
+    for (const lx of [ox + 5 * u, ox + Wp - 5 * u]){ c.fillStyle = '#e85a52'; c.beginPath(); c.arc(lx, t0 - 4.5 * u, 2.6 * u, 0, 7); c.fill(); }
+    c.fillStyle = metal(c, 0, floorY, 0, floorY + 6 * u); c.fillRect(ox - 10 * u, floorY, Wp + 20 * u, 6 * u);
+    c.fillStyle = '#8b8c84'; c.font = cond(9 * u, 700); c.textAlign = 'right'; c.textBaseline = 'middle';
+    for (let f = 0; f * 12 <= Hin; f += 2){ const yy = floorY - f * 12 * s; c.fillRect(ox - 20 * u, yy, 5 * u, 1); c.fillText(f + "'", ox - 22 * u, yy); }
+    for (const k of cases){ const sp = CASE[k.k], w = sp.w * s, h = sp.h * s; front(c, ox + k.x * s + 1, floorY - (k.z + sp.h) * s + 1, w - 2, h - 1, sp, {fade:k.fade}); }
+    return {s, ox, floorY, Wp, Hp, top:t0};
+  }
+
+  /* =====================================================================
+     4. STACKING + DOOR VIEW (L31)
+     ===================================================================== */
+  ABILITY_DEMOS.stack = {dur:7.6, still:5.8, draw(c, t, E){
+    const u = E.u; bg(c, E);
+    const reserve = E.phone ? ROW_H * u : 0;
+    const T = truck(E, {D:66, bottom:reserve, gutter:E.phone ? 24 : 46}), s = T.s, cw = 24 * s, ch = 30 * s;
+    const view = es(t, 3.6, 4.1) * (1 - es(t, 7.0, 7.4)); // 0 = top view, 1 = door view
+    const vPress = t > 3.3 && t < 3.6;
+    if (view < 1){
+      c.save(); c.globalAlpha = 1 - view;
+      drawTruck(c, E, T, {wallLabels:E.phone});
+      for (const ix of [12, 36, 60, 84]){ const [x, y] = T.P(ix, 15); caseAt(c, x, y, cw, ch, CASE.trunk); }
+      const tgt = T.P(36, 15), st = T.P(60, 50), k = es(t, .5, 2.0);
+      const cx = lerp(st[0], tgt[0], k), cy = lerp(st[1], tgt[1], k), over = k > .85, dropped = t >= 2.1;
+      caseAt(c, cx, cy, cw, ch, CASE.trunk, {elev:true, u, outline:!dropped && over ? C.good : (!dropped ? 'rgba(232,137,47,.9)' : null),
+        badge:dropped || over ? '▲ 30"' : null});
+      hand(c, E, cx, cy, seg(t, .3, .5) * (1 - seg(t, 2.1, 2.4)), {down:t > 1.95 && t < 2.2});
+      c.restore();
+    }
+    if (view > 0){
+      c.save(); c.globalAlpha = view;
+      c.fillStyle = C.bg; c.fillRect(0, 0, E.W, E.H - reserve);
+      doorView(c, E, [{k:'trunk', x:0, z:0}, {k:'trunk', x:24, z:0}, {k:'trunk', x:48, z:0}, {k:'trunk', x:72, z:0}, {k:'trunk', x:24, z:30}], {bottom:reserve});
+      c.restore();
+    }
+    if (E.phone){
+      const row = phoneRow(c, E, ['VIEW', 'LOAD BAR', 'STRAP'], {hi:t > 3 ? 'VIEW' : null, pressed:vPress ? 'VIEW' : null});
+      finger(c, row.VIEW.cx, row.VIEW.cy, 11 * u, seg(t, 3.0, 3.2) * (1 - seg(t, 3.7, 3.9)));
+      ripple(c, row.VIEW.cx, row.VIEW.cy, 11 * u, seg(t, 3.35, 3.9));
+    } else {
+      const kx = (E.W + T.ox + T.Wp) / 2, ks = 26 * u, ky = 40 * u;
+      key(c, kx, ky, ks, 'V', vPress || (t > 7.0 && t < 7.25));
+      note(c, E, ['DOOR', 'VIEW'], kx, ky + ks * .6 + 4);
+    }
+    const cy = view > .5 ? 11 * u : capY(T);
+    caption(c, E, t, [[.3, 2.1, 'DRAG IT ONTO A CASE', 'DROP IT ON TOP'], [2.1, 3.3, 'ON A FULL, FLAT LID', null, 'good'], [3.3, 4.0, 'TAP VIEW', 'PRESS V'], [4.0, 7.0, 'DOOR VIEW: TWO HIGH', null, 'good']], E.W / 2, cy);
+  }};
+
+  /* =====================================================================
+     5. DOCK STACK (L33)
+     ===================================================================== */
+  function stackParts(c, cx, cy, k, n, o = {}){ // big base + up to two small trunks on its lid, k px per inch
+    if (n >= 1) caseAt(c, cx, cy, 48 * k, 30 * k, CASE.big, {noText:k < 1.6, alpha:o.alpha});
+    for (let i = 0; i < Math.min(2, n - 1); i++) caseAt(c, cx + (i ? 12 : -12) * k, cy, 24 * k, 30 * k, CASE.trunk, {elev:true, noText:k < 1.6, alpha:o.alpha});
+  }
+  ABILITY_DEMOS.dock = {dur:8.6, still:6.8, draw(c, t, E){
+    const u = E.u; bg(c, E);
+    const leftCol = E.phone ? 96 * u : 128 * u;
+    const T = truck(E, {D:72, left:leftCol, gutter:8}), s = T.s;
+    drawTruck(c, E, T);
+    // card
+    const cx0 = 6 * u, cw = leftCol - 6 * u - (T.ox - leftCol > 12 * u ? 0 : 6 * u), cardY = 8 * u;
+    const k = Math.min((cw - 14 * u) / 48, s * .8), cardH = 30 * k + 30 * u;
+    c.fillStyle = C.panel; c.fillRect(cx0, cardY, cw, cardH); c.strokeStyle = '#0d0d0c'; c.lineWidth = 2; c.strokeRect(cx0, cardY, cw, cardH);
+    c.strokeStyle = '#4b4c47'; c.strokeRect(cx0 + 2, cardY + 2, cw - 4, cardH - 4);
+    c.fillStyle = C.accent; c.font = cond(10 * u); c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText('DOCK STACK', cx0 + cw / 2, cardY + 10 * u);
+    const slotC = [cx0 + cw / 2, cardY + 20 * u + 15 * k];
+    // one stack already rolled in at the nose
+    const [ax, ay] = T.P(24, 15); stackParts(c, ax, ay, s, 3);
+    // steps: three cases onto the card, then the whole stack into the truck
+    const steps = [.4, 1.7, 3.0], stepLen = 1.25;
+    let n = 0; for (const a of steps) if (t >= a + (E.phone ? .8 : 1.05)) n++;
+    const pick = E.phone ? es(t, 4.6, 5.8) : es(t, 5.0, 5.9), placed = t >= (E.phone ? 5.9 : 6.05);
+    const tgt = T.P(72, 15);
+    let btnAdd, btnPick;
+    if (!E.phone){
+      const by = cardY + cardH + 8 * u, bw = cw, bh = 22 * u;
+      const addPress = steps.some(a => t > a + .95 && t < a + 1.1), pickPress = t > 4.8 && t < 5.0;
+      btnAdd = button(c, E, cx0, by, bw, bh, 'ADD TO STACK', {pressed:addPress, fs:10});
+      btnPick = button(c, E, cx0, by + bh + 6 * u, bw, bh, 'PICK UP STACK', {pressed:pickPress, primary:t > 4.2 && !pickPress, fs:10});
+    }
+    // stack in the card / in motion / placed
+    const sx = lerp(slotC[0], tgt[0], pick), sy = lerp(slotC[1], tgt[1], pick), sk = lerp(k, s, pick);
+    if (placed) stackParts(c, tgt[0], tgt[1], s, 3);
+    else stackParts(c, sx, sy, sk, n);
+    if (pick > 0 && !placed){ c.save(); c.strokeStyle = C.accent; c.lineWidth = 2.5; rr(c, sx - 24 * sk - 3, sy - 15 * sk - 3, 48 * sk + 6, 30 * sk + 6, 4); c.stroke(); c.restore(); }
+    // the case currently being added
+    let hx = -99, hy = -99, ha = 0, down = false;
+    steps.forEach((a, i) => {
+      if (t < a || t >= a + stepLen) return;
+      const isBase = i === 0, sp = isBase ? CASE.big : CASE.trunk, w = sp.w * k, h = sp.d * k;
+      const dst = isBase ? slotC : [slotC[0] + (i === 1 ? -12 : 12) * k, slotC[1]], from = [dst[0] + 10 * u, E.H + 20 * u];
+      const carry = es(t, a, a + .7), p = [lerp(from[0], dst[0], carry), lerp(from[1], dst[1], carry) - (carry < 1 ? 0 : 0)];
+      const settled = t >= a + (E.phone ? .8 : 1.05);
+      if (!settled) caseAt(c, p[0], p[1] - 3, w, h, sp, {elev:true, noText:k < 1.6, outline:carry > .9 ? C.good : 'rgba(232,137,47,.9)', lw:2});
+      if (E.phone){ hx = p[0]; hy = p[1]; ha = seg(t, a, a + .15) * (1 - seg(t, a + .8, a + 1.0)); }
+      else {
+        const toBtn = es(t, a + .7, a + .95); hx = lerp(p[0], btnAdd.cx, toBtn); hy = lerp(p[1], btnAdd.cy, toBtn);
+        ha = seg(t, a, a + .15) * (1 - seg(t, a + 1.1, a + 1.25)); down = t > a + .95 && t < a + 1.1;
+      }
+    });
+    if (t >= 4.3 && t < 6.4){
+      if (E.phone){ hx = sx; hy = sy; ha = seg(t, 4.3, 4.5) * (1 - seg(t, 5.9, 6.2)); down = false; }
+      else {
+        const toBtn = es(t, 4.3, 4.75); hx = t < 5.0 ? lerp(T.ox - 20 * u, btnPick.cx, toBtn) : sx; hy = t < 5.0 ? lerp(T.oy + T.Dp, btnPick.cy, toBtn) : sy;
+        ha = seg(t, 4.3, 4.5) * (1 - seg(t, 6.05, 6.3)); down = (t > 4.8 && t < 5.0) || (t > 5.9 && t < 6.05);
+      }
+    }
+    hand(c, E, hx, hy, ha, {down});
+    caption(c, E, t, [[.3, 4.4, 'DRAG CASES ONTO THE CARD', 'ADD TO STACK'], [4.4, 6.0, 'DRAG THE CARD IN', 'PICK UP STACK'], [6.0, 99, 'ROLLED IN AS ONE PIECE', null, 'good']], T.ox + T.Wp / 2, capY(T));
+  }};
+
+  /* =====================================================================
+     6. LAY A CASE ON ITS SIDE (L61): seen from the doors, width and height swap
+     ===================================================================== */
+  ABILITY_DEMOS.tip = {dur:6.6, still:4.6, draw(c, t, E){
+    const u = E.u; bg(c, E);
+    const Hin = 54, top = 10 * u, bot = 12 * u, gut = E.phone ? 26 * u : 52 * u;
+    const s = Math.min((E.H - top - bot) / Hin, (E.W - 2 * gut) / 96), Wp = 96 * s, Hp = Hin * s;
+    const ox = Math.round((E.W - Wp) / 2), floorY = Math.round(top + (E.H - top - bot - Hp) / 2 + Hp);
+    // back wall + floor sill
+    c.fillStyle = '#121211'; c.fillRect(ox - 6 * u, floorY - Hp - 4, Wp + 12 * u, Hp + 4);
+    c.fillStyle = '#9a7748'; c.fillRect(ox, floorY - Hp, Wp, Hp);
+    c.fillStyle = 'rgba(70,42,16,.18)'; for (let i = 0; i < 7; i++) c.fillRect(ox, floorY - Hp + Hp * (i + .5) / 7, Wp, 1);
+    c.fillStyle = metal(c, 0, floorY, 0, floorY + 6 * u); c.fillRect(ox - 6 * u, floorY, Wp + 12 * u, 6 * u);
+    // the case: 24" wide x 30" tall, tips clockwise over its bottom-right corner
+    const sp = CASE.trunk, w = 24 * s, h = 30 * s, px = ox + 50 * s, py = floorY;
+    const hold = seg(t, .6, 1.6), tipK = E.phone ? es(t, 1.9, 2.7) : es(t, 1.6, 2.4);
+    const ang = Math.PI / 2 * tipK, settle = t > 2.4 ? Math.sin(seg(t, 2.4, 2.8) * Math.PI) * .03 : 0;
+    const lifted = !E.phone ? 0 : (t > .5 && t < 1.9 ? 1 : 0);
+    c.save(); c.translate(px, py); c.rotate(ang - settle);
+    c.fillStyle = 'rgba(0,0,0,.25)'; c.fillRect(-w + 3, -h + 3, w, h);
+    front(c, -w, -h, w, h, sp, {noLabel:true});
+    if (t > .4 && tipK < 1){ c.strokeStyle = 'rgba(232,137,47,.9)'; c.lineWidth = 2.5; c.strokeRect(-w - 2, -h - 2, w + 4, h + 4); }
+    c.restore();
+    // label stays upright at the case centre
+    const ccx = px + (-w / 2) * Math.cos(ang) - (-h / 2) * Math.sin(ang), ccy = py + (-w / 2) * Math.sin(ang) + (-h / 2) * Math.cos(ang);
+    frontPlate(c, ccx, ccy, Math.max(w, 24 * s), Math.max(h, 24 * s), 'GENERAL');
+    // dimensions: height on the left, width under the floor line
+    const before = 1 - seg(t, 1.5, 1.8), after = seg(t, 2.8, 3.1);
+    const dim = (x0, y0, x1, y1, label, a, vertical) => {
+      if (a <= .01) return; c.save(); c.globalAlpha *= a; c.strokeStyle = C.warn; c.lineWidth = 2; c.beginPath(); c.moveTo(x0, y0); c.lineTo(x1, y1); c.stroke();
+      const tk = 4; c.beginPath(); if (vertical){ c.moveTo(x0 - tk, y0); c.lineTo(x0 + tk, y0); c.moveTo(x1 - tk, y1); c.lineTo(x1 + tk, y1); } else { c.moveTo(x0, y0 - tk); c.lineTo(x0, y0 + tk); c.moveTo(x1, y1 - tk); c.lineTo(x1, y1 + tk); } c.stroke();
+      c.font = cond(11 * u); const tw = c.measureText(label).width + 8 * u, mx = (x0 + x1) / 2 - (vertical ? tw / 2 + 4 * u : 0), my = (y0 + y1) / 2;
+      c.fillStyle = 'rgba(29,30,27,.88)'; c.fillRect(mx - tw / 2, my - 7 * u, tw, 14 * u); c.fillStyle = C.warn; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText(label, mx, my + .5); c.restore();
+    };
+    const lx0 = px - w - 9 * u; dim(lx0, floorY, lx0, floorY - h, '30" TALL', before, true);
+    dim(px - w, floorY + 12 * u, px, floorY + 12 * u, '24"', before, false);
+    const lx1 = px - 9 * u; dim(lx1, floorY, lx1, floorY - 24 * s, '24" TALL', after, true);
+    dim(px, floorY + 12 * u, px + 30 * s, floorY + 12 * u, '30"', after, false);
+    // controls
+    if (E.phone){
+      const fy = t < 1.7 ? ccy : lerp(ccy, ccy - 34 * u, es(t, 1.7, 1.95));
+      const fa = seg(t, .4, .6) * (1 - seg(t, 1.95, 2.2));
+      finger(c, ccx, fy, 11 * u, fa, t > .6 && t < 1.7 ? hold : null);
+      if (t > 1.7 && t < 2.1){ c.save(); c.globalAlpha = 1 - seg(t, 1.9, 2.1); c.strokeStyle = C.cream; c.lineWidth = 2; for (const dx of [-7, 0, 7]){ c.beginPath(); c.moveTo(ccx + dx * u, fy + 16 * u); c.lineTo(ccx + dx * u, fy + 30 * u); c.stroke(); } c.restore(); }
+    } else {
+      pointer(c, ccx + 1, ccy + 2, 1.05 * u, seg(t, .3, .5) * (1 - seg(t, 2.6, 2.9)), true);
+      const kx = (E.W + ox + Wp) / 2, ks = 28 * u; key(c, kx, floorY - Hp * .6, ks, 'T', t > 1.35 && t < 1.75);
+      note(c, E, ['TIP'], kx, floorY - Hp * .6 + ks * .6 + 4);
+    }
+    caption(c, E, t, [[.5, 1.7, 'HOLD STILL 1 SEC', 'PRESS T'], [1.7, 2.6, 'FLICK UP', 'PRESS T'], [2.8, 99, 'ON ITS SIDE: 24" TALL', null, 'good']], ox + Wp / 2, top + 10 * u);
+  }};
+
+  /* =====================================================================
+     7. HARD CASES IN POCKETS (L62)
+     ===================================================================== */
+  ABILITY_DEMOS.pocket = {dur:7.8, still:6.0, draw(c, t, E){
+    const u = E.u; bg(c, E);
+    const T = truck(E, {D:66, gutter:E.phone ? 24 : 40}), s = T.s, cw = 24 * s, ch = 30 * s;
+    drawTruck(c, E, T, {wallLabels:true});
+    // row 1 on the floor, three more on its lids; the nose-corner lid is free
+    for (const ix of [12, 36, 60, 84]){ const [x, y] = T.P(ix, 15); caseAt(c, x, y, cw, ch, CASE.trunk, {noText:ix > 12}); }
+    for (const ix of [36, 60, 84]){ const [x, y] = T.P(ix, 15); caseAt(c, x, y, cw, ch, CASE.trunk, {elev:true}); }
+    // the hard case: 18 x 24, into the corner (nose + wall), 6" from its neighbours
+    const hw = 18 * s, hh = 24 * s, tgt = T.P(9, 12), from = T.P(40, 52), k = es(t, .5, 1.8);
+    const hx = lerp(from[0], tgt[0], k), hy = lerp(from[1], tgt[1], k), dropped = t >= 1.9, pocketed = t >= 4.7;
+    // the next row: two dock stacks roll in
+    for (const [i, a] of [[0, 3.2], [1, 3.8]]){
+      const kk = es(t, a, a + .7); if (kk <= 0) continue;
+      const [x, y] = T.P(24 + 48 * i, 45); stackParts(c, x, lerp(T.oy + T.Dp + 20 * s, y, kk), s, 3);
+    }
+    caseAt(c, hx, hy, hw, hh, CASE.hard, {elev:true, u,
+      outline:pocketed ? C.good : dropped ? null : 'rgba(232,137,47,.9)'});
+    // open side warning before the next row arrives
+    const open = seg(t, 2.1, 2.4) * (1 - seg(t, 3.4, 3.7));
+    if (open > 0){
+      c.save(); c.globalAlpha = open; c.strokeStyle = C.bad; c.lineWidth = 3; c.setLineDash([5, 4]);
+      const by = tgt[1] + hh / 2 + 3; c.beginPath(); c.moveTo(tgt[0] - hw / 2, by); c.lineTo(tgt[0] + hw / 2, by); c.stroke(); c.setLineDash([]);
+      c.fillStyle = C.bad; const ay = by + 6 * u; c.beginPath(); c.moveTo(tgt[0], ay + 12 * u); c.lineTo(tgt[0] - 6 * u, ay + 4 * u); c.lineTo(tgt[0] + 6 * u, ay + 4 * u); c.closePath(); c.fill(); c.restore();
+    }
+    if (pocketed){ const a = seg(t, 4.7, 5.0); pill(c, E, 'POCKETED', tgt[0] + hw / 2 + 30 * u, tgt[1] + hh / 2 + 4 * u, 'good', a); }
+    hand(c, E, hx, hy, seg(t, .3, .5) * (1 - seg(t, 1.9, 2.2)), {down:t > 1.75 && t < 1.95});
+    caption(c, E, t, [[.3, 1.9, 'DRAG IT ONTO THE LIDS', 'DROP IT ON THE LIDS'], [2.1, 3.3, 'OPEN AT THE BACK', null, 'warn'], [3.3, 4.7, 'THE NEXT ROW CLOSES IT IN'], [4.7, 99, 'TRAPPED ON EVERY SIDE', null, 'good']], T.ox + T.Wp / 2, capY(T));
+  }};
+
+  /* =====================================================================
+     8. PIN THE TIERS (L79)
+     ===================================================================== */
+  ABILITY_DEMOS.pin = {dur:7.0, still:5.0, draw(c, t, E){
+    const u = E.u; bg(c, E);
+    const T = truck(E, {D:66, gutter:E.phone ? 24 : 40}), s = T.s, cw = 24 * s, ch = 30 * s;
+    drawTruck(c, E, T);
+    for (const iy of [15, 45]) for (const ix of [12, 36, 60, 84]){ const [x, y] = T.P(ix, iy); caseAt(c, x, y, cw, ch, CASE.trunk, {noText:true}); }
+    // tier labels in the gutter
+    c.fillStyle = C.dim; c.font = cond(9 * u); c.textAlign = 'center'; c.textBaseline = 'middle';
+    for (const [lab, iy] of [['TIER 1', 15], ['TIER 2', 45]]){ c.save(); c.translate(T.ox - T.wall - 8 * u, T.oy + iy * s); c.rotate(-Math.PI / 2); c.fillText(lab, 0, 0); c.restore(); }
+    // the tier line
+    const glow = seg(t, 1.3, 1.6), pinned = t >= 2.4, ly = T.oy + 30 * s;
+    c.save(); c.setLineDash([6, 4]); c.lineWidth = glow > 0 ? 3 : 2; c.strokeStyle = pinned ? C.good : glow > 0 ? C.warn : C.cream;
+    c.beginPath(); c.moveTo(T.ox - T.wall, ly); c.lineTo(T.ox + T.Wp + T.wall, ly); c.stroke(); c.restore();
+    c.fillStyle = 'rgba(29,30,27,.8)'; c.font = cond(9 * u); const tl = 'TIER LINE', tw = c.measureText(tl).width + 8 * u;
+    c.fillRect(T.ox + 2 * u, ly - 15 * u, tw, 12 * u); c.fillStyle = pinned ? C.good : glow > 0 ? C.warn : C.cream; c.textAlign = 'center'; c.fillText(tl, T.ox + 2 * u + tw / 2, ly - 9 * u);
+    // the long case (Large Utility Trunk, laid lengthwise: 30" across x 48" deep) on the lids, centred on the line
+    const tgt = T.P(48, 30), from = [tgt[0] + 6 * u, E.H + 48 * s], k = es(t, .4, 2.0);
+    const lx = lerp(from[0], tgt[0], k), lyy = lerp(from[1], tgt[1], k);
+    caseAt(c, lx, lyy, 30 * s, 48 * s, CASE.big, {elev:true, u, badge:t >= 2.1 ? '▲ 30"' : null, outline:pinned ? C.good : 'rgba(232,137,47,.9)'});
+    if (pinned){ c.font = cond(11.5 * u); const pw = c.measureText('PINNED').width + 12.65 * u; pill(c, E, 'PINNED', Math.min(tgt[0] + 15 * s + 6 * u + pw / 2, T.ox + T.Wp - pw / 2 - 2 * u), ly, 'good', seg(t, 2.4, 2.7)); }
+    hand(c, E, lx, lyy + 14 * s, seg(t, .3, .5) * (1 - seg(t, 2.1, 2.4)), {down:t > 1.95 && t < 2.15});
+    caption(c, E, t, [[.3, 2.4, 'LAY IT ACROSS THE TIER LINE'], [2.4, 99, 'BOTH TIERS TIED TOGETHER', null, 'good']], T.ox + T.Wp / 2, capY(T));
+  }};
+
+  /* =====================================================================
+     9. UNLOADING (L91)
+     ===================================================================== */
+  ABILITY_DEMOS.unload = {dur:7.6, still:5.9, draw(c, t, E){
+    const u = E.u; bg(c, E);
+    const T = truck(E, {D:72, bottom:24 * u, left:E.phone ? 0 : 0, gutter:E.phone ? 62 : 70}), s = T.s;
+    // dock apron below the doors
+    c.fillStyle = '#2a2b28'; c.fillRect(T.ox - 30 * u, T.oy + T.Dp, T.Wp + 60 * u, E.H - T.oy - T.Dp);
+    drawTruck(c, E, T, {doors:true});
+    c.save(); c.beginPath(); c.rect(T.ox, T.oy, T.Wp, E.H - T.oy); c.clip();
+    // back of the load (partly cut off), then VIDEO, then RIGGING at the doors
+    for (const ix of [12, 36, 60, 84]){ const [x, y] = T.P(ix, -3); caseAt(c, x, y, 24 * s, 30 * s, CASE.audio, {noText:true}); }
+    const offs = [[1.3, 'rig', 24, 57], [2.3, 'rig', 72, 57], [3.7, 'video', 12, 27], [4.6, 'video', 36, 27]];
+    const videoRest = [[60, 27], [84, 27]];
+    for (const [x0, y0] of videoRest){ const [x, y] = T.P(x0, y0); caseAt(c, x, y, 24 * s, 30 * s, CASE.video); }
+    let tap = null;
+    offs.forEach(([a, k, x0, y0], i) => {
+      const sp = CASE[k], go = es(t, a + .1, a + .8);
+      const [x, y] = T.P(x0, y0), yy = lerp(y, E.H + sp.d * s, go);
+      if (go >= 1) return;
+      const reach = t > (i ? offs[i - 1][0] + .5 : 1.0) && t < a + .1;
+      caseAt(c, x, yy, sp.w * s, sp.d * s, sp, {outline:reach ? `rgba(235,227,203,${.6 + .4 * Math.sin(t * 9)})` : null});
+      if (t > a - .35 && t < a + .35) tap = [x, y, a];
+    });
+    c.restore();
+    // strap at the doors comes out on its own
+    const strapOut = es(t, .5, 1.0);
+    if (strapOut < 1) device(c, T, 'strap', 71, {alpha:1 - strapOut, dy:strapOut * 16 * u});
+    if (t > .5 && t < 1.3) pill(c, E, 'STRAP OFF', T.ox + T.Wp / 2, T.oy + 71 * s - 12 * u, 'warn', seg(t, .5, .7) * (1 - seg(t, 1.1, 1.3)));
+    if (tap){ const [x, y, a] = tap; hand(c, E, x, y, seg(t, a - .35, a - .2) * (1 - seg(t, a + .15, a + .35)), {down:t > a - .05 && t < a + .1}); if (E.phone) ripple(c, x, y, 11 * u, seg(t, a, a + .4)); }
+    // venue order, left gutter
+    const order = [['RIGGING', DEPT.RIGGING], ['VIDEO', DEPT.VIDEO], ['AUDIO', DEPT.AUDIO]], cur = t < 3.2 ? 0 : 1;
+    const gw = T.ox - T.wall - 10 * u, gx = 5 * u; let gy = T.oy;
+    c.fillStyle = C.dim; c.font = cond(9 * u); c.textAlign = 'left'; c.textBaseline = 'middle'; c.fillText('VENUE ORDER', gx, gy + 4 * u); gy += 12 * u;
+    order.forEach(([name, col], i) => {
+      const h = 16 * u, on = i === cur, done = i < cur;
+      c.fillStyle = on ? C.cream : '#2f302d'; c.fillRect(gx, gy, gw, h); c.strokeStyle = on ? '#0d0d0c' : '#4b4c47'; c.lineWidth = 1.5; c.strokeRect(gx, gy, gw, h);
+      c.fillStyle = col; c.fillRect(gx + 2, gy + 2, 4 * u, h - 4);
+      c.fillStyle = on ? '#111' : done ? '#6c6d67' : C.dim; c.font = cond(9.5 * u); c.fillText(`${i + 1}. ${name}${done ? ' ✓' : ''}`, gx + 8 * u, gy + h / 2 + .5);
+      gy += h + 4 * u;
+    });
+    caption(c, E, t, [[.3, 1.2, 'STRAPS COME OUT AS YOU REACH THEM'], [1.2, 3.2, 'TAP THE CASE YOU CAN REACH', 'CLICK THE CASE YOU CAN REACH'], [3.2, 99, 'RIGGING FIRST, THEN VIDEO', null, 'good']],
+      T.ox + T.Wp / 2, E.H - 12 * u);
+  }};
+
+  /* =====================================================================
+     10. ENDLESS TOUR
+     ===================================================================== */
+  ABILITY_DEMOS.tour = {dur:8.2, still:6.6, draw(c, t, E){
+    const u = E.u; bg(c, E);
+    const P = E.phone, topStrip = P ? 36 * u : 0, leftCol = P ? 0 : 86 * u, rightCol = P ? 0 : 76 * u;
+    const T = truck(E, {D:60, top:topStrip, left:leftCol, right:rightCol, gutter:P ? 52 : 8}), s = T.s;
+    // tiles: case cards that slide in
+    const tiles = [['trunk', '×8'], ['big', '×2'], ['distro', '×4']];
+    const left8 = Math.max(0, 8 - Math.floor(seg(t, 1.0, 3.4) * 8.0001));
+    const tileRects = [];
+    tiles.forEach(([k, cnt], i) => {
+      const inK = es(t, .15 + i * .2, .65 + i * .2); let x, y, w, h;
+      if (P){ w = 58 * u; h = 28 * u; x = lerp(-w - 10, 8 * u + i * (w + 6 * u), inK); y = 4 * u; }
+      else { w = leftCol - 12 * u; h = 46 * u; x = 6 * u; y = lerp(-h - 10, 8 * u + i * (h + 6 * u), inK); }
+      // after READY the used tile slides out and a fresh one replaces it
+      const swap = i === 0 ? es(t, 5.0, 5.5) : 0;
+      c.fillStyle = C.panel; c.fillRect(x, y, w, h); c.strokeStyle = '#0d0d0c'; c.lineWidth = 2; c.strokeRect(x, y, w, h);
+      const sp = CASE[i === 0 && swap > .5 ? 'rig' : k], kk = Math.min((h - 8 * u) / sp.d, (w * .55) / sp.w);
+      caseAt(c, x + 6 * u + sp.w * kk / 2, y + h / 2, sp.w * kk, sp.d * kk, sp, {noText:true});
+      c.fillStyle = C.cream; c.font = cond(11 * u); c.textAlign = 'right'; c.textBaseline = 'middle';
+      c.fillText(i === 0 ? (swap > .5 ? '×2' : '×' + left8) : cnt, x + w - 5 * u, y + h / 2 + .5);
+      tileRects.push({x, y, w, h});
+    });
+    // truck: fills, drives off (up), next one backs in (from below)
+    const off = es(t, 3.9, 4.7), back = es(t, 4.7, 5.6);
+    const dy = t < 4.7 ? -off * (T.oy + T.Dp + 10) : (1 - back) * (E.H - T.oy + 10);
+    c.save(); c.beginPath(); c.rect(T.ox - 20 * u, topStrip + 2, T.Wp + 40 * u, E.H - topStrip); c.clip();
+    drawTruck(c, E, T, {dy, doors:true});
+    if (t < 4.7){
+      for (let i = 0; i < 8; i++){
+        const a = 1.0 + i * .3, k = es(t, a, a + .35); if (k <= 0) continue;
+        const ix = 12 + (i % 4) * 24, iy = 15 + Math.floor(i / 4) * 30, [tx, ty] = T.P(ix, iy), r0 = tileRects[0];
+        const fx = r0.x + r0.w * .3, fy = r0.y + r0.h / 2;
+        caseAt(c, lerp(fx, tx, k), lerp(fy, ty, k) + dy, 24 * s * lerp(.4, 1, k), 30 * s * lerp(.4, 1, k), CASE.trunk, {noText:k < 1});
+      }
+    }
+    c.restore();
+    // READY + counters
+    let ready, rx, ry;
+    if (P){ rx = T.ox + T.Wp + T.wall + 5 * u; ry = T.oy + T.Dp - 26 * u; }
+    else { rx = T.ox + T.Wp + T.wall + 8 * u; ry = T.oy + T.Dp - 30 * u; }
+    const rw = E.W - rx - 5 * u, rh = P ? 24 * u : 28 * u;
+    ready = button(c, E, rx, ry, rw, rh, 'READY', {primary:t > 3.3 && t < 3.9, pressed:t > 3.65 && t < 3.85, fs:11});
+    // strikes + truck number
+    const sx = P ? 6 * u : rx, sw = P ? T.ox - T.wall - 10 * u : rw; let sy = P ? T.oy + 4 * u : T.oy + 2 * u;
+    c.fillStyle = C.dim; c.font = cond(9 * u); c.textAlign = 'left'; c.textBaseline = 'middle';
+    c.fillText(`TRUCK ${t < 4.7 ? 1 : 2}`, sx, sy + 4 * u); sy += 14 * u;
+    c.fillText('3 STRIKES', sx, sy + 4 * u); sy += 10 * u;
+    const bs = Math.min(13 * u, (sw - 8 * u) / 3);
+    for (let i = 0; i < 3; i++){ const bx = sx + i * (bs + 4 * u); c.fillStyle = '#2f302c'; c.fillRect(bx, sy, bs, bs); c.strokeStyle = '#0d0d0c'; c.lineWidth = 1.5; c.strokeRect(bx, sy, bs, bs); c.fillStyle = '#55564f'; c.font = cond(bs * .7); c.textAlign = 'center'; c.fillText('✕', bx + bs / 2, sy + bs / 2 + .5); c.textAlign = 'left'; }
+    hand(c, E, ready.cx, ready.cy, seg(t, 3.3, 3.5) * (1 - seg(t, 3.9, 4.1)), {down:t > 3.65 && t < 3.85});
+    if (P) ripple(c, ready.cx, ready.cy, 11 * u, seg(t, 3.7, 4.1));
+    caption(c, E, t, [[.2, 3.4, 'FILL THE TRUCK'], [3.4, 4.7, 'TAP READY', 'CLICK READY'], [4.7, 99, 'NEXT TRUCK BACKS IN', null, 'good']], T.ox + T.Wp / 2, E.H - 14 * u);
+  }};
+
+  /* ---------------- player ---------------- */
+  return function playAbilityDemo(canvas, key, phone){
+    const demo = ABILITY_DEMOS[key];
+    if (!canvas || !demo) return () => {};
+    const ctx = canvas.getContext('2d');
+    const reduce = typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const E = {phone:!!phone, cache:{}, W:0, H:0, u:1, dpr:1};
+    let raf = 0, t0 = null, stopped = false, visible = true, io = null;
+    const fit = () => {
+      const W = canvas.clientWidth || canvas.width, H = canvas.clientHeight || canvas.height, dpr = Math.max(1, Math.min(3, window.devicePixelRatio || 1));
+      if (W === E.W && H === E.H && dpr === E.dpr) return;
+      E.W = W; E.H = H; E.dpr = dpr; E.u = Math.min(W / 300, H / 170); E.cache = {};
+      canvas.width = Math.round(W * dpr); canvas.height = Math.round(H * dpr);
+    };
+    const render = t => {
+      fit(); if (!E.W || !E.H) return;
+      ctx.setTransform(E.dpr, 0, 0, E.dpr, 0, 0); ctx.clearRect(0, 0, E.W, E.H);
+      ctx.save(); ctx.globalAlpha = 1; demo.draw(ctx, t, E); ctx.restore();
+      if (!reduce){ // short dip between loops
+        const v = Math.max(seg(t, demo.dur - .4, demo.dur), 1 - seg(t, 0, .3)) * .85;
+        if (v > 0){ ctx.fillStyle = `rgba(29,30,27,${v})`; ctx.fillRect(0, 0, E.W, E.H); }
+      }
+    };
+    const frame = now => {
+      if (stopped) return;
+      if (t0 == null) t0 = now;
+      if (visible) render(((now - t0) / 1000) % demo.dur);
+      raf = requestAnimationFrame(frame);
+    };
+    if (reduce){
+      render(demo.still);
+      if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { if (!stopped) render(demo.still); });
+      const onResize = () => { if (!stopped) render(demo.still); };
+      window.addEventListener('resize', onResize);
+      return function stop(){ stopped = true; window.removeEventListener('resize', onResize); };
+    }
+    if (typeof IntersectionObserver === 'function'){ io = new IntersectionObserver(es2 => { visible = es2.some(e => e.isIntersecting); }); io.observe(canvas); }
+    raf = requestAnimationFrame(frame);
+    return function stop(){ stopped = true; cancelAnimationFrame(raf); if (io) io.disconnect(); };
+  };
+})();
+
+</script>
 <script>
 'use strict';
 /* =====================================================================
@@ -764,11 +1587,11 @@ const LESSON_LEVELS = [
     unloadSequence:null, rules:{heavyBase:false}, availableLoadBars:0, availableStraps:0, timer:null,
     lesson:'Every truck pack starts at the <b>nose</b> (the front wall, top of the screen) and works back toward the <b>rear doors</b>. Cases roll in through the doors, so you build from the far end first.',
     objectives:['Load all 4 Utility Trunks', 'Build one full-width row against the nose'],
-    hint:'Turn each trunk so its 24" side runs across the truck. Four 24" cases = 96": one perfect full-width row against the nose.',
+    hint:'Each trunk\'s 24" side already runs across the truck. Four 24" cases = 96": one perfect full-width row against the nose.',
     howTo:true,
     coach:[
       {until:'pick', text:'Click a <b>Utility Trunk</b> in the MANIFEST to pick it up (or drag it straight into the truck).'},
-      {until:'place', text:'Move into the truck. <b>Green</b> means it fits. Click to set it down. Press <b>R</b> to rotate, <b>SPACE</b> to push it all the way in.'},
+      {until:'place', text:'Move into the truck. <b>Green</b> means it fits. Click to set it down. <b>SPACE</b> pushes it all the way in.'},
       {until:'allPlaced', text:'Nice. Keep going: fill the width of the truck at the nose before starting a second row.'},
       {text:'Everything is on the truck. Hit <b>READY FOR TRANSIT</b> to see how it rides.'}
     ]
@@ -2880,12 +3703,13 @@ function showBriefing(){
     </div>`;
   if (lv.howTo) h += `<div class="howto">
       <kbd>CLICK</kbd><span>Pick a case from the manifest, then click in the truck to set it down. Dragging works too.</span>
-      <kbd>R</kbd><span>Rotate the case you're holding (right-click works too).</span>
+      ${lv.id >= TURN_LEVEL ? `<kbd>R</kbd><span>Rotate the case you're holding (right-click works too).</span>` : ''}
       <kbd>SPACE</kbd><span>Push it in: slide it toward the nose until it touches something.</span>
       <kbd>ARROWS</kbd><span>Move the case one grid square (6") at a time. <kbd>ENTER</kbd> sets it down.</span>
       <kbd>CLICK A CASE</kbd><span>Pick a case back up out of the truck. <kbd>⌘Z</kbd> undoes.</span>
     </div>`;
   $('brBody').innerHTML = isPhone() ? phoneHowTo(phoneText(h)) : h;
+  if (abilityThenBriefing(lv)) return;
   G.mode = 'briefing'; openModal('briefing');
 }
 function phoneHowTo(h){
@@ -2968,6 +3792,44 @@ function openAchievements(){
   $('achSum').textContent = `${got} of ${ACH_BADGES.length + ms.length} earned. Badges count every time you pass a level with them.`;
   G.mode = 'achievements'; openModal('achievements');
 }
+/* ---------- new abilities: a slide from the tier's crew the first time each one comes up ---------- */
+// ABILITY_INFO (titles + lines) and playAbilityDemo (looping demos) come from art-reference/ability-demos.js, pasted below
+function abilityFor(lv){
+  if (!lv || lv.demo) return null;
+  if (lv.loop) return 'tour';
+  for (const [k, a] of Object.entries(typeof ABILITY_INFO === 'object' ? ABILITY_INFO : {})) if (a.level === lv.id) return k;
+  return null;
+}
+let abStop = null, abNext = null;
+function showAbility(key, then){
+  const a = ABILITY_INFO[key]; if (!a){ if (then) then(); return; }
+  const lvId = a.level === 'Endless Tour' ? 61 : a.level, who = crewFor(key === 'tour' ? {loop:true} : {id:lvId});
+  $('abImg').src = `assets/crew/${who}-good.webp`; $('abName').textContent = CREW[who];
+  $('abTitle').textContent = a.title; $('abText').innerHTML = (isPhone() ? a.phone : a.desktop).replace(/^(Unlocked[^.]*\.)/, '<b>$1</b>');
+  const tag = $('abTag'), clone = tag.cloneNode(true); tag.replaceWith(clone); // replay the unlock flourish
+  abNext = then || null; G.abilityPrev = G.mode; G.mode = 'ability'; openModal('ability');
+  if (abStop) abStop(); abStop = typeof playAbilityDemo === 'function' ? playAbilityDemo($('abDemo'), key, isPhone()) : null;
+}
+function closeAbility(){
+  if (abStop){ abStop(); abStop = null; }
+  closeModals(); const next = abNext; abNext = null;
+  if (next) next(); else { G.mode = G.abilityPrev || 'help'; if (G.mode === 'help') openModal('help'); }
+}
+function abilityThenBriefing(lv){ // called where the briefing would open
+  const key = abilityFor(lv), p = G.progress; p.abilities = p.abilities || {};
+  if (!key || p.abilities[key]) return false;
+  p.abilities[key] = true; saveProgress();
+  showAbility(key, () => { G.mode = 'briefing'; openModal('briefing'); });
+  return true;
+}
+function renderAbilityList(){
+  const info = typeof ABILITY_INFO === 'object' ? ABILITY_INFO : {}, p = G.progress;
+  const open = Object.entries(info).filter(([k, a]) => k === 'tour' ? p.unlocked > 60 : p.unlocked >= a.level);
+  $('abListWrap').hidden = !open.length;
+  $('abList').innerHTML = open.map(([k, a]) => `<button class="btn" data-ab="${k}">${a.title}</button>`).join('');
+}
+$('abList').addEventListener('click', e => { const b = e.target.closest('[data-ab]'); if (b){ closeModals(); showAbility(b.dataset.ab); } });
+$('abGo').onclick = closeAbility;
 function startPlay(){ closeModals(); if (G.level && G.level.id && !G.level.demo) stat('level_start', {level:G.level.id}); G.mode = 'play'; G.coachShowUntil = performance.now() + COACH_LESSON_MS; G.coachFirst = true; G.warnSeen = {}; refresh(); }
 
 /* ---------- layout + rendering ---------- */
@@ -3469,7 +4331,7 @@ function renderGoal(){
 }
 // phone: keyboard and mouse wording becomes touch wording
 const PHONE_WORDS = [
-  [/Click to set it down\. Press <b>R<\/b> to rotate, <b>SPACE<\/b> to push it all the way in\./g, 'Let go to set it down. <b>Twist two fingers</b> to rotate it.'],
+  [/Click to set it down\. <b>SPACE<\/b> pushes it all the way in\./g, 'Let go to set it down.'],
   [/Click a <b>Utility Trunk<\/b> in the MANIFEST to pick it up \(or drag it straight into the truck\)\./g, 'Drag a <b>Utility Trunk</b> from the cases strip at the top down into the truck.'],
   [/Move into the truck\./g, 'Drag it into the truck.'],
   [/([Tt])hen click <b>LOAD BAR<\/b> \(or press B\) and set it/g, (m, t) => `${t}hen drag the <b>LOAD BAR</b> button into the truck and let go`],
@@ -3773,8 +4635,12 @@ function ghostFromPointer(px, py){
   const cx = (px - L.ox) / L.cell, cy = (py - L.oy) / L.cell;
   setGhost(clamp(Math.round(cx - w / 2), 0, W - w), clamp(Math.round(cy - d / 2), 0, D - d));
 }
+// turning a case is an ability you unlock at level 7 (levels 1-6 never need it)
+const TURN_LEVEL = 7;
+const turnLocked = () => { const lv = G.level; return !!lv && !lv.demo && !lv.loop && +lv.id > 0 && +lv.id < TURN_LEVEL; };
 function rotateHand(){
   const h = G.hand; if (!h || G.mode !== 'play') return;
+  if (turnLocked()){ flashCoach('tip', `You'll unlock turning a case at level ${TURN_LEVEL}. These cases already fit the way they come.`, 3000); return; }
   const nr = h.rot ^ 1, rc = Engine.canRotateCase(itemOf(h.uid).def, nr);
   if (!rc.ok){ flashCoach('bad', rc.reason); return; }
   if (h.stack){
@@ -3988,6 +4854,7 @@ window.addEventListener('keydown', e => {
     if (k === 'Escape'){ if (G.mode === 'account') closeAccount(); else if (G.mode === 'report') closeReport(); }
     return;
   }
+  if (G.mode === 'ability'){ e.preventDefault(); if (k === 'Enter' || k === 'Escape' || k === ' ') closeAbility(); return; }
   if (G.mode === 'help'){
     e.preventDefault();
     if (k === 'Escape') closeHelp(); else showKey(codeOf(e), $('helpKeyDesc'), $('helpKeyboard'));
@@ -4511,6 +5378,7 @@ function loopSave(){
   try { localStorage.setItem(LOOP_KEY, JSON.stringify(data)); } catch(e){}
 }
 function startLoop(fresh){
+  { const p = G.progress; p.abilities = p.abilities || {}; if (!p.abilities.tour && typeof ABILITY_INFO === 'object' && ABILITY_INFO.tour){ p.abilities.tour = true; saveProgress(); showAbility('tour', () => startLoop(fresh)); return; } }
   let saved = null; if (!fresh){ try { saved = JSON.parse(localStorage.getItem(LOOP_KEY)); } catch(e){} }
   closeModals();
   G.items = new Map();
@@ -4792,6 +5660,7 @@ function showKey(code, descEl, kbEl){
   descEl.innerHTML = info ? `<b>${info[0]}</b>${info[1]}` : 'That key isn\'t used in Truck Packology. The highlighted keys are the ones that do something.';
 }
 function openHelp(){
+  renderAbilityList();
   if (G.mode === 'help' || G.mode === 'transit') return;
   if (G.hand && G.mode === 'play') cancelHand(true);
   G.tool = null; G.helpPrev = G.mode; G.mode = 'help';
@@ -4965,7 +5834,7 @@ function phoneFlip(uid){
   if (G.hand && G.hand.from === 'truck' && G.ghost && G.ghost.ok) placeHand();
 }
 function phoneRotate(mx, my){
-  if (G.hand){ rotateHand(); return; }
+  if (G.hand || turnLocked()){ rotateHand(); if (turnLocked() && !G.hand) flashCoach('tip', `You'll unlock turning a case at level ${TURN_LEVEL}. These cases already fit the way they come.`, 3000); return; }
   const r = $('truckCanvas').getBoundingClientRect(), uid = hitCase(mx - r.left, my - r.top); if (!uid) return;
   pickFromTruck(uid); if (!G.hand) return;
   rotateHand();
