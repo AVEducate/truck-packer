@@ -195,6 +195,7 @@ body.crew-quiet:not(.phone) .coach::before{content:'';position:absolute;top:5px;
 .modal h2{font-family:var(--pixel);font-weight:800;letter-spacing:.02em;font-size:40px;margin:0 0 12px;line-height:1.05}
 .modal p{line-height:1.55;font-size:14.5px;margin:0 0 12px}
 .modal .row{display:flex;gap:10px;justify-content:flex-end;margin-top:16px;flex-wrap:wrap}
+#briefing .row .btn{flex:0 0 150px;justify-content:center;text-align:center} /* LEVELS and START: same size */
 .truck-spec{font-family:var(--pixel);font-weight:700;letter-spacing:.04em;font-size:14.5px;background:#262724;border:2px solid #121211;padding:8px 10px;margin:4px 0 12px}
 .howto{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;font-size:13px;background:#262724;border:2px solid #121211;padding:10px 12px;margin-bottom:12px}
 .howto kbd{font-family:var(--pixel);font-weight:700;font-size:13px;background:var(--cream);color:#111;padding:1px 6px;border:1px solid #000;white-space:nowrap}
@@ -203,6 +204,10 @@ body.crew-quiet:not(.phone) .coach::before{content:'';position:absolute;top:5px;
 .score-big span{font-family:var(--pixel);font-weight:700;font-size:20px;color:var(--cream-dim)}
 .score-big .stars, .score-big .stars span{font-size:30px;letter-spacing:4px;color:var(--warn);text-shadow:2px 2px 0 #000}
 .stars .dim, .score-big .stars .dim{color:#55564f}
+.sf, .sh, .se{font-style:normal} .se{color:#55564f} .lvl .st .se{color:inherit}
+.sh{position:relative;display:inline-block;color:#55564f} .lvl .st .sh{color:#77786f}
+.help-stars{color:var(--warn);font-size:16px;letter-spacing:1px;margin:0 12px 0 4px;white-space:nowrap} .star-key{line-height:1.9}
+.sh::before{content:'★';position:absolute;left:0;top:0;width:50%;overflow:hidden;color:var(--warn)}
 .cat{display:grid;grid-template-columns:150px 1fr 70px;gap:10px;align-items:center;font-size:13px;margin:7px 0}
 .cat .bar{height:12px;background:#1d1e1b;border:2px solid #0d0d0c;position:relative}
 .cat .bar i{position:absolute;inset:0 auto 0 0;background:var(--good)}
@@ -541,7 +546,7 @@ body.phone .home-btn kbd, body.phone .link-btn kbd{display:none}
     <div class="home-menu">
       <button id="pressEnter" class="home-btn primary">PRESS ENTER</button>
       <button id="titleLevels" class="home-btn">LEVEL SELECT</button>
-      <button id="titleHelp" class="home-btn">HELP <kbd>H</kbd></button>
+      <button id="titleHelp" class="home-btn">HELP</button>
       <button id="titleDemo" class="home-btn">PRACTICE BAY</button>
     </div>
   </div>
@@ -611,7 +616,7 @@ body.phone .home-btn kbd, body.phone .link-btn kbd{display:none}
   <h3 id="brKicker">LEVEL 1</h3>
   <h2 id="brTitle" style="text-transform:uppercase"></h2>
   <div id="brBody"></div>
-  <div class="row"><button class="btn" id="brLevels">LEVELS</button><button class="btn primary" id="brStart">START <kbd>ENTER</kbd></button></div>
+  <div class="row"><button class="btn" id="brLevels">LEVELS</button><button class="btn primary" id="brStart">START</button></div>
 </div></div>
 
 <div class="modal-back" id="results"><div class="modal" role="dialog" aria-modal="true" aria-labelledby="rsTitle">
@@ -664,7 +669,7 @@ body.phone .home-btn kbd, body.phone .link-btn kbd{display:none}
   </div>
   <p class="ab-text" id="abText"></p>
   <canvas class="ab-demo" id="abDemo"></canvas>
-  <div class="ab-row"><span class="ab-help">Watch it again any time in HELP</span><button class="ab-btn" id="abGo">GOT IT <kbd>ENTER</kbd></button></div>
+  <div class="ab-row"><span class="ab-help">Watch it again any time in HELP</span><button class="ab-btn" id="abGo">GOT IT</button></div>
 </div></div>
 <div class="modal-back ab-back" id="achPop"><div class="ab-card" role="dialog" aria-modal="true" aria-labelledby="apTitle">
   <div class="ab-head">
@@ -674,7 +679,7 @@ body.phone .home-btn kbd, body.phone .link-btn kbd{display:none}
     <h2 class="ab-title" id="apTitle">BADGE EARNED</h2>
   </div>
   <div class="ap-list" id="apList"></div>
-  <div class="ab-row"><span class="ab-help">Collected on the achievements shelf</span><button class="ab-btn" id="apGo">SEE RESULTS <kbd>ENTER</kbd></button></div>
+  <div class="ab-row"><span class="ab-help">Collected on the achievements shelf</span><button class="ab-btn" id="apGo">SEE RESULTS</button></div>
 </div></div>
 <div class="modal-back" id="account"><div class="modal acct-modal" role="dialog" aria-modal="true" aria-labelledby="acTitle">
   <h3>AV EDUCATE · TRUCK PACKOLOGY</h3>
@@ -726,7 +731,7 @@ body.phone .home-btn kbd, body.phone .link-btn kbd{display:none}
     <kbd>SCORE</kbd><span>Every pack is scored out of 100 on <b>space</b> (30), <b>stability</b> (25), <b>unload order</b> (20) and <b>securement</b> (15). A level only counts the parts it uses, so early levels score on space and stability.</span>
     <kbd>REHANDLES</kbd><span>Every case you pull back out after loading is 1 point off, up to 10. No rehandles is the only way to a perfect 100.</span>
     <kbd>PASS</kbd><span>Score <b>60 or better</b> and follow the level's lesson. Break the lesson and the level fails, even with a good score. The score still shows so you can see how the pack did.</span>
-    <kbd>STARS</kbd><span><b>100</b> = ★★★ · <b>90 to 99</b> = ★★ · <b>60 to 89</b> = ★</span>
+    <kbd>STARS</kbd><span class="star-key"><b>100</b> <span class="stars help-stars"><i class="sf">★</i><i class="sf">★</i><i class="sf">★</i></span> <b>95 to 99</b> <span class="stars help-stars"><i class="sf">★</i><i class="sf">★</i><i class="sh">★</i></span> <b>80 to 94</b> <span class="stars help-stars"><i class="sf">★</i><i class="sf">★</i><i class="se">★</i></span><br><b>70 to 79</b> <span class="stars help-stars"><i class="sf">★</i><i class="sh">★</i><i class="se">★</i></span> <b>65 to 69</b> <span class="stars help-stars"><i class="sf">★</i><i class="se">★</i><i class="se">★</i></span> <b>60 to 64</b> <span class="stars help-stars"><i class="sh">★</i><i class="se">★</i><i class="se">★</i></span></span>
     <kbd>BADGES</kbd><span>HIGH &amp; TIGHT, ROCK SOLID, CLEAN LOAD and more. Earn them on any passed level. They collect on the achievements shelf.</span>
   </div>
   <div class="ab-list-wrap" id="abListWrap"><div class="section-label">HOW-TOS AND ABILITIES · WATCH AGAIN</div><div class="ab-list" id="abList"></div></div>
@@ -743,7 +748,7 @@ body.phone .home-btn kbd, body.phone .link-btn kbd{display:none}
   <div class="kb-desc" id="helpKeyDesc">Click a highlighted key, or press it on your keyboard, to see what it does.</div>
   </div>
   <p class="hp-privacy">Your progress is saved in this browser. Make a free account (SIGN IN on the level screen) to keep it safe and play on other devices. The game also sends anonymous play stats (level, score, phone or computer) so we can see which levels need work. Nothing personal.</p>
-  <div class="row"><button class="btn" id="hpReport">REPORT A PROBLEM / IDEA</button><button class="btn" id="hpDemo">TRY THE PRACTICE BAY</button><button class="btn primary" id="hpClose">CLOSE <kbd>ESC</kbd></button></div>
+  <div class="row"><button class="btn" id="hpReport">REPORT A PROBLEM / IDEA</button><button class="btn" id="hpDemo">TRY THE PRACTICE BAY</button><button class="btn primary" id="hpClose">CLOSE</button></div>
 </div></div>
 
 <script>
@@ -770,8 +775,8 @@ const ABILITY_INFO = {
            phone:'Fill the width before you move back. Build each row wall to wall across the truck. Empty space can\'t be secured: a hole lets cases shift and slide around while the truck is moving.',
            desktop:'Fill the width before you move back. Build each row wall to wall across the truck. Empty space can\'t be secured: a hole lets cases shift and slide around while the truck is moving.'},
   stars:  {level:4,  title:'HOW STARS WORK', tag:'HOW SCORING WORKS',
-           phone:'Your score sets your stars. 100 is three stars, 90 to 99 is two, and 60 to 89 is one. Below 60 the level isn\'t passed yet, so pack it again.',
-           desktop:'Your score sets your stars. 100 is three stars, 90 to 99 is two, and 60 to 89 is one. Below 60 the level isn\'t passed yet, so pack it again.'},
+           phone:'Your score sets your stars, in half steps. 100 is three stars, 95 is two and a half, 80 is two, 70 is one and a half, 65 is one, and 60 is half a star. Below 60, pack it again.',
+           desktop:'Your score sets your stars, in half steps. 100 is three stars, 95 is two and a half, 80 is two, 70 is one and a half, 65 is one, and 60 is half a star. Below 60, pack it again.'},
   heavy:  {level:5,  title:'HEAVY IN THE NOSE', tag:'HOW TO PLAY',
            phone:'Heaviest cases go in first. Count the weight pips on each case: 4 is very heavy, 1 is light. Heavy cases go against the nose, lighter gear rides behind them toward the doors.',
            desktop:'Heaviest cases go in first. Count the weight pips on each case: 4 is very heavy, 1 is light. Heavy cases go against the nose, lighter gear rides behind them toward the doors.'},
@@ -1718,30 +1723,33 @@ const playAbilityDemo = (function(){
       T.ox + T.Wp / 2, T.oy + 45 * s);
   }};
 
-  ABILITY_DEMOS.stars = {dur:8.6, still:7.6, draw(c, t, E){
+  function star(c, cx, cy, r, fill, col){ // five-point star; fill 0, .5 or 1
+    const path = () => { c.beginPath(); for (let i = 0; i < 10; i++){ const a = -Math.PI / 2 + i * Math.PI / 5, rr2 = i % 2 ? r * .45 : r; c.lineTo(cx + Math.cos(a) * rr2, cy + Math.sin(a) * rr2); } c.closePath(); };
+    path(); c.fillStyle = '#4b4c47'; c.fill();
+    if (fill > 0){ c.save(); path(); c.clip(); c.fillStyle = col || C.warn; c.fillRect(cx - r, cy - r, 2 * r * fill, 2 * r); c.restore(); }
+    path(); c.strokeStyle = '#0d0d0c'; c.lineWidth = 2; c.stroke();
+  }
+  const STAR_STEPS = [[60, .5], [65, 1], [70, 1.5], [80, 2], [95, 2.5], [100, 3]]; // same table as starsOfScore in the game
+  const starsAt = v => STAR_STEPS.reduce((a, [n, k]) => v >= n ? k : a, 0);
+  ABILITY_DEMOS.stars = {dur:9.6, still:8.6, draw(c, t, E){
     const u = E.u; bg(c, E);
-    const x0 = 24 * u, x1 = E.W - 24 * u, y = E.H * .6, bw = x1 - x0, bh = 16 * u, X = n => x0 + bw * n / 100;
-    const val = t < .4 ? 0 : t < 6.0 ? Math.min(100, Math.round(100 * es(t, .4, 5.6))) : 100;
-    // bar
+    const x0 = 24 * u, x1 = E.W - 24 * u, y = E.H * .64, bw = x1 - x0, bh = 16 * u, X = n => x0 + bw * (n - 50) / 50; // the bar shows 50 to 100
+    const val = t < .4 ? 50 : t < 7.0 ? Math.min(100, Math.round(50 + 50 * seg(t, .4, 6.6))) : 100, k = starsAt(val);
     c.fillStyle = '#121211'; c.fillRect(x0, y - bh / 2, bw, bh); c.strokeStyle = '#0d0d0c'; c.lineWidth = 2; c.strokeRect(x0, y - bh / 2, bw, bh);
-    c.fillStyle = val >= 100 ? C.good : val >= 90 ? C.good : val >= 60 ? C.warn : C.bad; c.fillRect(x0 + 1, y - bh / 2 + 1, Math.max(0, bw * val / 100 - 2), bh - 2);
-    // thresholds
-    const marks = [[60, '★', '60 TO 89'], [90, '★★', '90 TO 99'], [100, '★★★', '100']];
-    for (const [n] of marks){ const x = X(n); c.strokeStyle = C.cream; c.lineWidth = 2; c.beginPath(); c.moveTo(x, y - bh / 2 - 4 * u); c.lineTo(x, y + bh / 2 + 4 * u); c.stroke(); }
-    c.fillStyle = C.dim; c.font = cond(10 * u); c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText('60', X(60), y + bh / 2 + 12 * u); c.fillText('90', X(90), y + bh / 2 + 12 * u);
-    c.textAlign = 'right'; c.fillText('100', X(100) + 2 * u, y + bh / 2 + 12 * u);
-    // star key above the bar: three chips that light up as the score reaches them
-    const cw2 = (bw - 12 * u) / 3;
-    marks.forEach(([n, st, lab], i) => {
-      const on = val >= n && (i === 2 || val < marks[i + 1][0]), got = val >= n, cx = x0 + i * (cw2 + 6 * u), cy = y - bh / 2 - 34 * u, ch2 = 24 * u;
-      c.fillStyle = on ? '#46392b' : C.panel; c.fillRect(cx, cy, cw2, ch2); c.strokeStyle = on ? C.accent : '#0d0d0c'; c.lineWidth = 2; c.strokeRect(cx, cy, cw2, ch2);
-      c.textAlign = 'left'; c.fillStyle = got ? C.warn : 'rgba(233,225,200,.25)'; c.font = cond(13 * u); c.fillText(st, cx + 6 * u, cy + ch2 / 2 + 1);
-      c.textAlign = 'right'; c.fillStyle = on ? C.cream : C.dim; c.font = cond(10 * u); c.fillText(lab, cx + cw2 - 6 * u, cy + ch2 / 2 + 1);
-    });
-    c.fillStyle = C.dim; c.font = cond(10 * u); c.textAlign = 'left'; c.fillText('0', x0, y + bh / 2 + 12 * u);
-    c.fillStyle = C.cream; c.font = cond(26 * u); c.textAlign = 'left'; c.textBaseline = 'top'; c.fillText(String(val), x0, 8 * u); const vw = c.measureText(String(val)).width;
-    c.fillStyle = C.dim; c.font = cond(10 * u); c.fillText('/ 100', x0 + vw + 5 * u, 20 * u);
-    caption(c, E, t, [[.6, 2.6, 'UNDER 60: TRY AGAIN', null, 'bad'], [2.6, 4.5, '60 TO 89: ★'], [4.5, 5.6, '90 TO 99: ★★'], [5.6, 99, 'A PERFECT 100: ★★★', null, 'good']], E.W / 2, E.H - 18 * u);
+    c.fillStyle = 'rgba(232,96,74,.35)'; c.fillRect(x0 + 1, y - bh / 2 + 1, X(60) - x0 - 1, bh - 2); // under 60: not passed
+    c.fillStyle = val >= 95 ? C.good : val >= 60 ? C.warn : C.bad; c.fillRect(x0 + 1, y - bh / 2 + 1, Math.max(0, X(val) - x0 - 2), bh - 2);
+    c.font = cond(10 * u); c.textBaseline = 'middle';
+    for (const [n] of STAR_STEPS){ const x = X(n); c.strokeStyle = C.cream; c.lineWidth = 2; c.beginPath(); c.moveTo(x, y - bh / 2 - 4 * u); c.lineTo(x, y + bh / 2 + 4 * u); c.stroke();
+      c.fillStyle = val >= n ? C.cream : C.dim; c.textAlign = n === 100 ? 'right' : 'center'; c.fillText(String(n), n === 100 ? x + 2 * u : x, y + bh / 2 + 12 * u); }
+    c.fillStyle = C.dim; c.textAlign = 'left'; c.fillText('50', x0, y + bh / 2 + 12 * u);
+    // score + stars
+    c.fillStyle = C.cream; c.font = cond(26 * u); c.textAlign = 'left'; c.textBaseline = 'top'; c.fillText(val < 51 && t < .4 ? '' : String(val), x0, 8 * u);
+    const vw = c.measureText(String(val)).width; c.fillStyle = C.dim; c.font = cond(10 * u); c.fillText('/ 100', x0 + vw + 5 * u, 20 * u);
+    const sr = 13 * u, sx = x1 - sr - 2 * u, sy = 8 * u + sr;
+    for (let i = 0; i < 3; i++) star(c, sx - (2 - i) * (sr * 2 + 6 * u), sy, sr, Math.max(0, Math.min(1, k - i)));
+    const cap = val < 60 ? ['UNDER 60: TRY AGAIN', 'bad'] : val < 65 ? ['60 TO 64: HALF A STAR'] : val < 70 ? ['65 TO 69: ONE STAR'] : val < 80 ? ['70 TO 79: ONE AND A HALF'] :
+      val < 95 ? ['80 TO 94: TWO STARS'] : val < 100 ? ['95 TO 99: TWO AND A HALF'] : ['A PERFECT 100: THREE STARS', 'good'];
+    pill(c, E, cap[0], E.W / 2, E.H - 18 * u, cap[1]);
   }};
 
   ABILITY_DEMOS.drive = {dur:9.6, still:8.6, draw(c, t, E){
@@ -1777,8 +1785,8 @@ const playAbilityDemo = (function(){
     c.fillStyle = C.cream; c.font = cond(30 * u); c.fillText('86', x + 10 * u, y + 44 * u);
     c.fillStyle = C.dim; c.font = cond(11 * u); c.fillText('/ 100', x + 46 * u, y + 58 * u);
     c.font = cond(20 * u); c.textAlign = 'right';
-    c.fillStyle = second ? C.warn : 'rgba(233,225,200,.22)'; c.fillText('★', x + w - 46 * u, y + 48 * u);
-    c.fillStyle = 'rgba(233,225,200,.22)'; c.fillText('★★', x + w - 10 * u, y + 48 * u);
+    c.fillStyle = second ? C.warn : 'rgba(233,225,200,.22)'; c.fillText('★★', x + w - 28 * u, y + 48 * u);
+    c.fillStyle = 'rgba(233,225,200,.22)'; c.fillText('★', x + w - 10 * u, y + 48 * u);
     c.textAlign = 'left'; c.font = `600 ${10 * u}px ${SANS}`; c.fillStyle = second ? C.good : C.bad;
     c.fillText(second ? 'Passed. Next level unlocked.' : 'Good pack, but a heavy case rides', x + 10 * u, y + 82 * u);
     if (!second) c.fillText('behind a light one. Not passed yet.', x + 10 * u, y + 95 * u);
@@ -3726,7 +3734,7 @@ function selfTest(){
 /* ---------- small helpers ---------- */
 function fmtLen(inches){ const f = Math.floor(inches / 12), i = Math.round(inches % 12); return i ? `${f}' ${i}"` : `${f}'`; }
 function fmtArea(sqft){ return sqft >= 1 ? `${Math.round(sqft * 10) / 10} sq ft` : `${Math.round(sqft * 144)} sq in`; }
-function title(s){ return s.charAt(0) + s.slice(1).toLowerCase(); }
+function title(s){ return s === 'LED' ? 'LED' : s.charAt(0) + s.slice(1).toLowerCase(); } // LED stays an acronym
 function listNames(arr){ const c = {}; arr.forEach(n => c[n] = (c[n] || 0) + 1); return Object.entries(c).map(([n, k]) => k > 1 ? `${k}× ${n}` : n).join(', '); }
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 const clone = a => a.map(p => ({...p}));
@@ -4012,7 +4020,7 @@ function loadLevelObj(lv, idx){
   showBriefing();
 }
 function showBriefing(){
-  const lv = G.level;
+  const lv = G.level; if (!lv){ openLevels(); return; }
   $('brKicker').textContent = lv.demo ? 'PRACTICE BAY · NO SCORE · NOTHING SAVED' : `LEVEL ${lv.id} OF 101 · ${tierOf(lv.id).name} · ${lv.boss ? 'BOSS LOAD' : lv.practice ? 'PRACTICE' : lv.stacked ? 'STACKED LOAD' : 'FLOOR LOAD'}`;
   $('brTitle').textContent = lv.title;
   let h = `<p>${lv.lesson}</p>`;
@@ -4105,9 +4113,10 @@ function bonusHtml(lv, rep){ // the bonus goals are badges now; stars come from 
   const passed = rep && passedRep(rep);
   return `<div class="section-label">BADGES TO EARN</div><ul class="bonus-list">${g.map(b => `<li class="${rep ? (passed && b.test(rep) ? 'met' : 'miss') : ''}">${b.label}${b.reh && !rep ? ' <span class="reh">· rehandles: <b class="rehCount">0</b></span>' : ''}</li>`).join('')}</ul>`;
 }
-// Pass = 60 or more AND the level's lesson followed. Stars: 100 = 3, 90-99 = 2, 60-89 = 1.
+// Pass = 60 or more AND the level's lesson followed. Stars: 100 = 3, 95-99 = 2.5, 80-94 = 2, 70-79 = 1.5, 65-69 = 1, 60-64 = 0.5.
 const passedRep = rep => rep.total >= 60 && rep.lessonPassed !== false;
-const starsOfScore = n => n >= 100 ? 3 : n >= 90 ? 2 : n >= 60 ? 1 : 0;
+const starsOfScore = n => n >= 100 ? 3 : n >= 95 ? 2.5 : n >= 80 ? 2 : n >= 70 ? 1.5 : n >= 65 ? 1 : n >= 60 ? .5 : 0; // half stars
+const starRow = (n, empty = '★') => [0, 1, 2].map(i => n >= i + 1 ? '<i class="sf">★</i>' : n >= i + .5 ? '<i class="sh">★</i>' : `<i class="se">${empty}</i>`).join('');
 const starsFor = (lv, rep) => passedRep(rep) ? starsOfScore(rep.total) : 0;
 const levelStars = (prog, i) => i > 100 ? ((prog.bonus || {})[i] || 0) : starsOfScore(prog.best[i] || 0); // best only holds passing scores at 60+
 
@@ -4170,7 +4179,7 @@ function showAchievements(list, then, label = 'SEE RESULTS'){
   $('apImg').src = `assets/crew/${who}-good.webp`; $('apName').textContent = CREW[who];
   $('apTitle').textContent = list.length > 1 ? `${list.length} ACHIEVEMENTS` : list[0].kind === 'MILESTONE' ? 'MILESTONE REACHED' : 'BADGE EARNED';
   $('apList').innerHTML = list.map((a, i) => `<div class="ap-item" style="animation-delay:${.35 + i * .18}s"><img class="ap-art" src="${badgeArt(a.name)}" alt="${a.name}"><small>${a.kind === 'MILESTONE' ? '<b>MILESTONE</b> · ' : ''}${a.desc}</small></div>`).join('');
-  $('apGo').innerHTML = `${label} <kbd>ENTER</kbd>`;
+  $('apGo').textContent = label;
   G.achPrev = G.mode; G.mode = 'achpop'; openModal('achPop'); setTimeout(() => sfx('star3'), 350);
 }
 function closeAchievements(){ if (G.mode !== 'achpop') return; const t = achThen; achThen = null; closeModals(); if (t) t(); }
@@ -4609,7 +4618,7 @@ function refresh(){
   if (G.level.offload){
     const inT = G.placements.length;
     btn.disabled = inT > 0 || G.mode !== 'play'; btn.classList.toggle('ready', !inT && G.mode === 'play');
-    btn.innerHTML = inT ? `UNLOADING<span class="lock">${inT} STILL IN THE TRUCK</span>` : `TRUCK EMPTY · FINISH<span class="lock">${isPhone() ? 'TAP TO FINISH' : 'ENTER'}</span>`;
+    btn.innerHTML = inT ? `UNLOADING<span class="lock">${inT} STILL IN THE TRUCK</span>` : `TRUCK EMPTY · FINISH<span class="lock">${isPhone() ? 'TAP TO FINISH' : 'CLICK TO FINISH'}</span>`;
     $('hudUnload').textContent = G.offMistakes.length ? `${G.offMistakes.length} MISSED` : 'CLEAN';
     $('hudScore').textContent = inT ? '--' : Math.max(0, 100 - 10 * G.offMistakes.length);
     $('hudStab').textContent = '--'; $('hudSecure').textContent = G.bars.length ? `${G.bars.length} LEFT` : 'ALL OUT';
@@ -4631,7 +4640,7 @@ function refresh(){
   const left = leftCount();
   btn.disabled = left > 0 || G.mode !== 'play';
   btn.classList.toggle('ready', left === 0 && G.mode === 'play');
-  btn.innerHTML = left > 0 ? `READY FOR TRANSIT<span class="lock">${left} STILL ON THE DOCK</span>` : `READY FOR TRANSIT<span class="lock">${isPhone() ? 'TAP TO SEND THIS TRUCK' : 'ENTER'}</span>`;
+  btn.innerHTML = left > 0 ? `READY FOR TRANSIT<span class="lock">${left} STILL ON THE DOCK</span>` : `READY FOR TRANSIT<span class="lock">${isPhone() ? 'TAP TO SEND THIS TRUCK' : 'CLICK TO SEND THIS TRUCK'}</span>`;
   renderManifest(); renderInfo(); renderCoach(); render();
   // the crew-lead message can change the play area's height: re-fit the truck if it did
   const stg = $('stage'); if (G.L && (stg.clientHeight !== G.L.ch || stg.clientWidth !== G.L.cw)) layout();
@@ -5450,7 +5459,7 @@ function showResults(rep){
   $('rsTitle').textContent = lv.offload ? (rep.badges.includes('SMART UNLOAD') ? 'SMART UNLOAD' : passed ? 'TRUCK EMPTY' : 'OUT OF ORDER') : lessonMissed ? 'LESSON MISSED' : rep.badges.includes('SHOW READY') ? 'SHOW READY' : passed ? 'TRUCK PACKED' : 'NOT ROAD READY';
   const cats = rep.cats.map(c => `<div class="cat ${c.active ? '' : 'off'}"><span>${c.label}</span><span class="bar"><i style="width:${c.active ? Math.round(c.s * 100) : 0}%"></i></span><span class="pts">${c.active ? `${Math.round(c.pts)}/${c.max}` : 'LATER'}</span></div>`).join('');
   $('rsBody').innerHTML = `
-    <div class="score-big"><b>${rep.total}</b><span>/ 100</span><span class="stars">${'★'.repeat(stars)}<span class="dim">${'★'.repeat(3 - stars)}</span></span></div>
+    <div class="score-big"><b>${rep.total}</b><span>/ 100</span><span class="stars">${starRow(stars)}</span></div>
     ${passed ? '' : lessonMissed ? `<p style="color:var(--bad)">Good pack, but this level is about learning to ${rep.lesson || 'follow its lesson'}. Follow the lesson to pass and unlock the next level.</p>` : '<p style="color:var(--bad)">Score 60 or better to unlock the next level.</p>'}
     ${passed && (lv.id === 3 || lv.id === 6) && !ACCOUNT.get() ? `<div class="save-nudge"><span><b>Your progress is saved only in this browser.</b> Clear it, switch phones or computers, and it's gone. Make a free account to keep it.</span><button class="btn primary" id="rsSave">SAVE PROGRESS</button></div>` : ''}
     ${bonusHtml(lv, rep)}
@@ -5978,7 +5987,7 @@ function openLevels(){
     if (tier) h += `${i > 1 ? '</div>' : ''}<div class="tier-head">${tier.name}<small>${tier.from === tier.to ? `Level ${tier.from}` : `Levels ${tier.from}–${tier.to}`} · ${tier.note}</small></div><div class="levels-grid">`;
     const lv = LEVELS[i - 1], open = lv && prog.unlocked >= i && (i < 101 || examReady(prog)), st = levelStars(prog, i);
     if (i === 101){ h += `<button class="lvl" ${open ? `data-i="${i - 1}"` : 'disabled'}><b>${i}</b><span class="tag">FINAL EXAM</span><small>3★ or 95%+ on all 100 levels</small><span class="st">${masteredCount(prog)}/100</span></button>`; continue; }
-    h += `<button class="lvl${lv && lv.boss ? ' boss' : ''}" ${open ? `data-i="${i - 1}"` : 'disabled'}><b>${i}</b><span class="tag">${lv ? (lv.boss ? 'BOSS LOAD' : lv.practice ? 'PRACTICE' : 'LESSON') : ''}</span><small>${lv ? lv.title : 'COMING SOON'}</small><span class="st">${lv ? `${'★'.repeat(st)}${'☆'.repeat(3 - st)}` : '&nbsp;'}</span></button>`;
+    h += `<button class="lvl${lv && lv.boss ? ' boss' : ''}" ${open ? `data-i="${i - 1}"` : 'disabled'}><b>${i}</b><span class="tag">${lv ? (lv.boss ? 'BOSS LOAD' : lv.practice ? 'PRACTICE' : 'LESSON') : ''}</span><small>${lv ? lv.title : 'COMING SOON'}</small><span class="st">${lv ? starRow(st, '☆') : '&nbsp;'}</span></button>`;
   }
   const lo = loopOpen(prog);
   let hasRun = false; try { hasRun = !!localStorage.getItem(LOOP_KEY); } catch(e){}
@@ -6024,8 +6033,8 @@ function keyInfo(code, plat){
     KeyR:['R', 'Rotate the case (or dock stack) you\'re holding 90°. Right-click does the same.'],
     KeyT:['T', 'Tip the case you\'re holding onto its side (or stand it back up). Only cases built to ride on their side can tip.'],
     Space:['Space', 'Push In: slide the case toward the nose until it touches something, then set it down. On the title screen: start.'],
-    Enter:[plat === 'mac' ? 'Return' : 'Enter', 'Set the case down where the ghost is. With empty hands: READY FOR TRANSIT. On a briefing: START. On a report: next level.'],
-    Escape:[plat === 'mac' ? 'esc' : 'Esc', 'Cancel: a case you picked up out of the truck comes off the truck and goes back to the dock. A case from the manifest is put back. Also closes this help.'],
+    Enter:[plat === 'mac' ? 'Return' : 'Enter', 'Set the case down where the ghost is. With empty hands: READY FOR TRANSIT. It also presses the orange button on any card: START on a briefing, GOT IT on a how-to, SEE RESULTS on an achievement, NEXT LEVEL on a report.'],
+    Escape:[plat === 'mac' ? 'esc' : 'Esc', 'Cancel: a case you picked up out of the truck goes back to the dock, if it can get out through the doors. A case from the manifest is put back. Also closes this help and any how-to card.'],
     KeyN:['N', 'Pick up the next case type from the manifest, ready to move with the arrow keys.'],
     Tab:['Tab', 'Same as N: pick up the next case type from the manifest.'],
     KeyB:['B', 'Pick up a LOAD BAR (levels that have them). Set it right behind a finished tier.'],
@@ -6160,7 +6169,8 @@ const examReady = prog => masteredCount(prog) === 100;
 const nextLevelIdx = () => Math.min(LEVELS.length - 1, Math.max(0, (G.progress.unlocked || 1) - 1));
 function enterHome(){
   homeBusy = false;
-  G.quietLoad = true; try { loadLevel(nextLevelIdx()); } finally { G.quietLoad = false; } // loaded behind the title: don't use up its how-to or ability slide
+  const nx = nextLevelIdx(), home = LEVELS[nx] && LEVELS[nx].exam ? nx - 1 : nx; // past level 100: put level 100 behind the title, not the exam
+  G.quietLoad = true; try { loadLevel(home); } finally { G.quietLoad = false; } // loaded behind the title: don't use up its how-to or ability slide
   closeModals(); openLevels(); G.prevMode = 'briefing'; G.mode = 'title';
   document.body.classList.add('home');
   const t = $('title'); t.hidden = false; t.classList.remove('focus');
@@ -6173,7 +6183,7 @@ function homeGo(setup){
   setTimeout(() => { $('title').hidden = true; homeBusy = false; }, 780);
 }
 const HOME = {
-  enter: () => { closeModals(); showBriefing(); },
+  enter: () => { closeModals(); const nx = LEVELS[nextLevelIdx()]; if (nx && nx.exam){ openLevels(); return; } showBriefing(); }, // all 100 done: the level grid, where the exam and the tour are
   levels: () => { G.mode = 'levels'; G.prevMode = 'briefing'; },
   help: () => { closeModals(); showBriefing(); openHelp(); },
   demo: () => startDemo()
