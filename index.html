@@ -4873,11 +4873,22 @@ function flashSome(kind, html, ms){
 const NICE_ROW = ['Full-width row. That\'s how it\'s done.', 'Wall to wall. Nothing slides in that row.', 'Clean row. Keep building back from it.'];
 function coachPeek(){ G.coachPeek = performance.now() + COACH_PEEK_MS; renderCoach(); }
 const crewPassed = () => { const lv = G.level; return !!lv && (lv.demo || lv.loop || (G.progress.best[lv.id] || 0) >= 60); };
+// the swipe follows where the crew ends up: no more than one every 0.4 s, and after a quick flicker it catches up to the final state
+function crewSwipe(){
+  const now = performance.now(), wait = 400 - (now - (crewSwipe.last || 0));
+  if (wait > 0){ clearTimeout(crewSwipe.t); crewSwipe.t = setTimeout(crewSwipe, wait); return; }
+  const away = document.body.classList.contains('crew-away'); if (crewSwipe.played === away) return; // already sounds right
+  crewSwipe.last = now; crewSwipe.played = away; sfx(away ? 'crewdown' : 'crewup');
+}
+crewSwipe.played = true; // the crew starts out of sight: no swipe on page load
 function crewAway(){
   const lv = G.level;
   const loaded = lv && G.mode === 'play' && !lv.loop && !G.hand && !G.tool && (lv.offload ? !G.placements.length : !leftCount());
-  const away = !lv || G.mode !== 'play' || G.crewOff || loaded || document.querySelector('.modal-back.open');
+  const praising = G.coachOverride && G.coachOverride.kind === 'good' && performance.now() < G.coachOverride.until; // a thumbs-up gets its full time on screen
+  const away = !lv || G.mode !== 'play' || G.crewOff || (loaded && !praising) || document.querySelector('.modal-back.open');
+  const wasAway = document.body.classList.contains('crew-away');
   document.body.classList.toggle('crew-away', !!away);
+  if (wasAway !== !!away) crewSwipe(); // a soft swipe as the crew pops up; reversed as they go
   $('crewBack').hidden = !(G.crewOff && lv && G.mode === 'play' && !document.querySelector('.modal-back.open'));
 }
 $('crewFig').addEventListener('click', e => {
@@ -4931,7 +4942,13 @@ function renderCoach(){
   if (G.hand && G.ghost && G.ghost.ok) return say('good', 'Good spot. Click (or press ENTER) to set it down.', 'live');
   say('tip', lv.lesson, 'lesson');
 }
-function flashCoach(kind, html, ms = 3500){ G.coachOverride = {kind, html, until:performance.now() + ms}; renderCoach(); setTimeout(renderCoach, ms + 20); }
+const CREW_HMM = false; // the thumbs-up "hmm": on in the test copy, off on the live site until Omar has heard it
+const CREW_VOICE = {stagehand:1.07, docklead:.93}; // throat clears: Lead Stagehand a touch higher, Dock Lead a touch deeper; Chief and Rigger as recorded
+function flashCoach(kind, html, ms = 3500){
+  if ((kind === 'bad' || kind === 'warn') && performance.now() - (flashCoach.throat || 0) > 1500){ flashCoach.throat = performance.now(); setTimeout(() => sfx('throat'), 120); } // "ahem": a warning from the crew
+  if (CREW_HMM && kind === 'good' && performance.now() - (flashCoach.hmm || 0) > 1500){ flashCoach.hmm = performance.now(); setTimeout(() => sfx('hmm'), 120); } // the thumbs-up crew approves
+  G.coachOverride = {kind, html, until:performance.now() + ms}; renderCoach(); setTimeout(renderCoach, ms + 20);
+}
 function fire(ev){
   const lv = G.level; if (!lv.coach) return;
   const st = lv.coach[G.coachStep];
@@ -5173,7 +5190,7 @@ function placeHand(){
   fire('place');
   if (G.coachFirst){ G.coachFirst = false; G.coachShowUntil = Math.min(G.coachShowUntil || 0, performance.now() + COACH_AFTER_FIRST_MS); }
   if (warn) flashSome('warn', warn, 4000);
-  else if (newRows.length) flashCoach('good', NICE_ROW[Math.floor(Math.random() * NICE_ROW.length)], 2800);
+  else if (newRows.length) flashCoach('good', NICE_ROW[Math.floor(Math.random() * NICE_ROW.length)], 4000); // a few seconds to read it and feel good
   refresh();
   return true;
 }
@@ -5441,7 +5458,12 @@ const SAMPLES = {out:{url:'assets/sounds/case-poof.mp3', vol:.33, skip:.5, buf:n
   shine1:{url:'assets/sounds/star-1.m4a', vol:1.2, buf:null, loading:null},   // BenKirb 'Shine 1': the first star
   shine2:{url:'assets/sounds/star-11.m4a', vol:.7, buf:null, loading:null},   // 'Shine 11': the second
   shine3:{url:'assets/sounds/star-7.m4a', vol:.45, buf:null, loading:null},  // 'Shine 7': the third (a perfect 100)
-  baydoor:{url:'assets/sounds/bay-door.m4a', vol:.25, buf:null, loading:null}}; // the bay door rolling shut when you leave the Endless Tour
+  baydoor:{url:'assets/sounds/bay-door.m4a', vol:.25, buf:null, loading:null}, // the bay door rolling shut when you leave the Endless Tour
+  crewup:{url:'assets/sounds/crew-swipe.mp3', vol:.6, buf:null, loading:null},   // the crew member pops up: a soft swipe, the quietest sound in the game
+  crewdown:{from:'crewup', reverse:true, vol:.6, buf:null, loading:null},       // and goes away: the same swipe reversed
+  throat:{url:'assets/sounds/crew-throat.mp3', vol:.25, buf:null, loading:null,   // the crew clears their throat: one of four, never the same twice in a row
+    parts:[[.22, .45], [1.17, .6], [2.12, .48], [2.88, .55]], last:-1},
+  hmm:{url:'assets/sounds/crew-hmm.m4a', vol:.15, buf:null, loading:null}};      // the thumbs-up crew: an approving "hmm, ahh" 
 function leaveTour(){ if (G.loop && !G.loop.closed){ G.loop.closed = true; sfx('baydoor'); } } // once per tour, however you leave
 // every game button clicks (the case list doesn't: picking up a case has its own sound)
 const BUTTON_TAP = false; // held: Omar is still deciding on a button sound (Pixabay 'Screen tap' is loaded and ready)
@@ -5450,8 +5472,11 @@ document.addEventListener('click', e => { if (!BUTTON_TAP) return; const b = e.t
 function warmSound(){ if (!SOUND.on) return; try { const AC = window.AudioContext || window.webkitAudioContext; if (!AC) return; SOUND.ctx = SOUND.ctx || new AC(); loadSamples(SOUND.ctx); loadEngine(SOUND.ctx); loadRoll(SOUND.ctx); } catch(e){} }
 ['pointerdown', 'keydown'].forEach(ev => addEventListener(ev, warmSound, {once:true, capture:true}));
 function loadSamples(ctx){
-  for (const s of Object.values(SAMPLES)) if (!s.buf && !s.loading)
+  for (const s of Object.values(SAMPLES)) if (!s.from && !s.buf && !s.loading)
     s.loading = fetch(s.url).then(r => r.arrayBuffer()).then(a => new Promise((ok, no) => ctx.decodeAudioData(a, ok, no))).then(b => { s.buf = b; }).catch(() => { s.loading = null; });
+  for (const s of Object.values(SAMPLES)) if (s.from && !s.buf && !s.loading){ const src = SAMPLES[s.from]; // a reversed copy of another sound
+    s.loading = (src.loading || Promise.resolve()).then(() => { if (!src.buf) { s.loading = null; return; } const b = ctx.createBuffer(src.buf.numberOfChannels, src.buf.length, src.buf.sampleRate);
+      for (let c = 0; c < b.numberOfChannels; c++){ const d = src.buf.getChannelData(c).slice(); if (s.reverse) d.reverse(); b.copyToChannel(d, c); } s.buf = b; }); }
 }
 function sfx(name, n){
   if (!SOUND.on) return;
@@ -5462,7 +5487,10 @@ function sfx(name, n){
     if (smp){
       const go = () => { const src = ctx.createBufferSource(), g = ctx.createGain(), t0 = ctx.currentTime + .005; src.buffer = smp.buf; src.connect(g).connect(ctx.destination);
         if (n === 'half'){ g.gain.setValueAtTime(smp.vol * .5, t0); g.gain.setValueAtTime(smp.vol * .5, t0 + .3); g.gain.linearRampToValueAtTime(0.0001, t0 + .6); src.start(t0, smp.skip || 0); src.stop(t0 + .62); } // a half star: softer, cut short
-        else { g.gain.value = smp.vol; src.start(t0, smp.skip || 0); } };
+        else if (smp.parts){ let k; do k = Math.floor(Math.random() * smp.parts.length); while (k === smp.last && smp.parts.length > 1); smp.last = k; g.gain.value = smp.vol;
+          const rate = name === 'throat' ? (CREW_VOICE[G.level ? crewFor(G.level) : 'chief'] || 1) : 1; src.playbackRate.value = rate; // each crew member's own voice
+          src.start(t0, smp.parts[k][0]); src.stop(t0 + smp.parts[k][1] / rate); }
+        else { g.gain.value = smp.vol; if (name === 'hmm') src.playbackRate.value = CREW_VOICE[G.level ? crewFor(G.level) : 'chief'] || 1; src.start(t0, smp.skip || 0); } };
       if (smp.buf){ go(); return; }
       if (smp.loading){ const asked = performance.now(); smp.loading.then(() => { if (smp.buf && SOUND.on && performance.now() - asked < 500) go(); }); return; } // still loading: play when it lands, if it's still timely
     }
