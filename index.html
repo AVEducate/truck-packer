@@ -3974,7 +3974,7 @@ const G = {
 const STORE_KEY = 'truckPackology.progress.v2' + (/[?&]test\b/.test(location.search) ? '.test' : '');
 function loadProgress(){
   try {
-    const v2 = JSON.parse(localStorage.getItem(STORE_KEY)); if (v2){ if (v2.badges) v2.badges = renameBadges(v2.badges); return v2; }
+    const v2 = JSON.parse(localStorage.getItem(STORE_KEY)); if (v2){ if (!v2.badgesV2){ v2.badges = {}; v2.badgeLv = {}; v2.badgesV2 = true; } return v2; } // badges restarted once-per-level (2026-10-07)
     const v1 = JSON.parse(localStorage.getItem('truckPackology.progress.v1')); // 15-level numbering
     if (v1){
       const m = o => Object.fromEntries(Object.entries(o || {}).map(([k, v]) => [2 * k - 1, v]));
@@ -4157,9 +4157,18 @@ function achMilestones(p){
 const badgeArt = name => `assets/badges/${name.toLowerCase().replace(/ & /g, '-').replace(/\s+/g, '-')}.webp`; // HIGH & TIGHT -> high-tight
 // badges unlock in tiers, scaled to how many levels can award each one (CLEAN BASE and PINNED live on two levels each)
 const TIER_NAMES = ['BRONZE', 'SILVER', 'GOLD'];
-const TIER_AT = {'SMART PACK':[10, 25, 50], 'POCKETED':[5, 15, 30], 'SMART UNLOAD':[3, 10, 20], 'CLEAN BASE':[2, 5, 10], 'PINNED':[2, 5, 10]}; // everything else 10, 50, 100
-const tiersOf = name => (TIER_AT[name] || [10, 50, 100]).map((n, i) => [n, TIER_NAMES[i]]);
+// Badges count ONCE PER LEVEL (replays don't add), so gold = every level that can award it. FULL TRUCK (Endless Tour) counts every full truck.
+const TIER_AT = {'LOCKED IN':[[10, 'BRONZE'], [40, 'SILVER'], [80, 'GOLD']], 'SMART PACK':[[5, 'BRONZE'], [18, 'SILVER'], [35, 'GOLD']],
+  'POCKETED':[[3, 'BRONZE'], [11, 'SILVER'], [22, 'GOLD']], 'SMART UNLOAD':[[2, 'BRONZE'], [5, 'SILVER'], [10, 'GOLD']],
+  'CLEAN BASE':[[1, 'BRONZE'], [2, 'GOLD']], 'PINNED':[[1, 'BRONZE'], [2, 'GOLD']], 'FULL TRUCK':[[10, 'BRONZE'], [50, 'SILVER'], [100, 'GOLD']]};
+const tiersOf = name => TIER_AT[name] || [[10, 'BRONZE'], [45, 'SILVER'], [90, 'GOLD']]; // the five 90-level badges
 const badgeTier = (c, name) => { let t = -1; tiersOf(name).forEach(([n], i) => { if (c >= n) t = i; }); return t; };
+// record a passed level's badges: each badge counts that level once, however often it's replayed
+function awardBadges(p, list, levelId){
+  p.badges = p.badges || {}; p.badgeLv = p.badgeLv || {}; p.badgesV2 = true;
+  for (const b of list){ const k = b.replace(/ ×\d+$/, ''); if (k === 'FULL TRUCK') continue;
+    const set = p.badgeLv[k] = p.badgeLv[k] || []; if (!set.includes(levelId)) set.push(levelId); p.badges[k] = set.length; }
+}
 function openAchievements(){
   const p = G.progress, b = p.badges || {};
   $('achBadges').innerHTML = ACH_BADGES.map(([k, d]) => { const c = b[k] || 0, T = tiersOf(k), ti = badgeTier(c, k), nx = T[ti + 1];
@@ -4168,7 +4177,7 @@ function openAchievements(){
   const ms = achMilestones(p);
   $('achMiles').innerHTML = ms.map(([k, d, done, n]) => `<div class="ach ${done ? '' : 'locked'}"><img class="ach-art" src="${badgeArt(k)}" alt="${k}" loading="lazy"><small>${d}</small><span class="cnt">${done ? 'DONE' : n ? 'IN PROGRESS' : 'NOT YET'}</span></div>`).join('');
   const got = ACH_BADGES.filter(([k]) => badgeTier(b[k] || 0, k) >= 0).length + ms.filter(m => m[2]).length;
-  $('achSum').textContent = `${got} of ${ACH_BADGES.length + ms.length} earned. Badges count every time you pass a level with them, and go bronze, silver, then gold.`;
+  $('achSum').textContent = `${got} of ${ACH_BADGES.length + ms.length} earned. Each badge counts once per level (replays don't add), and goes bronze, silver, then gold. Gold means you earned it on every level that has it.`;
   G.mode = 'achievements'; openModal('achievements');
 }
 // TOUR READY was renamed SHOW READY (2026-10-06): carry old counts over
@@ -4191,7 +4200,7 @@ function showAchievements(list, then, label = 'SEE RESULTS'){
   const who = crewFor(G.level || {id:1});
   $('apImg').src = `assets/crew/${who}-good.webp`; $('apName').textContent = CREW[who];
   $('apTitle').textContent = list.length > 1 ? `${list.length} ACHIEVEMENTS` : list[0].kind === 'MILESTONE' ? 'MILESTONE REACHED' : `${list[0].tier} BADGE`;
-  $('apList').innerHTML = list.map((a, i) => `<div class="ap-item" style="animation-delay:${.35 + i * .18}s"><img class="ap-art ${a.tier ? 'tier-' + a.tier.toLowerCase() : ''}" src="${badgeArt(a.name)}" alt="${a.name}"><small>${a.kind === 'MILESTONE' ? '<b>MILESTONE</b> · ' : `<b class="tier-${a.tier.toLowerCase()}">${a.tier}</b> · earned ${a.times} times · `}${a.desc}</small></div>`).join('');
+  $('apList').innerHTML = list.map((a, i) => `<div class="ap-item" style="animation-delay:${.35 + i * .18}s"><img class="ap-art ${a.tier ? 'tier-' + a.tier.toLowerCase() : ''}" src="${badgeArt(a.name)}" alt="${a.name}"><small>${a.kind === 'MILESTONE' ? '<b>MILESTONE</b> · ' : `<b class="tier-${a.tier.toLowerCase()}">${a.tier}</b> · ${a.name === 'FULL TRUCK' ? `${a.times} full trucks` : `earned on ${a.times} level${a.times > 1 ? 's' : ''}`} · `}${a.desc}</small></div>`).join('');
   $('apGo').textContent = label;
   G.achPrev = G.mode; G.mode = 'achpop'; openModal('achPop'); setTimeout(() => sfx('star3'), 350);
 }
@@ -4884,8 +4893,8 @@ crewSwipe.played = true; // the crew starts out of sight: no swipe on page load
 function crewAway(){
   const lv = G.level;
   const loaded = lv && G.mode === 'play' && !lv.loop && !G.hand && !G.tool && (lv.offload ? !G.placements.length : !leftCount());
-  const praising = G.coachOverride && G.coachOverride.kind === 'good' && performance.now() < G.coachOverride.until; // a thumbs-up gets its full time on screen
-  const away = !lv || G.mode !== 'play' || G.crewOff || (loaded && !praising) || document.querySelector('.modal-back.open');
+  const speaking = G.coachOverride && performance.now() < G.coachOverride.until; // a warning or a thumbs-up gets its full time on screen, even with the truck full
+  const away = !lv || G.mode !== 'play' || G.crewOff || (loaded && !speaking) || document.querySelector('.modal-back.open');
   const wasAway = document.body.classList.contains('crew-away');
   document.body.classList.toggle('crew-away', !!away);
   if (wasAway !== !!away) crewSwipe(); // a soft swipe as the crew pops up; reversed as they go
@@ -4942,12 +4951,16 @@ function renderCoach(){
   if (G.hand && G.ghost && G.ghost.ok) return say('good', 'Good spot. Click (or press ENTER) to set it down.', 'live');
   say('tip', lv.lesson, 'lesson');
 }
-const CREW_HMM = false; // the thumbs-up "hmm": on in the test copy, off on the live site until Omar has heard it
+const CREW_HMM = true; // the thumbs-up sounds: hmm, affirmatives, awww yeah every 12th (approved 2026-10-07)
 const CREW_VOICE = {stagehand:1.07, docklead:.93}; // throat clears: Lead Stagehand a touch higher, Dock Lead a touch deeper; Chief and Rigger as recorded
 function flashCoach(kind, html, ms = 3500){
-  if ((kind === 'bad' || kind === 'warn') && performance.now() - (flashCoach.throat || 0) > 1500){ flashCoach.throat = performance.now(); setTimeout(() => sfx('throat'), 120); } // "ahem": a warning from the crew
-  if (CREW_HMM && kind === 'good' && performance.now() - (flashCoach.hmm || 0) > 1500){ flashCoach.hmm = performance.now(); setTimeout(() => sfx('hmm'), 120); } // the thumbs-up crew approves
   G.coachOverride = {kind, html, until:performance.now() + ms}; renderCoach(); setTimeout(renderCoach, ms + 20);
+  if (document.body.classList.contains('crew-away')) return; // no voice without the crew on screen (dismissed, or a menu open)
+  if ((kind === 'bad' || kind === 'warn') && performance.now() - (flashCoach.throat || 0) > 1500){ flashCoach.throat = performance.now(); setTimeout(() => sfx('throat'), 120); } // "ahem": a warning from the crew
+  if (CREW_HMM && kind === 'good' && performance.now() - (flashCoach.hmm || 0) > 1500){ flashCoach.hmm = performance.now();
+    const p = G.progress, n = p.thumbs = (p.thumbs || 0) + 1; saveProgress(); // counted across levels and visits
+    let pick = 'awyeah'; if (n % 12){ pick = Math.random() < .2 ? 'hmm' : 'affirm'; if (pick === 'hmm' && flashCoach.lastOk === 'hmm') pick = 'affirm'; } flashCoach.lastOk = pick; // the Aha or one of four approvals, never the same twice in a row
+    setTimeout(() => sfx(pick), 120); } // the thumbs-up crew approves; every 12th time it's "awww yeah"
 }
 function fire(ev){
   const lv = G.level; if (!lv.coach) return;
@@ -5463,7 +5476,10 @@ const SAMPLES = {out:{url:'assets/sounds/case-poof.mp3', vol:.33, skip:.5, buf:n
   crewdown:{from:'crewup', reverse:true, vol:.6, buf:null, loading:null},       // and goes away: the same swipe reversed
   throat:{url:'assets/sounds/crew-throat.mp3', vol:.25, buf:null, loading:null,   // the crew clears their throat: one of four, never the same twice in a row
     parts:[[.22, .45], [1.17, .6], [2.12, .48], [2.88, .55]], last:-1},
-  hmm:{url:'assets/sounds/crew-hmm.m4a', vol:.15, buf:null, loading:null}};      // the thumbs-up crew: an approving "hmm, ahh" 
+  hmm:{url:'assets/sounds/crew-hmm.m4a', vol:.15, buf:null, loading:null},      // the thumbs-up crew: an approving "hmm, ahh"
+  awyeah:{url:'assets/sounds/crew-awyeah.m4a', vol:.15, buf:null, loading:null}, // every 12th thumbs-up: "awww yeah" (shaped to match the Aha's tone and loudness)
+  affirm:{url:'assets/sounds/crew-affirm.m4a', vol:.15, buf:null, loading:null,  // three more approvals for the thumbs-up mix, matched to the Aha
+    parts:[[0, .96], [1.11, .54], [1.8, .68], [2.63, .69]], last:-1}};   // the 4th is Pixabay 'Mmm Hmm'
 function leaveTour(){ if (G.loop && !G.loop.closed){ G.loop.closed = true; sfx('baydoor'); } } // once per tour, however you leave
 // every game button clicks (the case list doesn't: picking up a case has its own sound)
 const BUTTON_TAP = false; // held: Omar is still deciding on a button sound (Pixabay 'Screen tap' is loaded and ready)
@@ -5488,9 +5504,9 @@ function sfx(name, n){
       const go = () => { const src = ctx.createBufferSource(), g = ctx.createGain(), t0 = ctx.currentTime + .005; src.buffer = smp.buf; src.connect(g).connect(ctx.destination);
         if (n === 'half'){ g.gain.setValueAtTime(smp.vol * .5, t0); g.gain.setValueAtTime(smp.vol * .5, t0 + .3); g.gain.linearRampToValueAtTime(0.0001, t0 + .6); src.start(t0, smp.skip || 0); src.stop(t0 + .62); } // a half star: softer, cut short
         else if (smp.parts){ let k; do k = Math.floor(Math.random() * smp.parts.length); while (k === smp.last && smp.parts.length > 1); smp.last = k; g.gain.value = smp.vol;
-          const rate = name === 'throat' ? (CREW_VOICE[G.level ? crewFor(G.level) : 'chief'] || 1) : 1; src.playbackRate.value = rate; // each crew member's own voice
+          const rate = name === 'throat' || name === 'affirm' ? (CREW_VOICE[G.level ? crewFor(G.level) : 'chief'] || 1) : 1; src.playbackRate.value = rate; // each crew member's own voice
           src.start(t0, smp.parts[k][0]); src.stop(t0 + smp.parts[k][1] / rate); }
-        else { g.gain.value = smp.vol; if (name === 'hmm') src.playbackRate.value = CREW_VOICE[G.level ? crewFor(G.level) : 'chief'] || 1; src.start(t0, smp.skip || 0); } };
+        else { g.gain.value = smp.vol; if (name === 'hmm' || name === 'awyeah') src.playbackRate.value = CREW_VOICE[G.level ? crewFor(G.level) : 'chief'] || 1; src.start(t0, smp.skip || 0); } };
       if (smp.buf){ go(); return; }
       if (smp.loading){ const asked = performance.now(); smp.loading.then(() => { if (smp.buf && SOUND.on && performance.now() - asked < 500) go(); }); return; } // still loading: play when it lands, if it's still timely
     }
@@ -5730,7 +5746,7 @@ function showResults(rep){
   const prog = G.progress, ach0 = achSnap(prog);
   prog.best[lv.id] = Math.max(prog.best[lv.id] || 0, passed ? rep.total : Math.min(rep.total, 59)); // best >= 60 always means passed
   if (passed) prog.unlocked = Math.max(prog.unlocked, lv.id + 1);
-  if (passed){ prog.badges = prog.badges || {}; for (const b of rep.badges){ const k = b.replace(/ ×\d+$/, ''); prog.badges[k] = (prog.badges[k] || 0) + 1; } }
+  if (passed) awardBadges(prog, rep.badges, lv.id);
   saveProgress();
   $('rsKicker').textContent = `LEVEL ${lv.id} · ${lv.title.toUpperCase()}`;
   $('rsTitle').textContent = lv.offload ? (rep.badges.includes('SMART UNLOAD') ? 'SMART UNLOAD' : passed ? 'TRUCK EMPTY' : 'OUT OF ORDER') : lessonMissed ? 'LESSON MISSED' : rep.badges.includes('SHOW READY') ? 'SHOW READY' : passed ? 'TRUCK PACKED' : 'NOT ROAD READY';
@@ -5874,13 +5890,15 @@ function accountButtons(){
   if ($('pmSignOut')) $('pmSignOut').hidden = !a;
   if ($('saveCodeOut')) $('saveCodeOut').textContent = a ? `Signed in as ${a.email}. Your progress saves to your account.` : 'Sign in to save your progress to your account and pick up on any device. No password: we email you a code.';
 }
+function mergeLv(x, y){ const o = {}; for (const k of new Set([...Object.keys(x || {}), ...Object.keys(y || {})])) o[k] = [...new Set([...((x || {})[k] || []), ...((y || {})[k] || [])])]; return o; }
+const lvCounts = m => { for (const k in m.badgeLv) m.badges[k] = m.badgeLv[k].length; return m; }; // a badge's count = the levels it was earned on
 // merge two saves: the best of both, nothing lost
 function mergeProgress(a, b){
   if (!b) return a; if (!a) return b;
   const mx = (x, y) => { const o = {...(x || {})}; for (const k in (y || {})) o[k] = Math.max(o[k] || 0, y[k]); return o; };
   const exam = (a.exam && a.exam.passed) ? (a.exam.certNo || !(b.exam && b.exam.certNo) ? a.exam : b.exam) : b.exam;
-  return {...b, ...a, unlocked:Math.max(a.unlocked || 1, b.unlocked || 1), best:mx(a.best, b.best), stars:mx(a.stars, b.stars), bonus:mx(a.bonus, b.bonus),
-    badges:mx(renameBadges(a.badges), renameBadges(b.badges)), loopBest:Math.max(a.loopBest || 0, b.loopBest || 0), ...(exam ? {exam} : {})};
+  return lvCounts({...b, ...a, unlocked:Math.max(a.unlocked || 1, b.unlocked || 1), best:mx(a.best, b.best), stars:mx(a.stars, b.stars), bonus:mx(a.bonus, b.bonus),
+    badges:mx(a.badgesV2 ? a.badges : {}, b.badgesV2 ? b.badges : {}), badgeLv:mergeLv(a.badgesV2 ? a.badgeLv : {}, b.badgesV2 ? b.badgeLv : {}), badgesV2:true, loopBest:Math.max(a.loopBest || 0, b.loopBest || 0), ...(exam ? {exam} : {})});
 }
 let cloudSaveT = null;
 function cloudSave(){
@@ -6163,7 +6181,7 @@ function renderLoopGoal(){
 function loopScore(rep, kind){
   const L = G.loop, passed = rep.total >= 60, pts = passed ? rep.total : -(60 - rep.total);
   L.total += pts; if (!passed) L.strikes++;
-  if (passed && rep.badges && rep.badges.length){ const p = G.progress; p.badges = p.badges || {}; for (const b of rep.badges){ const k = b.replace(/ ×\d+$/, ''); p.badges[k] = (p.badges[k] || 0) + 1; } saveProgress(); }
+  if (passed && rep.badges && rep.badges.includes('FULL TRUCK')){ const p = G.progress; p.badges = p.badges || {}; p.badgesV2 = true; p.badges['FULL TRUCK'] = (p.badges['FULL TRUCK'] || 0) + 1; saveProgress(); } // tour trucks aren't levels: only FULL TRUCK counts here
   const h = {n:L.truckNo, kind, size:G.level.truck.name.split(' · ')[1] || '', score:rep.total, pts};
   L.history.push(h);
   L.last = rep.feedback.filter(f => f[0] !== 'good').slice(0, 3);
@@ -6433,7 +6451,7 @@ function applyProgressCode(code){
   const pad = raw + '==='.slice((raw.length + 3) % 4);
   const p = JSON.parse(atob(pad));
   if (!p || typeof p.unlocked !== 'number') throw new Error('bad code');
-  G.progress = {...p, unlocked:Math.max(1, Math.min(101, p.unlocked)), best:p.best || {}, stars:p.stars || {}, badges:renameBadges(p.badges)}; // keep everything (exam, tour best, badges, bonus stars)
+  G.progress = {...p, unlocked:Math.max(1, Math.min(101, p.unlocked)), best:p.best || {}, stars:p.stars || {}, badges:p.badgesV2 ? p.badges || {} : {}, badgeLv:p.badgesV2 ? p.badgeLv || {} : {}, badgesV2:true}; // old-style badge counts restart at zero; keep everything (exam, tour best, badges, bonus stars)
   saveProgress();
 }
 // (save/load codes replaced by accounts: SIGN IN / SIGN OUT on the level screen)
