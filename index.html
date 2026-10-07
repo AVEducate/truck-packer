@@ -5410,7 +5410,7 @@ function semiSound(ctx, out, at, dur, phases, o = {}){ // o.engine === false: ho
   for (const fr of [185, 233]){ const osc = ctx.createOscillator(); osc.type = 'sawtooth'; osc.frequency.value = fr; osc.connect(hg); osc.start(at + hornAt); osc.stop(at + hornAt + .6); }
   hg.gain.setValueAtTime(0.0001, at + hornAt); hg.gain.exponentialRampToValueAtTime(.09, at + hornAt + .04); hg.gain.setValueAtTime(.09, at + hornAt + .45); hg.gain.exponentialRampToValueAtTime(0.0001, at + hornAt + .59);
   if (o.engine === false){ // braking hisses still follow the drive
-    phases.forEach((ph, i) => { if (/BRAK|STOP/i.test(ph.label)) hiss(.9 + i + .55, .45, .1, 2600); });
+    const p0 = o.phase0 != null ? o.phase0 : .9; if (!o.noBrakeHiss) phases.forEach((ph, i) => { if (/BRAK|STOP/i.test(ph.label)) hiss(p0 + i + .55, .45, .1, 2600); });
     return;
   }
   // diesel: a low buzzy firing note plus rumble, revving up then holding, a dip on braking
@@ -5436,7 +5436,16 @@ function semiSound(ctx, out, at, dur, phases, o = {}){ // o.engine === false: ho
 /* ---------- sound effects (made in the browser; follow SOUND ON/OFF; phones on silent stay silent) ---------- */
 /* recorded one-shots that replace a built-in sound once they're loaded (assets/sounds, Pixabay Content License) */
 const SAMPLES = {out:{url:'assets/sounds/case-poof.mp3', vol:.33, skip:.5, buf:null, loading:null}, // skip: the recording's silent lead-in, so the poof lands with the smoke
-  slide:{url:'assets/sounds/slide-open.mp3', vol:.45, buf:null, loading:null}};
+  slide:{url:'assets/sounds/slide-open.mp3', vol:.45, buf:null, loading:null},
+  click:{url:'assets/sounds/ui-tap.mp3', vol:.3, skip:.49, buf:null, loading:null}, // Pixabay 'Screen tap', its silent lead-in skipped
+  shine1:{url:'assets/sounds/star-1.m4a', vol:1.2, buf:null, loading:null},   // BenKirb 'Shine 1': the first star
+  shine2:{url:'assets/sounds/star-11.m4a', vol:.7, buf:null, loading:null},   // 'Shine 11': the second
+  shine3:{url:'assets/sounds/star-7.m4a', vol:.45, buf:null, loading:null},  // 'Shine 7': the third (a perfect 100)
+  baydoor:{url:'assets/sounds/bay-door.m4a', vol:.25, buf:null, loading:null}}; // the bay door rolling shut when you leave the Endless Tour
+function leaveTour(){ if (G.loop && !G.loop.closed){ G.loop.closed = true; sfx('baydoor'); } } // once per tour, however you leave
+// every game button clicks (the case list doesn't: picking up a case has its own sound)
+const BUTTON_TAP = false; // held: Omar is still deciding on a button sound (Pixabay 'Screen tap' is loaded and ready)
+document.addEventListener('click', e => { if (!BUTTON_TAP) return; const b = e.target.closest && e.target.closest('button, .lvl'); if (b && !b.disabled && !b.closest('.manifest-item, #manifestList')) sfx('click'); }, true);
 // start the audio and fetch the recordings on the first click, tap or key, so the first slide's chime is ready
 function warmSound(){ if (!SOUND.on) return; try { const AC = window.AudioContext || window.webkitAudioContext; if (!AC) return; SOUND.ctx = SOUND.ctx || new AC(); loadSamples(SOUND.ctx); loadEngine(SOUND.ctx); loadRoll(SOUND.ctx); } catch(e){} }
 ['pointerdown', 'keydown'].forEach(ev => addEventListener(ev, warmSound, {once:true, capture:true}));
@@ -5451,7 +5460,9 @@ function sfx(name, n){
     SOUND.ctx = SOUND.ctx || new AC(); const ctx = SOUND.ctx; if (ctx.state !== 'running') ctx.resume(); loadEngine(ctx); loadRoll(ctx); loadSamples(ctx);
     const smp = SAMPLES[name];
     if (smp){
-      const go = () => { const src = ctx.createBufferSource(), g = ctx.createGain(); src.buffer = smp.buf; g.gain.value = smp.vol; src.connect(g).connect(ctx.destination); src.start(ctx.currentTime + .005, smp.skip || 0); };
+      const go = () => { const src = ctx.createBufferSource(), g = ctx.createGain(), t0 = ctx.currentTime + .005; src.buffer = smp.buf; src.connect(g).connect(ctx.destination);
+        if (n === 'half'){ g.gain.setValueAtTime(smp.vol * .5, t0); g.gain.setValueAtTime(smp.vol * .5, t0 + .3); g.gain.linearRampToValueAtTime(0.0001, t0 + .6); src.start(t0, smp.skip || 0); src.stop(t0 + .62); } // a half star: softer, cut short
+        else { g.gain.value = smp.vol; src.start(t0, smp.skip || 0); } };
       if (smp.buf){ go(); return; }
       if (smp.loading){ const asked = performance.now(); smp.loading.then(() => { if (smp.buf && SOUND.on && performance.now() - asked < 500) go(); }); return; } // still loading: play when it lands, if it's still timely
     }
@@ -5514,12 +5525,12 @@ function sfx(name, n){
   } catch(e){}
 }
 /* recorded truck: the diesel start-up, then the truck pulling away (assets/sounds, Pixabay Content License). Fetched once, decoded on first use. */
-const ENGINE = {start:{url:'assets/sounds/truck-start.mp3', buf:null}, move:{url:'assets/sounds/truck-move.m4a', buf:null}, nostart:{url:'assets/sounds/truck-nostart.m4a', buf:null}, loading:null,
+const ENGINE = {start:{url:'assets/sounds/truck-start.mp3', buf:null}, move:{url:'assets/sounds/truck-move.m4a', buf:null}, nostart:{url:'assets/sounds/truck-nostart.m4a', buf:null}, door:{url:'assets/sounds/truck-door.mp3', buf:null}, brake:{url:'assets/sounds/truck-brake.m4a', buf:null}, brakeVol:.22, loading:null, doorSkip:.5, doorLead:.6, doorVol:.3,
   skip:.5, caught:1.6, loopA:2.3, loopB:4.3}; // seconds in truck-start: silent lead-in, the moment it fires, its idle
 function loadEngine(ctx){
   if (ENGINE.loading) return ENGINE.loading;
   const one = s => s.buf ? null : fetch(s.url).then(r => r.arrayBuffer()).then(a => new Promise((ok, no) => ctx.decodeAudioData(a, ok, no))).then(b => { s.buf = b; });
-  ENGINE.loading = Promise.all([one(ENGINE.start), one(ENGINE.move), one(ENGINE.nostart)]).catch(() => { ENGINE.loading = null; });
+  ENGINE.loading = Promise.all([one(ENGINE.start), one(ENGINE.move), one(ENGINE.nostart), one(ENGINE.door), one(ENGINE.brake)]).catch(() => { ENGINE.loading = null; });
   return ENGINE.loading;
 }
 function engineSound(ctx, out, at, dur, phases){ // returns when the truck starts rolling (seconds after `at`)
@@ -5561,14 +5572,27 @@ function rollStop(){
   const t = SOUND.ctx.currentTime, g = ROLL.g.gain; g.cancelScheduledValues(t); g.setValueAtTime(Math.max(g.value, 0.0001), t); g.linearRampToValueAtTime(0.0001, t + .08);
   ROLL.src.stop(t + .1); ROLL.src = null; ROLL.g = null;
 }
-function playSemi(dur, phases){
+function cabDoor(ctx, out, at){ // the driver climbs in and shuts the cab door; returns how long before the key turns
+  if (!ENGINE.door.buf) return 0;
+  const src = ctx.createBufferSource(), g = ctx.createGain(); src.buffer = ENGINE.door.buf; g.gain.value = ENGINE.doorVol; src.connect(g).connect(out); src.start(at, ENGINE.doorSkip);
+  return ENGINE.doorLead;
+}
+function playSemi(dur, phases, introS = .9){
   if (!SOUND.on) return;
   try {
     const AC = window.AudioContext || window.webkitAudioContext; if (!AC) return;
     SOUND.ctx = SOUND.ctx || new AC(); const ctx = SOUND.ctx; if (ctx.state !== 'running') ctx.resume();
-    const master = ctx.createGain(); master.gain.value = .8; master.connect(ctx.destination);
-    const at = ctx.currentTime + .03;
-    if (ENGINE.start.buf){ const rolls = engineSound(ctx, master, at, dur, phases); semiSound(ctx, master, at, dur, phases, {engine:false, hornAt:ENGINE.caught - ENGINE.skip + .3, releaseAt:rolls - .15}); }
+    const master = ctx.createGain(); master.gain.value = .8;
+    const at0 = ctx.currentTime + .03;
+    if (ctx.createStereoPanner){ // turns pan the truck: left turn to the left speaker, right turn to the right
+      const pan = ctx.createStereoPanner(); master.connect(pan).connect(ctx.destination); pan.pan.setValueAtTime(0, at0);
+      phases.forEach((ph, i) => { const side = /LEFT/i.test(ph.label) ? -.75 : /RIGHT/i.test(ph.label) ? .75 : 0; if (!side) return;
+        const t = at0 + introS + i; pan.pan.setValueAtTime(0, t); pan.pan.linearRampToValueAtTime(side, t + .3); pan.pan.setValueAtTime(side, t + .7); pan.pan.linearRampToValueAtTime(0, t + 1); });
+    } else master.connect(ctx.destination);
+    const lead = ENGINE.start.buf ? cabDoor(ctx, master, at0) : 0, at = at0 + lead; dur = Math.max(2.5, dur - lead); // cab door, then the key
+    if (ENGINE.start.buf){ const rolls = engineSound(ctx, master, at, dur, phases); semiSound(ctx, master, at, dur, phases, {engine:false, hornAt:ENGINE.caught - ENGINE.skip + .3, releaseAt:rolls - .15, phase0:introS - lead, noBrakeHiss:!!ENGINE.brake.buf});
+      if (ENGINE.brake.buf) phases.forEach((ph, i) => { if (!/BRAK|STOP/i.test(ph.label)) return; // the truck gets cut off: a tire screech as HARD BRAKING shows
+        const src = ctx.createBufferSource(), g = ctx.createGain(); src.buffer = ENGINE.brake.buf; g.gain.value = ENGINE.brakeVol; src.connect(g).connect(master); src.start(at0 + introS + i + .05); }); }
     else { semiSound(ctx, master, at, dur, phases); loadEngine(ctx); } // not loaded yet: the built-in engine this once
     setTimeout(() => master.disconnect(), (dur + .5) * 1000);
   } catch(e){}
@@ -5586,15 +5610,17 @@ function startTransit(){
   G.mode = 'transit'; refresh();
   // a pack that fails with nothing sliding never leaves the dock: the truck won't start (if things slid, it drives so you see them slide)
   if (!G.level.loop && !G.level.demo && !passedRep(report) && !sim.shifted.size && !(sim.rolled && sim.rolled.size)){ noStart(report, base, sim); return; }
-  const intro = 900, per = 1000, outro = 900, t0 = performance.now();
-  playSemi((intro + per * sim.phases.length + outro) / 1000, sim.phases);
+  const rec = !!(SOUND.on && ENGINE.start.buf), doorMs = rec && ENGINE.door.buf ? ENGINE.doorLead * 1000 : 0;
+  const startMs = rec ? (ENGINE.caught - ENGINE.skip + .6) * 1000 : 0; // from the key to the truck rolling
+  const intro = rec ? doorMs + startMs : 900, per = 1000, outro = 900, t0 = performance.now();
+  playSemi((intro + per * sim.phases.length + outro) / 1000, sim.phases, intro / 1000);
   const movedSet = new Set([...sim.shifted.keys(), ...(sim.rolled ? sim.rolled.keys() : [])]), moved = movedSet.size;
   G.anim = {positions:clone(base), shiftedNow:new Set(), shake:null};
-  const lbl = $('transitLabel'); lbl.textContent = 'ROLLING OUT…'; lbl.style.display = 'block';
+  const lbl = $('transitLabel'); lbl.textContent = rec && doorMs ? 'DRIVER CLIMBS IN…' : 'ROLLING OUT…'; lbl.style.display = 'block';
   const step = now => {
     const t = now - t0;
     let label, amp = 1.5;
-    if (t < intro){ label = 'ROLLING OUT…'; G.anim.positions = clone(base); }
+    if (t < intro){ label = !rec ? 'ROLLING OUT…' : t < doorMs ? 'DRIVER CLIMBS IN…' : t < doorMs + startMs - 450 ? 'STARTING UP…' : 'ROLLING OUT…'; amp = rec && t < doorMs ? .01 : 1.5; G.anim.positions = clone(base); } // barely a tremble while the driver climbs in
     else if (t < intro + per * sim.phases.length){
       const i = Math.floor((t - intro) / per), ph = sim.phases[i], k = clamp(((t - intro) % per - 150) / 600, 0, 1), e = k * k * (3 - 2 * k);
       label = ph.label; amp = 3.5;
@@ -5617,16 +5643,16 @@ function startTransit(){
 }
 // The truck won't start: two tries on the starter, the second one dying, then the results.
 function noStart(report, base, sim){
-  const lbl = $('transitLabel'), t0 = performance.now(), dur = 4300;
+  const lead = ENGINE.door.buf ? ENGINE.doorLead * 1000 : 0, lbl = $('transitLabel'), t0 = performance.now() + lead, dur = 4300; // starts after the cab door
   playNoStart();
-  G.anim = {positions:clone(base), shiftedNow:new Set(), shake:null}; lbl.textContent = 'STARTING…'; lbl.style.display = 'block';
+  G.anim = {positions:clone(base), shiftedNow:new Set(), shake:null}; lbl.textContent = lead ? 'DRIVER CLIMBS IN…' : 'STARTING…'; lbl.style.display = 'block';
   const step = now => {
-    const t = now - t0;
-    if (t >= dur){ lbl.style.display = 'none'; G.anim = null; G.transitView = {final:sim.final, shifted:new Set()}; render(); showResults(report); return; }
+    const t = Math.max(0, now - t0);
+    if (now - t0 >= dur){ lbl.style.display = 'none'; G.anim = null; G.transitView = {final:sim.final, shifted:new Set()}; render(); report.noStart = true; showResults(report); return; }
     const cranking = t < 2050 || (t > 2400 && t < 3150), dead = t >= 3150; // cranks, pauses, one tired try, then gives up on the horn
-    lbl.textContent = dead ? "WON'T START · NOT ROAD READY" : 'STARTING…';
+    lbl.textContent = dead ? "WON'T START · NOT ROAD READY" : now < t0 ? 'DRIVER CLIMBS IN…' : 'STARTING…';
     lbl.style.color = lbl.style.borderColor = dead ? 'var(--bad)' : 'var(--warn)';
-    G.anim.shake = cranking ? [Math.sin(t * .12) * 1.4, Math.cos(t * .17) * .9] : null;
+    G.anim.shake = cranking && now >= t0 ? [Math.sin(t * .12) * 1.4, Math.cos(t * .17) * .9] : null;
     render(); requestAnimationFrame(step);
   };
   requestAnimationFrame(step);
@@ -5636,7 +5662,7 @@ function playNoStart(){ // the starter cranking from the Dodge recording, withou
   try {
     const AC = window.AudioContext || window.webkitAudioContext; if (!AC) return;
     SOUND.ctx = SOUND.ctx || new AC(); const ctx = SOUND.ctx; if (ctx.state !== 'running') ctx.resume(); loadEngine(ctx);
-    const t = ctx.currentTime + .03;
+    const t = ctx.currentTime + .03 + (ENGINE.nostart.buf ? cabDoor(ctx, ctx.destination, ctx.currentTime + .03) : 0); // cab door first
     if (ENGINE.nostart.buf){ // the failed start recording (Pixabay 'failed_car_start'), then a long honk: the driver gives up
       const m2 = ctx.createGain(); m2.gain.value = .8; m2.connect(ctx.destination);
       const src = ctx.createBufferSource(); src.buffer = ENGINE.nostart.buf; src.connect(m2); src.start(t);
@@ -5656,11 +5682,12 @@ function playNoStart(){ // the starter cranking from the Dodge recording, withou
   } catch(e){}
 }
 // results: the stars fill in one after another, a ding each (a half star gets a shorter, softer one)
-function fillStars(){
+function fillStars(){ // the stars fill in one after another; ONE sound for the result: 1 star Shine 1, 2 stars Shine 11, 3 stars Shine 7
   const el = $('rsStars'); if (!el) return; const n = +el.dataset.n || 0, steps = [];
   for (let i = 1; i <= Math.floor(n); i++) steps.push(i); if (n % 1) steps.push(Math.floor(n) + .5); // 2.5 stars: 1, 2, then the half
-  steps.forEach((v, j) => setTimeout(() => { if (!document.body.contains(el)) return; el.innerHTML = starRow(v);
-    sfx('starding', v % 1 ? Math.floor(v) + .5 : v - 1); }, 450 + j * 220)); // after the pass chime
+  if (!steps.length) return;
+  const full = Math.floor(n); setTimeout(() => { if (document.body.contains(el)) sfx(full ? 'shine' + full : 'shine1', full ? null : 'half'); }, 300); // half a star only: a soft Shine 1
+  steps.forEach((v, j) => setTimeout(() => { if (document.body.contains(el)) el.innerHTML = starRow(v); }, 300 + j * 220));
 }
 function showResults(rep){
   if (G.level.demo){
@@ -5694,7 +5721,7 @@ function showResults(rep){
   $('rsBetter').hidden = !!(lv.offload || lv.loop || !lv.solution || !lv.solution.length);
   if ($('rsSave')) $('rsSave').onclick = () => openAccount('start');
   stat('level_end', {level:lv.id, score:rep.total, stars, rehandles:rep.rehandles, passed});
-  setTimeout(() => sfx(!passed ? 'fail' : stars === 3 ? 'star3' : 'pass'), 150);
+  if (!passed && !rep.noStart) setTimeout(() => sfx('fail'), 150); // no level-complete sound: the truck ends the level, the stars are the reward. A won't-start already said it.
   $('rsNext').textContent = next < LEVELS.length ? 'NEXT LEVEL' : 'STACKED LEVELS SOON';
   showAchievements(newAchievements(ach0), () => { G.mode = 'results'; openModal('results'); fillStars(); });
 }
@@ -6187,6 +6214,7 @@ function loopFinish(restart, why){
   const best = G.progress.loopBest || 0;
   try { localStorage.removeItem(LOOP_KEY); } catch(e){}
   if (restart){ startLoop(true); return; }
+  leaveTour(); // the tour is over: the bay door rolls shut
   const packs = L.history.filter(h => h.kind !== 'loadin');
   $('exKicker').textContent = 'ENDLESS TOUR';
   $('exTitle').textContent = 'TOUR OVER';
@@ -6224,7 +6252,7 @@ function closeLevels(){
   G.mode = G.prevMode === 'title' ? 'title' : G.level ? (G.prevMode === 'briefing' ? (openModal('briefing'), 'briefing') : G.prevMode === 'results' ? (openModal('results'), 'results') : 'play') : 'title';
   if (G.level) refresh();
 }
-$('levelsGrid').addEventListener('click', e => { const b = e.target.closest('.lvl'); if (!b || b.disabled) return; closeModals(); if (b.dataset.loop){ startLoop(false); return; } G.loop = null; loadLevel(+b.dataset.i); });
+$('levelsGrid').addEventListener('click', e => { const b = e.target.closest('.lvl'); if (!b || b.disabled) return; closeModals(); if (b.dataset.loop){ startLoop(false); return; } leaveTour(); G.loop = null; loadLevel(+b.dataset.i); });
 $('certClose').onclick = () => { closeModals(); openExam(); };
 $('certPrint').onclick = () => window.print();
 
@@ -6390,7 +6418,7 @@ const masteredCount = prog => { let n = 0; for (let i = 1; i <= 100; i++) if (is
 const examReady = prog => masteredCount(prog) === 100;
 const nextLevelIdx = () => Math.min(LEVELS.length - 1, Math.max(0, (G.progress.unlocked || 1) - 1));
 function enterHome(){
-  homeBusy = false;
+  homeBusy = false; leaveTour();
   const nx = nextLevelIdx(), home = LEVELS[nx] && LEVELS[nx].exam ? nx - 1 : nx; // past level 100: put level 100 behind the title, not the exam
   G.quietLoad = true; try { loadLevel(home); } finally { G.quietLoad = false; } // loaded behind the title: don't use up its how-to or ability slide
   closeModals(); openLevels(); G.prevMode = 'briefing'; G.mode = 'title';
