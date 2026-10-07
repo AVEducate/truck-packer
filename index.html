@@ -271,6 +271,11 @@ body.phone .ab-help{text-align:center}
 .ach-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:10px;margin:8px 0 16px}
 .ach{background:var(--panel2);border:2px solid #0d0d0c;padding:10px;min-height:96px;display:flex;flex-direction:column;align-items:center;text-align:center;gap:6px}
 .ach-art{width:118px;height:118px;display:block;filter:drop-shadow(0 4px 0 rgba(0,0,0,.45))}
+.ach.tier-bronze .ach-art, .ap-art.tier-bronze{--o:#c47a3a} .ach.tier-silver .ach-art, .ap-art.tier-silver{--o:#d7dce3} .ach.tier-gold .ach-art, .ap-art.tier-gold{--o:#f0c04a}
+.ach[class*="tier-"] .ach-art, .ap-art[class*="tier-"]{filter:drop-shadow(3px 0 0 var(--o)) drop-shadow(-3px 0 0 var(--o)) drop-shadow(0 3px 0 var(--o)) drop-shadow(0 -3px 0 var(--o)) drop-shadow(0 4px 0 rgba(0,0,0,.45))} /* a solid outline, like the crew figures */
+.tier-chip{font-family:var(--pixel);font-weight:800;font-size:11px;letter-spacing:.08em;padding:2px 8px;border:2px solid #0d0d0c;color:#111}
+.ach.tier-bronze .tier-chip{background:#c47a3a} .ach.tier-silver .tier-chip{background:#d7dce3} .ach.tier-gold .tier-chip{background:#f0c04a}
+.ap-item small b.tier-bronze{color:#e09a5a} .ap-item small b.tier-silver{color:#d7dce3} .ap-item small b.tier-gold{color:#f0c04a}
 .ach.locked .ach-art{filter:grayscale(1) brightness(.55)}
 .ach .badge{align-self:flex-start;font-size:13px}
 .ach small{color:var(--cream-dim);font-size:12px;line-height:1.35}
@@ -4150,13 +4155,20 @@ function achMilestones(p){
     ['PACKOLOGIST', 'Passed the final exam', !!(p.exam && p.exam.passed)], ['ON THE ROAD', 'Finished an Endless Tour', (p.loopBest || 0) > 0]];
 }
 const badgeArt = name => `assets/badges/${name.toLowerCase().replace(/ & /g, '-').replace(/\s+/g, '-')}.webp`; // HIGH & TIGHT -> high-tight
+// badges unlock in tiers, scaled to how many levels can award each one (CLEAN BASE and PINNED live on two levels each)
+const TIER_NAMES = ['BRONZE', 'SILVER', 'GOLD'];
+const TIER_AT = {'SMART PACK':[10, 25, 50], 'POCKETED':[5, 15, 30], 'SMART UNLOAD':[3, 10, 20], 'CLEAN BASE':[2, 5, 10], 'PINNED':[2, 5, 10]}; // everything else 10, 50, 100
+const tiersOf = name => (TIER_AT[name] || [10, 50, 100]).map((n, i) => [n, TIER_NAMES[i]]);
+const badgeTier = (c, name) => { let t = -1; tiersOf(name).forEach(([n], i) => { if (c >= n) t = i; }); return t; };
 function openAchievements(){
   const p = G.progress, b = p.badges || {};
-  $('achBadges').innerHTML = ACH_BADGES.map(([k, d]) => `<div class="ach ${b[k] ? '' : 'locked'}"><img class="ach-art" src="${badgeArt(k)}" alt="${k}" loading="lazy"><small>${d}</small><span class="cnt">${b[k] ? '×' + b[k] : 'NOT YET'}</span></div>`).join('');
+  $('achBadges').innerHTML = ACH_BADGES.map(([k, d]) => { const c = b[k] || 0, T = tiersOf(k), ti = badgeTier(c, k), nx = T[ti + 1];
+    return `<div class="ach ${ti < 0 ? 'locked' : 'tier-' + T[ti][1].toLowerCase()}"><img class="ach-art" src="${badgeArt(k)}" alt="${k}" loading="lazy"><small>${d}</small>` +
+      `${ti >= 0 ? `<span class="tier-chip">${T[ti][1]}</span>` : ''}<span class="cnt">${nx ? `${c} / ${nx[0]} to ${nx[1]}` : `GOLD · ×${c}`}</span></div>`; }).join('');
   const ms = achMilestones(p);
   $('achMiles').innerHTML = ms.map(([k, d, done, n]) => `<div class="ach ${done ? '' : 'locked'}"><img class="ach-art" src="${badgeArt(k)}" alt="${k}" loading="lazy"><small>${d}</small><span class="cnt">${done ? 'DONE' : n ? 'IN PROGRESS' : 'NOT YET'}</span></div>`).join('');
-  const got = ACH_BADGES.filter(([k]) => b[k]).length + ms.filter(m => m[2]).length;
-  $('achSum').textContent = `${got} of ${ACH_BADGES.length + ms.length} earned. Badges count every time you pass a level with them.`;
+  const got = ACH_BADGES.filter(([k]) => badgeTier(b[k] || 0, k) >= 0).length + ms.filter(m => m[2]).length;
+  $('achSum').textContent = `${got} of ${ACH_BADGES.length + ms.length} earned. Badges count every time you pass a level with them, and go bronze, silver, then gold.`;
   G.mode = 'achievements'; openModal('achievements');
 }
 // TOUR READY was renamed SHOW READY (2026-10-06): carry old counts over
@@ -4166,7 +4178,8 @@ const achSnap = p => JSON.parse(JSON.stringify({badges:p.badges || {}, best:p.be
 function newAchievements(before){
   if (!before) return [];
   const p = G.progress, b0 = before.badges || {}, b1 = p.badges || {}, out = [];
-  for (const [k, d] of ACH_BADGES) if (!b0[k] && b1[k]) out.push({kind:'BADGE', name:k, desc:d});
+  for (const [k, d] of ACH_BADGES){ const t0 = badgeTier(b0[k] || 0, k), t1 = badgeTier(b1[k] || 0, k);
+    if (t1 > t0) out.push({kind:'BADGE', name:k, desc:d, tier:tiersOf(k)[t1][1], times:tiersOf(k)[t1][0]}); }
   const m0 = achMilestones(before), m1 = achMilestones(p);
   m1.forEach((m, i) => { if (m[2] && !(m0[i] && m0[i][2])) out.push({kind:'MILESTONE', name:m[0], desc:m[1].replace(/: \d+$/, '')}); });
   return out;
@@ -4177,8 +4190,8 @@ function showAchievements(list, then, label = 'SEE RESULTS'){
   achThen = then;
   const who = crewFor(G.level || {id:1});
   $('apImg').src = `assets/crew/${who}-good.webp`; $('apName').textContent = CREW[who];
-  $('apTitle').textContent = list.length > 1 ? `${list.length} ACHIEVEMENTS` : list[0].kind === 'MILESTONE' ? 'MILESTONE REACHED' : 'BADGE EARNED';
-  $('apList').innerHTML = list.map((a, i) => `<div class="ap-item" style="animation-delay:${.35 + i * .18}s"><img class="ap-art" src="${badgeArt(a.name)}" alt="${a.name}"><small>${a.kind === 'MILESTONE' ? '<b>MILESTONE</b> · ' : ''}${a.desc}</small></div>`).join('');
+  $('apTitle').textContent = list.length > 1 ? `${list.length} ACHIEVEMENTS` : list[0].kind === 'MILESTONE' ? 'MILESTONE REACHED' : `${list[0].tier} BADGE`;
+  $('apList').innerHTML = list.map((a, i) => `<div class="ap-item" style="animation-delay:${.35 + i * .18}s"><img class="ap-art ${a.tier ? 'tier-' + a.tier.toLowerCase() : ''}" src="${badgeArt(a.name)}" alt="${a.name}"><small>${a.kind === 'MILESTONE' ? '<b>MILESTONE</b> · ' : `<b class="tier-${a.tier.toLowerCase()}">${a.tier}</b> · earned ${a.times} times · `}${a.desc}</small></div>`).join('');
   $('apGo').textContent = label;
   G.achPrev = G.mode; G.mode = 'achpop'; openModal('achPop'); setTimeout(() => sfx('star3'), 350);
 }
@@ -4200,7 +4213,7 @@ function showAbility(key, then){
   $('abTitle').textContent = a.title; $('abText').innerHTML = (isPhone() ? a.phone : a.desktop).replace(/^([^.]*\.)/, '<b>$1</b>');
   const tag = $('abTag'), clone = tag.cloneNode(true); tag.replaceWith(clone); // replay the unlock flourish
   clone.querySelector('.ab-tag-txt').textContent = a.tag || 'NEW ABILITY UNLOCKED'; clone.querySelector('.lock').style.display = a.tag ? 'none' : '';
-  abNext = then || null; G.abilityPrev = G.mode; G.mode = 'ability'; openModal('ability');
+  abNext = then || null; G.abilityPrev = G.mode; G.mode = 'ability'; openModal('ability'); sfx('slide');
   if (abStop) abStop(); abStop = typeof playAbilityDemo === 'function' ? playAbilityDemo($('abDemo'), key, isPhone()) : null;
 }
 function closeAbility(){
@@ -4225,7 +4238,7 @@ function renderAbilityList(){
 }
 $('abList').addEventListener('click', e => { const b = e.target.closest('[data-ab]'); if (b){ closeModals(); showAbility(b.dataset.ab); } });
 $('abGo').onclick = closeAbility;
-function startPlay(){ closeModals(); if (G.level && G.level.id && !G.level.demo) stat('level_start', {level:G.level.id}); G.mode = 'play'; G.coachShowUntil = performance.now() + COACH_LESSON_MS; G.coachFirst = true; G.warnSeen = {}; refresh(); }
+function startPlay(){ closeModals(); if (G.level && !G.level.loop) sfx('beeper'); /* the truck backs in */ if (G.level && G.level.id && !G.level.demo) stat('level_start', {level:G.level.id}); G.mode = 'play'; G.coachShowUntil = performance.now() + COACH_LESSON_MS; G.coachFirst = true; G.warnSeen = {}; refresh(); }
 
 /* ---------- layout + rendering ---------- */
 const PHONE_RESERVE = 124; // phone: the button row + READY under the truck
@@ -5422,18 +5435,26 @@ function semiSound(ctx, out, at, dur, phases, o = {}){ // o.engine === false: ho
 }
 /* ---------- sound effects (made in the browser; follow SOUND ON/OFF; phones on silent stay silent) ---------- */
 /* recorded one-shots that replace a built-in sound once they're loaded (assets/sounds, Pixabay Content License) */
-const SAMPLES = {out:{url:'assets/sounds/case-poof.mp3', vol:.33, skip:.5, buf:null, loading:null}}; // skip: the recording's silent lead-in, so the poof lands with the smoke
+const SAMPLES = {out:{url:'assets/sounds/case-poof.mp3', vol:.33, skip:.5, buf:null, loading:null}, // skip: the recording's silent lead-in, so the poof lands with the smoke
+  slide:{url:'assets/sounds/slide-open.mp3', vol:.45, buf:null, loading:null}};
+// start the audio and fetch the recordings on the first click, tap or key, so the first slide's chime is ready
+function warmSound(){ if (!SOUND.on) return; try { const AC = window.AudioContext || window.webkitAudioContext; if (!AC) return; SOUND.ctx = SOUND.ctx || new AC(); loadSamples(SOUND.ctx); loadEngine(SOUND.ctx); loadRoll(SOUND.ctx); } catch(e){} }
+['pointerdown', 'keydown'].forEach(ev => addEventListener(ev, warmSound, {once:true, capture:true}));
 function loadSamples(ctx){
   for (const s of Object.values(SAMPLES)) if (!s.buf && !s.loading)
     s.loading = fetch(s.url).then(r => r.arrayBuffer()).then(a => new Promise((ok, no) => ctx.decodeAudioData(a, ok, no))).then(b => { s.buf = b; }).catch(() => { s.loading = null; });
 }
-function sfx(name){
+function sfx(name, n){
   if (!SOUND.on) return;
   try {
     const AC = window.AudioContext || window.webkitAudioContext; if (!AC) return;
     SOUND.ctx = SOUND.ctx || new AC(); const ctx = SOUND.ctx; if (ctx.state !== 'running') ctx.resume(); loadEngine(ctx); loadRoll(ctx); loadSamples(ctx);
     const smp = SAMPLES[name];
-    if (smp && smp.buf){ const src = ctx.createBufferSource(), g = ctx.createGain(); src.buffer = smp.buf; g.gain.value = smp.vol; src.connect(g).connect(ctx.destination); src.start(ctx.currentTime + .005, smp.skip || 0); return; }
+    if (smp){
+      const go = () => { const src = ctx.createBufferSource(), g = ctx.createGain(); src.buffer = smp.buf; g.gain.value = smp.vol; src.connect(g).connect(ctx.destination); src.start(ctx.currentTime + .005, smp.skip || 0); };
+      if (smp.buf){ go(); return; }
+      if (smp.loading){ const asked = performance.now(); smp.loading.then(() => { if (smp.buf && SOUND.on && performance.now() - asked < 500) go(); }); return; } // still loading: play when it lands, if it's still timely
+    }
     const t = ctx.currentTime + .01, out = ctx.createGain(); out.gain.value = .55; out.connect(ctx.destination);
     SOUND.noise = SOUND.noise || noiseBuf(ctx);
     const tone = (type, f0, f1, at, len, vol, lp) => {
@@ -5459,9 +5480,10 @@ function sfx(name){
     const tone2 = (type, f0, f1, at, len, vol, o = {}) => {
       const osc = ctx.createOscillator(), g = ctx.createGain(), s0 = t + at; osc.type = type;
       osc.frequency.setValueAtTime(f0, s0); if (f1) osc.frequency.exponentialRampToValueAtTime(f1, s0 + (o.glide || len));
-      g.gain.setValueAtTime(0.0001, s0); g.gain.exponentialRampToValueAtTime(vol, s0 + .006); g.gain.exponentialRampToValueAtTime(0.0001, s0 + len);
+      const at0 = o.attack || .006; g.gain.setValueAtTime(0.0001, s0); g.gain.exponentialRampToValueAtTime(vol, s0 + at0);
+      if (o.hold) g.gain.setValueAtTime(vol, s0 + at0 + o.hold); g.gain.exponentialRampToValueAtTime(0.0001, s0 + len);
       let n = osc; if (o.lp){ const f = ctx.createBiquadFilter(); f.type = 'lowpass'; f.frequency.value = o.lp; n.connect(f); n = f; }
-      n.connect(g).connect(out); osc.start(s0); osc.stop(s0 + len + .05);
+      n.connect(g).connect(out); if (o.wet){ const w = ctx.createGain(); w.gain.value = o.wet; g.connect(w).connect(SOUND.verb); } osc.start(s0); osc.stop(s0 + len + .05);
     };
     const hiss2 = (type, freq, at, len, vol, o = {}) => {
       const src = ctx.createBufferSource(), f = ctx.createBiquadFilter(), g = ctx.createGain(), s0 = t + at;
@@ -5477,6 +5499,9 @@ function sfx(name){
       place: () => { thump(0, 88, 42, .75); hiss2('lowpass', 1300, 0, .035, .22); click2(.035, .07, 3400); click2(.055, .05, 3000); hiss2('bandpass', 160, .01, .1, .08, {q:1, wet:.25}); }, // road case lands on the plywood floor
       bad:   () => { tone2('triangle', 230, 190, 0, .13, .26, {lp:1300}); tone2('triangle', 200, 150, .15, .2, .26, {lp:1100}); }, // soft "uh-uh"
       strap: () => { hiss2('bandpass', 700, 0, .22, .1, {q:2, to:2600}); let at = .2; for (let i = 0; i < 7; i++){ hiss2('bandpass', 3300, at, .022, .38, {q:7}); tone2('square', 1500, 0, at, .012, .035); at += .085 - i * .006; } thump(at + .02, 150, 90, .22, .12); }, // strap pulled, ratchet clicks, cinched (going on)
+      starding: () => { const i = Math.floor(n), half = n % 1 > 0, f = 1047 * Math.pow(2, i * 4 / 12); // one star filling in; a half star rings shorter and softer
+        if (half){ tone2('sine', f, 0, 0, .25, .07, {wet:.45}); } else { tone2('sine', f, 0, 0, .5, .14, {wet:.45}); tone2('triangle', f * 2, 0, 0, .2, .03); } },
+      beeper: () => { for (let i = 0; i < 3; i++) tone2('square', 1040, 0, i * .7, .4, .06, {lp:2600, hold:.33, attack:.01}); }, // a truck backing in to the dock
       unstrap: () => { for (let i = 0; i < 6; i++){ hiss('highpass', 2400 + i * 180, i * .065, .03, .22); tone('square', 900 + i * 40, 0, i * .065, .015, .03); } }, // the original ratchet clicks (coming off)
       bar:   () => { tone('triangle', 330, 0, 0, .35, .18); tone('triangle', 347, 0, 0, .3, .12); tone('square', 1180, 0, 0, .12, .04, 3000); hiss('bandpass', 1800, 0, .05, .2, 3); }, // metal clunk
       row:   () => notes([[1047, 0, .16], [1568, .11, .3]], 'sine', .2),                                           // full-width row chime
@@ -5489,12 +5514,12 @@ function sfx(name){
   } catch(e){}
 }
 /* recorded truck: the diesel start-up, then the truck pulling away (assets/sounds, Pixabay Content License). Fetched once, decoded on first use. */
-const ENGINE = {start:{url:'assets/sounds/truck-start.mp3', buf:null}, move:{url:'assets/sounds/truck-move.m4a', buf:null}, loading:null,
+const ENGINE = {start:{url:'assets/sounds/truck-start.mp3', buf:null}, move:{url:'assets/sounds/truck-move.m4a', buf:null}, nostart:{url:'assets/sounds/truck-nostart.m4a', buf:null}, loading:null,
   skip:.5, caught:1.6, loopA:2.3, loopB:4.3}; // seconds in truck-start: silent lead-in, the moment it fires, its idle
 function loadEngine(ctx){
   if (ENGINE.loading) return ENGINE.loading;
   const one = s => s.buf ? null : fetch(s.url).then(r => r.arrayBuffer()).then(a => new Promise((ok, no) => ctx.decodeAudioData(a, ok, no))).then(b => { s.buf = b; });
-  ENGINE.loading = Promise.all([one(ENGINE.start), one(ENGINE.move)]).catch(() => { ENGINE.loading = null; });
+  ENGINE.loading = Promise.all([one(ENGINE.start), one(ENGINE.move), one(ENGINE.nostart)]).catch(() => { ENGINE.loading = null; });
   return ENGINE.loading;
 }
 function engineSound(ctx, out, at, dur, phases){ // returns when the truck starts rolling (seconds after `at`)
@@ -5559,11 +5584,13 @@ function startTransit(){
   const report = Engine.calculateFinalScore(state(), G.level, base, {rehandles:G.rehandles || 0});
   const sim = report.transit;
   G.mode = 'transit'; refresh();
+  // a pack that fails with nothing sliding never leaves the dock: the truck won't start (if things slid, it drives so you see them slide)
+  if (!G.level.loop && !G.level.demo && !passedRep(report) && !sim.shifted.size && !(sim.rolled && sim.rolled.size)){ noStart(report, base, sim); return; }
   const intro = 900, per = 1000, outro = 900, t0 = performance.now();
   playSemi((intro + per * sim.phases.length + outro) / 1000, sim.phases);
   const movedSet = new Set([...sim.shifted.keys(), ...(sim.rolled ? sim.rolled.keys() : [])]), moved = movedSet.size;
   G.anim = {positions:clone(base), shiftedNow:new Set(), shake:null};
-  const lbl = $('transitLabel'); lbl.style.display = 'block';
+  const lbl = $('transitLabel'); lbl.textContent = 'ROLLING OUT…'; lbl.style.display = 'block';
   const step = now => {
     const t = now - t0;
     let label, amp = 1.5;
@@ -5588,6 +5615,53 @@ function startTransit(){
   };
   requestAnimationFrame(step);
 }
+// The truck won't start: two tries on the starter, the second one dying, then the results.
+function noStart(report, base, sim){
+  const lbl = $('transitLabel'), t0 = performance.now(), dur = 4300;
+  playNoStart();
+  G.anim = {positions:clone(base), shiftedNow:new Set(), shake:null}; lbl.textContent = 'STARTING…'; lbl.style.display = 'block';
+  const step = now => {
+    const t = now - t0;
+    if (t >= dur){ lbl.style.display = 'none'; G.anim = null; G.transitView = {final:sim.final, shifted:new Set()}; render(); showResults(report); return; }
+    const cranking = t < 2050 || (t > 2400 && t < 3150), dead = t >= 3150; // cranks, pauses, one tired try, then gives up on the horn
+    lbl.textContent = dead ? "WON'T START · NOT ROAD READY" : 'STARTING…';
+    lbl.style.color = lbl.style.borderColor = dead ? 'var(--bad)' : 'var(--warn)';
+    G.anim.shake = cranking ? [Math.sin(t * .12) * 1.4, Math.cos(t * .17) * .9] : null;
+    render(); requestAnimationFrame(step);
+  };
+  requestAnimationFrame(step);
+}
+function playNoStart(){ // the starter cranking from the Dodge recording, without the part where it catches
+  if (!SOUND.on) return;
+  try {
+    const AC = window.AudioContext || window.webkitAudioContext; if (!AC) return;
+    SOUND.ctx = SOUND.ctx || new AC(); const ctx = SOUND.ctx; if (ctx.state !== 'running') ctx.resume(); loadEngine(ctx);
+    const t = ctx.currentTime + .03;
+    if (ENGINE.nostart.buf){ // the failed start recording (Pixabay 'failed_car_start'), then a long honk: the driver gives up
+      const m2 = ctx.createGain(); m2.gain.value = .8; m2.connect(ctx.destination);
+      const src = ctx.createBufferSource(); src.buffer = ENGINE.nostart.buf; src.connect(m2); src.start(t);
+      const hg = ctx.createGain(), hf = ctx.createBiquadFilter(); hf.type = 'lowpass'; hf.frequency.value = 1600; hg.connect(hf).connect(m2); const h0 = t + 3.2;
+      for (const fr of [185, 233]){ const o = ctx.createOscillator(); o.type = 'sawtooth'; o.frequency.value = fr; o.connect(hg); o.start(h0); o.stop(h0 + .8); }
+      hg.gain.setValueAtTime(0.0001, h0); hg.gain.exponentialRampToValueAtTime(.11, h0 + .04); hg.gain.setValueAtTime(.11, h0 + .66); hg.gain.exponentialRampToValueAtTime(0.0001, h0 + .79);
+      setTimeout(() => m2.disconnect(), 4600); return;
+    }
+    const buf = ENGINE.start.buf; if (!buf) return; // fallback: the Dodge starter without the catch
+    const master = ctx.createGain(); master.gain.value = .8 * 1.6; master.connect(ctx.destination);
+    const crank = (at, len, dying) => { const src = ctx.createBufferSource(), g = ctx.createGain(); src.buffer = buf; src.connect(g).connect(master);
+      g.gain.setValueAtTime(1, at); g.gain.setValueAtTime(1, at + len - (dying ? .45 : .08)); g.gain.linearRampToValueAtTime(0.0001, at + len);
+      if (dying){ src.playbackRate.setValueAtTime(1, at + len * .45); src.playbackRate.linearRampToValueAtTime(.72, at + len); } // the battery giving out
+      src.start(at, ENGINE.skip + .05); src.stop(at + len + .02); };
+    crank(t, .95, false); crank(t + 1.25, .9, true);
+    setTimeout(() => master.disconnect(), 3000);
+  } catch(e){}
+}
+// results: the stars fill in one after another, a ding each (a half star gets a shorter, softer one)
+function fillStars(){
+  const el = $('rsStars'); if (!el) return; const n = +el.dataset.n || 0, steps = [];
+  for (let i = 1; i <= Math.floor(n); i++) steps.push(i); if (n % 1) steps.push(Math.floor(n) + .5); // 2.5 stars: 1, 2, then the half
+  steps.forEach((v, j) => setTimeout(() => { if (!document.body.contains(el)) return; el.innerHTML = starRow(v);
+    sfx('starding', v % 1 ? Math.floor(v) + .5 : v - 1); }, 450 + j * 220)); // after the pass chime
+}
 function showResults(rep){
   if (G.level.demo){
     $('rsKicker').textContent = 'PRACTICE BAY · NOTHING SAVED'; $('rsTitle').textContent = 'PRACTICE RUN';
@@ -5607,7 +5681,7 @@ function showResults(rep){
   $('rsTitle').textContent = lv.offload ? (rep.badges.includes('SMART UNLOAD') ? 'SMART UNLOAD' : passed ? 'TRUCK EMPTY' : 'OUT OF ORDER') : lessonMissed ? 'LESSON MISSED' : rep.badges.includes('SHOW READY') ? 'SHOW READY' : passed ? 'TRUCK PACKED' : 'NOT ROAD READY';
   const cats = rep.cats.map(c => `<div class="cat ${c.active ? '' : 'off'}"><span>${c.label}</span><span class="bar"><i style="width:${c.active ? Math.round(c.s * 100) : 0}%"></i></span><span class="pts">${c.active ? `${Math.round(c.pts)}/${c.max}` : 'LATER'}</span></div>`).join('');
   $('rsBody').innerHTML = `
-    <div class="score-big"><b>${rep.total}</b><span>/ 100</span><span class="stars">${starRow(stars)}</span></div>
+    <div class="score-big"><b>${rep.total}</b><span>/ 100</span><span class="stars" id="rsStars" data-n="${stars}">${starRow(0)}</span></div>
     ${passed ? '' : lessonMissed ? `<p style="color:var(--bad)">Good pack, but this level is about learning to ${rep.lesson || 'follow its lesson'}. Follow the lesson to pass and unlock the next level.</p>` : '<p style="color:var(--bad)">Score 60 or better to unlock the next level.</p>'}
     ${passed && (lv.id === 3 || lv.id === 6) && !ACCOUNT.get() ? `<div class="save-nudge"><span><b>Your progress is saved only in this browser.</b> Clear it, switch phones or computers, and it's gone. Make a free account to keep it.</span><button class="btn primary" id="rsSave">SAVE PROGRESS</button></div>` : ''}
     ${bonusHtml(lv, rep)}
@@ -5622,7 +5696,7 @@ function showResults(rep){
   stat('level_end', {level:lv.id, score:rep.total, stars, rehandles:rep.rehandles, passed});
   setTimeout(() => sfx(!passed ? 'fail' : stars === 3 ? 'star3' : 'pass'), 150);
   $('rsNext').textContent = next < LEVELS.length ? 'NEXT LEVEL' : 'STACKED LEVELS SOON';
-  showAchievements(newAchievements(ach0), () => { G.mode = 'results'; openModal('results'); });
+  showAchievements(newAchievements(ach0), () => { G.mode = 'results'; openModal('results'); fillStars(); });
 }
 
 // ---- offloading: player actions ----
@@ -6092,7 +6166,7 @@ function loopDepart(){
     if (k < 1) return requestAnimationFrame(away);
     if (L.sent) for (const u of L.sent) G.items.delete(u);
     L.truckNo++; G.transitView = null;
-    loopSetTruck(next[0], next[1]);
+    loopSetTruck(next[0], next[1]); sfx('beeper'); // the next truck backs in
     const t1 = performance.now(), start = G.L.ch;
     const arrive = now2 => {
       if (gone()){ G.loopShift = 0; return; }
