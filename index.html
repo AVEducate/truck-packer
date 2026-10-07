@@ -4294,7 +4294,7 @@ function render(){
   if (G.anim && G.anim.shake){ ctx.translate(G.anim.shake[0], G.anim.shake[1]); }
   if (L.clipH){ ctx.beginPath(); ctx.rect(0, 0, L.cw, L.clipH); ctx.clip(); } // phone: the truck stays above the button row
   if (G.loopShift) ctx.translate(0, G.loopShift); // Endless Tour: the truck driving off / backing in
-  if (G.level.stacked && G.view === 'door'){ renderDoor(ctx); ctx.restore(); return; }
+  if (G.level.stacked && G.view === 'door'){ renderDoor(ctx); drawPuffs(ctx); ctx.restore(); return; }
   const {ox, oy, Wp, Dp, cell, wall} = L;
   const W = G.level.truck.width / IN, D = G.level.truck.depth / IN;
   // truck body + walls
@@ -4370,7 +4370,68 @@ function render(){
         elev:((g.z || 0) + m.dz) * IN, priority:G.level.unloadSequence ? Engine.priorityOf(G.level, it.def) : null});
     }
   }
+  drawPuffs(ctx);
   ctx.restore();
+}
+/* ---------- poof: a cartoon smoke puff where a case leaves the truck (with the poof sound) ---------- */
+const PUFF_MS = 360; // a ring of little puffs: smaller than the case, spreads to just past it, fading as it goes
+function poofAt(p){ // p: the case's placement (grid cells), taken before it leaves
+  if (!p || !G.level) return;
+  const it = itemOf(p.uid), {w, d} = Engine.dimsOf(it.def, p.rot), h = Engine.hOf(it.def, p.rot);
+  G.puffs = (G.puffs || []).concat({x:p.x, y:p.y, z:p.z || 0, w, d, h, t0:performance.now()});
+  if (!G.puffLoop){ G.puffLoop = true; const step = () => { G.puffs = G.puffs.filter(f => performance.now() - f.t0 < PUFF_MS); render(); if (G.puffs.length) requestAnimationFrame(step); else G.puffLoop = false; }; requestAnimationFrame(step); }
+}
+function drawPuffs(ctx){
+  if (!G.puffs || !G.puffs.length) return;
+  const door = G.level.stacked && G.view === 'door', L = G.L, LD = G.LD;
+  for (const f of G.puffs){
+    const t = (performance.now() - f.t0) / PUFF_MS; if (t >= 1) continue;
+    let cx, cy, w, h;
+    if (door && LD){ cx = LD.ox + (f.x + f.w / 2) * LD.cell; cy = LD.floorY - (f.z + f.h / 2) * LD.cell; w = f.w * LD.cell; h = f.h * LD.cell; }
+    else { cx = L.ox + (f.x + f.w / 2) * L.cell; cy = L.oy + (f.y + f.d / 2) * L.cell; w = f.w * L.cell; h = f.d * L.cell; }
+    const e = 1 - Math.pow(1 - t, 2.2);                                   // fast out, easing at the end
+    const a = t < .35 ? 1 : 1 - (t - .35) / .65;                           // fades while it spreads
+    if (POOF_ART.img.complete && POOF_ART.img.naturalWidth){ poofArt(ctx, cx, cy, w, h, e, a, f.t0); continue; }
+    const k = .32 + .3 * e, blob = Math.max(5, Math.min(w, h) * (.17 - .05 * e)); // fallback while the picture loads: drawn puffs
+    puffShape(ctx, cx, cy, w * k, h * k, blob, a, e * .6 + (f.t0 % 6.28));
+  }
+}
+// Omar's smoke ring (assets/fx/poof-ring.webp), cut into its four pieces. They start stacked in the middle, smaller than the case,
+// then spread out to about the case's size so the gaps open, turning a little and fading.
+const POOF_ART = {img:Object.assign(new Image(), {src:'assets/fx/poof-ring.webp'}), W:440, H:384, // the whole ring's size
+  pieces:[[0, 0, 226, 128, 57, -130], [232, 0, 154, 212, -145, -48], [392, 0, 132, 214, 156, 37], [530, 0, 244, 136, -62, 126]]}; // sheet x, y, w, h, then its offset from the ring's middle
+function poofArt(ctx, cx, cy, w, h, e, a, seed){
+  const P = POOF_ART, S1 = 1.06 * (w + h) / 2 / ((P.W + P.H) / 2), S0 = S1 * .55, sc = S0 + (S1 - S0) * e; // whole ring ends just past the case
+  const spread = .12 + .88 * e, turn = (seed % 6.28) + e * .35, cs = Math.cos(turn), sn = Math.sin(turn);
+  ctx.save(); ctx.globalAlpha = Math.max(0, Math.min(1, a));
+  for (const [px, py, pw, ph, dx, dy] of P.pieces){
+    const ox = dx * spread * S1, oy = dy * spread * S1; // starts near the middle, all on top of each other
+    ctx.save(); ctx.translate(cx + ox * cs - oy * sn, cy + ox * sn + oy * cs); ctx.rotate(turn);
+    ctx.drawImage(P.img, px, py, pw, ph, -pw * sc / 2, -ph * sc / 2, pw * sc, ph * sc); ctx.restore();
+  }
+  ctx.restore();
+}
+function puffShape(ctx, cx, cy, rx, ry, blob, a, turn){ // drawn whole off-screen, then faded as one piece (so outlines don't show through)
+  const padX = rx + blob * 2.2, padY = ry + blob * 2.2, W = Math.ceil(padX * 2), H = Math.ceil(padY * 2), dpr = Math.min(2, window.devicePixelRatio || 1);
+  const off = puffShape.c || (puffShape.c = document.createElement('canvas'));
+  if (off.width < W * dpr || off.height < H * dpr){ off.width = Math.ceil(Math.max(off.width / dpr, W) * dpr); off.height = Math.ceil(Math.max(off.height / dpr, H) * dpr); }
+  const o = off.getContext('2d'); o.setTransform(dpr, 0, 0, dpr, 0, 0); o.clearRect(0, 0, off.width, off.height);
+  puffRing(o, padX, padY, rx, ry, blob, turn);
+  ctx.save(); ctx.globalAlpha = Math.max(0, Math.min(1, a)); ctx.drawImage(off, 0, 0, W * dpr, H * dpr, cx - padX, cy - padY, W, H); ctx.restore();
+}
+function puffRing(ctx, cx, cy, rx, ry, blob, turn){ // little cartoon puffs around a circle: white, shaded underneath, dark outline, a tiny curl on each
+  const INK = '#2b2b28', WHITE = '#f3f1ea', SHADE = '#cfcdc5', lw = Math.max(1.2, blob * .14), N = 9, puffs = [];
+  for (let i = 0; i < N; i++){
+    const ang = turn + i / N * Math.PI * 2, x = cx + Math.cos(ang) * rx, y = cy + Math.sin(ang) * ry, b = blob * (i % 3 === 0 ? 1.15 : i % 3 === 1 ? .9 : 1);
+    puffs.push([[x, y, b], [x + Math.cos(ang + 1.9) * b * .7, y + Math.sin(ang + 1.9) * b * .7, b * .62], [x + Math.cos(ang - 1.9) * b * .7, y + Math.sin(ang - 1.9) * b * .7, b * .55]]);
+  }
+  const disc = (x, y, r) => { ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill(); };
+  for (const p of puffs){
+    ctx.fillStyle = INK; for (const [x, y, r] of p) disc(x, y, r + lw);
+    ctx.fillStyle = SHADE; for (const [x, y, r] of p) disc(x, y, r);
+    ctx.fillStyle = WHITE; for (const [x, y, r] of p) disc(x - r * .1, y - r * .16, r * .84);
+    const [x, y, r] = p[0]; ctx.strokeStyle = '#a9a69e'; ctx.lineWidth = Math.max(1, r * .16); ctx.lineCap = 'round'; ctx.beginPath(); ctx.arc(x + r * .05, y + r * .05, r * .42, .3, 4.2); ctx.stroke(); // a little curl
+  }
 }
 
 // Small ON SIDE tag on the bottom-left corner of a tipped case (top view)
@@ -4911,6 +4972,7 @@ function removeHovered(){
   }
   { const why = Engine.leaveBlock(state(), G.placements.find(p => p.uid === uid)); if (why){ flashCoach('bad', why, 4000); return; } }
   G.hist.push(snap()); G.fut = [];
+  poofAt(G.placements.find(p => p.uid === uid));
   G.placements = G.placements.filter(p => p.uid !== uid); G.hover = null; G.rehandles = (G.rehandles || 0) + 1; sfx('out');
   flashCoach('tip', `The ${itemOf(uid).def.name} is back on the dock. <b>UNDO</b> puts it back in the truck.`, 3500);
   refresh();
@@ -4921,11 +4983,12 @@ function returnToDock(){ // true = it went back to the dock
     const st = state(), why = Engine.leaveBlock(st, G.hand.orig, [...st.placements, G.hand.orig]);
     if (why){ cancelHand(); flashCoach('bad', why, 4000); return false; }
   }
-  if (G.hand.from === 'truck'){ G.hist.push(G.hand.pre); G.fut = []; G.rehandles = (G.rehandles || 0) + 1; sfx('out'); } // a loaded case came back out
+  if (G.hand.from === 'truck'){ G.hist.push(G.hand.pre); G.fut = []; G.rehandles = (G.rehandles || 0) + 1; sfx('out'); poofAt(G.hand.orig); } // a loaded case came back out
   G.hand = null; G.ghost = null; refresh(); return true;
 }
 function setGhost(x, y){
   const h = G.hand; if (!h) return;
+  if (h.from === 'truck' && G.ghost && (G.ghost.x !== x || G.ghost.y !== y)) rollMove(); // a loaded case being moved: it rolls
   const res = testPlace(x, y);
   G.ghost = {x, y, z:res.z || 0, ok:res.ok, reason:res.reason, warn:res.ok ? Engine.getPlacementWarning(state(), G.level, h.uid, x, y, h.rot, null, res.z || 0) : null};
 }
@@ -5175,7 +5238,7 @@ function barAt(px, py){
 }
 function removeBar(b){
   G.hist.push(snap()); G.fut = [];
-  G.bars = G.bars.filter(x => x !== b); G.hoverBar = null;
+  G.bars = G.bars.filter(x => x !== b); G.hoverBar = null; if (b.kind === 'strap') sfx('unstrap');
   flashCoach('tip', `${b.kind === 'strap' ? 'Strap' : 'Load bar'} taken out. <b>UNDO</b> puts it back.`);
   refresh();
 }
@@ -5358,11 +5421,19 @@ function semiSound(ctx, out, at, dur, phases, o = {}){ // o.engine === false: ho
   for (const o of [fire, sub, chug, rum]){ o.start(at); o.stop(end + .05); }
 }
 /* ---------- sound effects (made in the browser; follow SOUND ON/OFF; phones on silent stay silent) ---------- */
+/* recorded one-shots that replace a built-in sound once they're loaded (assets/sounds, Pixabay Content License) */
+const SAMPLES = {out:{url:'assets/sounds/case-poof.mp3', vol:.33, skip:.5, buf:null, loading:null}}; // skip: the recording's silent lead-in, so the poof lands with the smoke
+function loadSamples(ctx){
+  for (const s of Object.values(SAMPLES)) if (!s.buf && !s.loading)
+    s.loading = fetch(s.url).then(r => r.arrayBuffer()).then(a => new Promise((ok, no) => ctx.decodeAudioData(a, ok, no))).then(b => { s.buf = b; }).catch(() => { s.loading = null; });
+}
 function sfx(name){
   if (!SOUND.on) return;
   try {
     const AC = window.AudioContext || window.webkitAudioContext; if (!AC) return;
-    SOUND.ctx = SOUND.ctx || new AC(); const ctx = SOUND.ctx; if (ctx.state !== 'running') ctx.resume(); loadEngine(ctx);
+    SOUND.ctx = SOUND.ctx || new AC(); const ctx = SOUND.ctx; if (ctx.state !== 'running') ctx.resume(); loadEngine(ctx); loadRoll(ctx); loadSamples(ctx);
+    const smp = SAMPLES[name];
+    if (smp && smp.buf){ const src = ctx.createBufferSource(), g = ctx.createGain(); src.buffer = smp.buf; g.gain.value = smp.vol; src.connect(g).connect(ctx.destination); src.start(ctx.currentTime + .005, smp.skip || 0); return; }
     const t = ctx.currentTime + .01, out = ctx.createGain(); out.gain.value = .55; out.connect(ctx.destination);
     SOUND.noise = SOUND.noise || noiseBuf(ctx);
     const tone = (type, f0, f1, at, len, vol, lp) => {
@@ -5379,11 +5450,34 @@ function sfx(name){
       src.connect(f).connect(g).connect(out); src.start(t + at, Math.random()); src.stop(t + at + len + .02);
     };
     const notes = (seq, type = 'triangle', vol = .24) => seq.forEach(([hz, at, len]) => tone(type, hz, 0, at, len, vol));
+    if (!SOUND.verb){ // a small room, shared
+      const len = ctx.sampleRate * 1.3, ir = ctx.createBuffer(2, len, ctx.sampleRate);
+      for (let ch = 0; ch < 2; ch++){ const d = ir.getChannelData(ch); for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 3.2); }
+      SOUND.verb = ctx.createConvolver(); SOUND.verb.buffer = ir; const vg = ctx.createGain(); vg.gain.value = .9; SOUND.verb.connect(vg).connect(ctx.destination);
+    }
+    // finer tools for the newer sounds (pick, place): glides, Q, reverb send
+    const tone2 = (type, f0, f1, at, len, vol, o = {}) => {
+      const osc = ctx.createOscillator(), g = ctx.createGain(), s0 = t + at; osc.type = type;
+      osc.frequency.setValueAtTime(f0, s0); if (f1) osc.frequency.exponentialRampToValueAtTime(f1, s0 + (o.glide || len));
+      g.gain.setValueAtTime(0.0001, s0); g.gain.exponentialRampToValueAtTime(vol, s0 + .006); g.gain.exponentialRampToValueAtTime(0.0001, s0 + len);
+      let n = osc; if (o.lp){ const f = ctx.createBiquadFilter(); f.type = 'lowpass'; f.frequency.value = o.lp; n.connect(f); n = f; }
+      n.connect(g).connect(out); osc.start(s0); osc.stop(s0 + len + .05);
+    };
+    const hiss2 = (type, freq, at, len, vol, o = {}) => {
+      const src = ctx.createBufferSource(), f = ctx.createBiquadFilter(), g = ctx.createGain(), s0 = t + at;
+      src.buffer = SOUND.noise; f.type = type; f.frequency.value = freq; if (o.q) f.Q.value = o.q; if (o.to) f.frequency.exponentialRampToValueAtTime(o.to, s0 + len);
+      g.gain.setValueAtTime(0.0001, s0); g.gain.exponentialRampToValueAtTime(vol, s0 + .004); g.gain.exponentialRampToValueAtTime(0.0001, s0 + len);
+      src.connect(f).connect(g).connect(out); if (o.wet){ const w = ctx.createGain(); w.gain.value = o.wet; g.connect(w).connect(SOUND.verb); }
+      src.start(s0, Math.random()); src.stop(s0 + len + .05);
+    };
+    const click2 = (at, vol, f) => hiss2('bandpass', f, at, .018, vol, {q:5});
+    const thump = (at, f0, f1, vol, len = .22) => { tone2('sine', f0, f1, at, len, vol, {lp:320, glide:len * .7}); hiss2('bandpass', 170, at, len * .6, vol * .7, {q:1.4}); };
     ({
-      pick:  () => { tone('sine', 150, 230, 0, .09, .22); hiss('lowpass', 900, 0, .06, .12); },                     // the case comes up off its wheels
-      place: () => { tone('sine', 95, 48, 0, .18, .5, 400); hiss('lowpass', 500, 0, .07, .3); tone('square', 2400, 0, .02, .03, .02); }, // road-case thunk + a caster tick
-      bad:   () => { tone('square', 120, 0, 0, .08, .14, 900); tone('square', 120, 0, .12, .1, .14, 900); },       // soft "nope"
-      strap: () => { for (let i = 0; i < 6; i++){ hiss('highpass', 2400 + i * 180, i * .065, .03, .22); tone('square', 900 + i * 40, 0, i * .065, .015, .03); } }, // ratchet clicks
+      pick:  () => { tone('sine', 150, 230, 0, .09, .22); hiss('lowpass', 900, 0, .06, .12); },                     // the case comes up off its wheels (the original; Omar 2026-10-06)
+      place: () => { thump(0, 88, 42, .75); hiss2('lowpass', 1300, 0, .035, .22); click2(.035, .07, 3400); click2(.055, .05, 3000); hiss2('bandpass', 160, .01, .1, .08, {q:1, wet:.25}); }, // road case lands on the plywood floor
+      bad:   () => { tone2('triangle', 230, 190, 0, .13, .26, {lp:1300}); tone2('triangle', 200, 150, .15, .2, .26, {lp:1100}); }, // soft "uh-uh"
+      strap: () => { hiss2('bandpass', 700, 0, .22, .1, {q:2, to:2600}); let at = .2; for (let i = 0; i < 7; i++){ hiss2('bandpass', 3300, at, .022, .38, {q:7}); tone2('square', 1500, 0, at, .012, .035); at += .085 - i * .006; } thump(at + .02, 150, 90, .22, .12); }, // strap pulled, ratchet clicks, cinched (going on)
+      unstrap: () => { for (let i = 0; i < 6; i++){ hiss('highpass', 2400 + i * 180, i * .065, .03, .22); tone('square', 900 + i * 40, 0, i * .065, .015, .03); } }, // the original ratchet clicks (coming off)
       bar:   () => { tone('triangle', 330, 0, 0, .35, .18); tone('triangle', 347, 0, 0, .3, .12); tone('square', 1180, 0, 0, .12, .04, 3000); hiss('bandpass', 1800, 0, .05, .2, 3); }, // metal clunk
       row:   () => notes([[1047, 0, .16], [1568, .11, .3]], 'sine', .2),                                           // full-width row chime
       out:   () => { hiss('bandpass', 1400, 0, .16, .45, 1.2); tone('sine', 260, 140, 0, .12, .12); },                                                        // a case back out
@@ -5416,6 +5510,31 @@ function engineSound(ctx, out, at, dur, phases){ // returns when the truck start
   mv.g.gain.setValueAtTime(0.0001, roll - .1); mv.g.gain.linearRampToValueAtTime(1, roll + .4);
   mv.g.gain.setValueAtTime(1, Math.max(roll + .5, end - .7)); mv.g.gain.linearRampToValueAtTime(0.0001, end); mv.src.stop(end + .05);
   return fired + .6;
+}
+/* moving a case inside the truck: the rolling recording (assets/sounds/case-roll.mp3, Pixabay Content License) loops while it moves.
+   Each pickup gets one of four pitches, never the same one twice in a row, so it doesn't sound like the same clip every time. */
+const ROLL = {url:'assets/sounds/case-roll.mp3', vol:.1, muffle:900, buf:null, loading:null, rates:[.9, .95, 1.05, 1.1], last:-1, src:null, g:null, moved:0, timer:0, a:.15, b:1.15};
+function loadRoll(ctx){
+  if (ROLL.buf || ROLL.loading) return;
+  ROLL.loading = fetch(ROLL.url).then(r => r.arrayBuffer()).then(a => new Promise((ok, no) => ctx.decodeAudioData(a, ok, no))).then(b => { ROLL.buf = b; }).catch(() => { ROLL.loading = null; });
+}
+function rollMove(){
+  if (!SOUND.on || !SOUND.ctx) return;
+  const ctx = SOUND.ctx, h = G.hand; if (!ROLL.buf){ loadRoll(ctx); return; }
+  ROLL.moved = performance.now();
+  if (ROLL.src) return;
+  if (h.rollRate == null){ let r; do r = Math.floor(Math.random() * ROLL.rates.length); while (r === ROLL.last); ROLL.last = r; h.rollRate = ROLL.rates[r]; }
+  const t = ctx.currentTime, src = ctx.createBufferSource(), g = ctx.createGain();
+  src.buffer = ROLL.buf; src.loop = true; src.loopStart = ROLL.a; src.loopEnd = ROLL.b; src.playbackRate.value = h.rollRate;
+  const mf = ctx.createBiquadFilter(); mf.type = 'lowpass'; mf.frequency.value = ROLL.muffle; mf.Q.value = .5; // muffled: casters on plywood, under everything else
+  g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(ROLL.vol, t + .05); src.connect(mf).connect(g).connect(ctx.destination); src.start(t, ROLL.a); // low, at the level of pick up / set down
+  ROLL.src = src; ROLL.g = g;
+  ROLL.timer = setInterval(() => { if (!G.hand || G.hand.from !== 'truck' || performance.now() - ROLL.moved > 200 || !SOUND.on) rollStop(); }, 40);
+}
+function rollStop(){
+  clearInterval(ROLL.timer); if (!ROLL.src) return;
+  const t = SOUND.ctx.currentTime, g = ROLL.g.gain; g.cancelScheduledValues(t); g.setValueAtTime(Math.max(g.value, 0.0001), t); g.linearRampToValueAtTime(0.0001, t + .08);
+  ROLL.src.stop(t + .1); ROLL.src = null; ROLL.g = null;
 }
 function playSemi(dur, phases){
   if (!SOUND.on) return;
@@ -5525,7 +5644,7 @@ function tryUnload(uid){
 function tryRemoveDevice(b){
   const why = offDeviceBlockSt(state(), b); if (why){ flashCoach('bad', why, 3000); return; }
   G.hist.push(snap()); G.fut = [];
-  G.bars = G.bars.filter(x => x !== b); G.hoverBar = null;
+  G.bars = G.bars.filter(x => x !== b); G.hoverBar = null; if (b.kind === 'strap') sfx('unstrap');
   toast(b.kind === 'strap' ? 'UNSTRAPPED' : 'BAR OUT', b.tier === 'high' ? 'Upper tier' : 'Tier');
   refresh();
 }
