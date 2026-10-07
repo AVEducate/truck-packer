@@ -5318,8 +5318,8 @@ const noiseBuf = ctx => {
   return b;
 };
 // the whole run, scheduled from `at`: air-brake release + horn, diesel revs as it rolls out, a hiss on each braking phase, fade out
-function semiSound(ctx, out, at, dur, phases){
-  const end = at + dur, nb = noiseBuf(ctx);
+function semiSound(ctx, out, at, dur, phases, o = {}){ // o.engine === false: horn + hisses only (the recorded engine plays instead)
+  const end = at + dur, nb = noiseBuf(ctx), hornAt = o.hornAt || .15, relAt = o.releaseAt || 0;
   const env = (g, pts) => { g.gain.setValueAtTime(0.0001, at); for (const [t, v] of pts) g.gain.exponentialRampToValueAtTime(Math.max(v, 0.0001), at + t); };
   const hiss = (t0, len, vol, hp) => {
     const src = ctx.createBufferSource(), f = ctx.createBiquadFilter(), g = ctx.createGain();
@@ -5328,11 +5328,15 @@ function semiSound(ctx, out, at, dur, phases){
     g.gain.setValueAtTime(vol, at + t0 + len * .25); g.gain.exponentialRampToValueAtTime(0.0001, at + t0 + len);
     src.start(at + t0, Math.random()); src.stop(at + t0 + len + .05);
   };
-  hiss(0, .7, .22, 2200);                                         // pssht: the brakes let go
+  hiss(relAt, .7, .22, 2200);                                     // pssht: the brakes let go
   // horn: a short two-note blast
   const hg = ctx.createGain(), hf = ctx.createBiquadFilter(); hf.type = 'lowpass'; hf.frequency.value = 1600; hg.connect(hf).connect(out);
-  for (const fr of [185, 233]){ const o = ctx.createOscillator(); o.type = 'sawtooth'; o.frequency.value = fr; o.connect(hg); o.start(at + .15); o.stop(at + .75); }
-  hg.gain.setValueAtTime(0.0001, at + .15); hg.gain.exponentialRampToValueAtTime(.09, at + .19); hg.gain.setValueAtTime(.09, at + .6); hg.gain.exponentialRampToValueAtTime(0.0001, at + .74);
+  for (const fr of [185, 233]){ const osc = ctx.createOscillator(); osc.type = 'sawtooth'; osc.frequency.value = fr; osc.connect(hg); osc.start(at + hornAt); osc.stop(at + hornAt + .6); }
+  hg.gain.setValueAtTime(0.0001, at + hornAt); hg.gain.exponentialRampToValueAtTime(.09, at + hornAt + .04); hg.gain.setValueAtTime(.09, at + hornAt + .45); hg.gain.exponentialRampToValueAtTime(0.0001, at + hornAt + .59);
+  if (o.engine === false){ // braking hisses still follow the drive
+    phases.forEach((ph, i) => { if (/BRAK|STOP/i.test(ph.label)) hiss(.9 + i + .55, .45, .1, 2600); });
+    return;
+  }
   // diesel: a low buzzy firing note plus rumble, revving up then holding, a dip on braking
   const eg = ctx.createGain(), ef = ctx.createBiquadFilter(); ef.type = 'lowpass'; ef.frequency.value = 420; ef.Q.value = 2; eg.connect(out);
   ef.connect(eg);
@@ -5358,7 +5362,7 @@ function sfx(name){
   if (!SOUND.on) return;
   try {
     const AC = window.AudioContext || window.webkitAudioContext; if (!AC) return;
-    SOUND.ctx = SOUND.ctx || new AC(); const ctx = SOUND.ctx; if (ctx.state !== 'running') ctx.resume();
+    SOUND.ctx = SOUND.ctx || new AC(); const ctx = SOUND.ctx; if (ctx.state !== 'running') ctx.resume(); loadEngine(ctx);
     const t = ctx.currentTime + .01, out = ctx.createGain(); out.gain.value = .55; out.connect(ctx.destination);
     SOUND.noise = SOUND.noise || noiseBuf(ctx);
     const tone = (type, f0, f1, at, len, vol, lp) => {
@@ -5390,13 +5394,38 @@ function sfx(name){
     setTimeout(() => out.disconnect(), 1500);
   } catch(e){}
 }
+/* recorded truck: the diesel start-up, then the truck pulling away (assets/sounds, Pixabay Content License). Fetched once, decoded on first use. */
+const ENGINE = {start:{url:'assets/sounds/truck-start.mp3', buf:null}, move:{url:'assets/sounds/truck-move.m4a', buf:null}, loading:null,
+  skip:.5, caught:1.6, loopA:2.3, loopB:4.3}; // seconds in truck-start: silent lead-in, the moment it fires, its idle
+function loadEngine(ctx){
+  if (ENGINE.loading) return ENGINE.loading;
+  const one = s => s.buf ? null : fetch(s.url).then(r => r.arrayBuffer()).then(a => new Promise((ok, no) => ctx.decodeAudioData(a, ok, no))).then(b => { s.buf = b; });
+  ENGINE.loading = Promise.all([one(ENGINE.start), one(ENGINE.move)]).catch(() => { ENGINE.loading = null; });
+  return ENGINE.loading;
+}
+function engineSound(ctx, out, at, dur, phases){ // returns when the truck starts rolling (seconds after `at`)
+  const E = ENGINE, end = at + dur, fired = E.caught - E.skip;          // it fires about 1.1 s in
+  const play = (buf, when, offset, vol, loop) => { const src = ctx.createBufferSource(), g = ctx.createGain(); src.buffer = buf; src.connect(g).connect(out);
+    if (loop){ src.loop = true; src.loopStart = E.loopA; src.loopEnd = E.loopB; } src.start(when, offset); return {src, g, vol}; };
+  const st = play(E.start.buf, at, E.skip, 1.6, !E.move.buf);
+  st.g.gain.setValueAtTime(1.6, at);
+  if (!E.move.buf){ st.g.gain.setValueAtTime(1.6, end - .6); st.g.gain.linearRampToValueAtTime(0.0001, end); st.src.stop(end + .05); return fired + .6; }
+  const roll = at + fired + .6;                                          // a breath of idle, then it pulls away
+  st.g.gain.setValueAtTime(1.6, roll); st.g.gain.linearRampToValueAtTime(0.0001, roll + .5); st.src.stop(roll + .55);
+  const mv = play(E.move.buf, roll - .1, .6, 1, false);                  // blend in, skipping its quiet first moment
+  mv.g.gain.setValueAtTime(0.0001, roll - .1); mv.g.gain.linearRampToValueAtTime(1, roll + .4);
+  mv.g.gain.setValueAtTime(1, Math.max(roll + .5, end - .7)); mv.g.gain.linearRampToValueAtTime(0.0001, end); mv.src.stop(end + .05);
+  return fired + .6;
+}
 function playSemi(dur, phases){
   if (!SOUND.on) return;
   try {
     const AC = window.AudioContext || window.webkitAudioContext; if (!AC) return;
     SOUND.ctx = SOUND.ctx || new AC(); const ctx = SOUND.ctx; if (ctx.state !== 'running') ctx.resume();
     const master = ctx.createGain(); master.gain.value = .8; master.connect(ctx.destination);
-    semiSound(ctx, master, ctx.currentTime + .03, dur, phases);
+    const at = ctx.currentTime + .03;
+    if (ENGINE.start.buf){ const rolls = engineSound(ctx, master, at, dur, phases); semiSound(ctx, master, at, dur, phases, {engine:false, hornAt:ENGINE.caught - ENGINE.skip + .3, releaseAt:rolls - .15}); }
+    else { semiSound(ctx, master, at, dur, phases); loadEngine(ctx); } // not loaded yet: the built-in engine this once
     setTimeout(() => master.disconnect(), (dur + .5) * 1000);
   } catch(e){}
 }
