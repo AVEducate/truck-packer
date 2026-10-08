@@ -418,7 +418,10 @@ body.phone .crew-fig{left:6px;width:66px}
 /* phone dock stack zone (Omar 2026-10-08): stacking gets its own space. It opens over the lower truck (the loaded cases stay in view above it);
    tap or drag cases from the strip into it, then PICK UP STACK puts the stack at the doors to drag into place. Desktop keeps the side panel. */
 .dock-zone{display:none}
-body.phone .dock-zone:not([hidden]){display:flex;flex-direction:column;position:absolute;left:8px;right:8px;bottom:124px;height:46%;z-index:20;background:rgba(24,25,22,.95);border:3px solid var(--accent);box-shadow:0 6px 18px rgba(0,0,0,.55);padding:8px;gap:6px}
+body.phone .dock-zone:not([hidden]){display:flex;flex-direction:column;position:absolute;left:8px;right:8px;top:calc((100% - 124px - 46%) / 2);height:46%;z-index:20;background:rgba(24,25,22,.95);border:3px solid var(--accent);box-shadow:0 6px 18px rgba(0,0,0,.55);padding:8px;gap:6px}
+body.phone #stagingBox.has-stack{border:3px solid var(--accent);animation:dockPulse 2.4s ease-in-out infinite} /* cases are stacked on the dock: they still need to go on the truck */
+@keyframes dockPulse{0%,100%{border-color:var(--accent);box-shadow:0 0 10px rgba(232,137,47,.55)}50%{border-color:rgba(232,137,47,.15);box-shadow:0 0 0 rgba(232,137,47,0)}}
+@media (prefers-reduced-motion:reduce){body.phone #stagingBox.has-stack{animation:none}}
 .dz-hd{display:flex;align-items:center;justify-content:space-between;font-family:var(--pixel);font-size:17px;letter-spacing:.08em;color:var(--cream)}
 .dz-hd .btn{width:40px;height:36px;font-size:18px;padding:0}
 #dzCanvas{flex:1 1 auto;width:100%;min-height:0}
@@ -5242,6 +5245,7 @@ function renderStaging(){
     : `Base: ${itemOf(stg[0].uid).def.name}${stg.length > 1 ? ` · on top: ${listNames(stg.slice(1).map(m => itemOf(m.uid).def.name))}` : ''} · ${tot}" tall`;
   const canAdd = G.mode === 'play' && G.hand && G.hand.from === 'dock' && !G.hand.stack;
   $('btnStage').disabled = !canAdd; $('btnTakeStack').disabled = G.mode !== 'play' || !stg.length || !!G.hand; $('btnClearStage').disabled = G.mode !== 'play' || !stg.length;
+  $('stagingBox').classList.toggle('has-stack', !!stg.length && $('dockZone').hidden);
   $('dzPick').disabled = $('btnTakeStack').disabled; $('dzClear').disabled = $('btnClearStage').disabled;
   $('dzText').textContent = !stg.length ? 'Tap a case in the strip above (or drag it down here) to set the base. Then add what fits on its lid.' : $('stagingText').textContent;
 }
