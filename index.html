@@ -729,6 +729,7 @@ body.phone .home-btn kbd, body.phone .link-btn kbd{display:none}
   <h2 id="rpTitle">TELL US</h2>
   <div class="rp-kind"><button class="btn on" data-kind="problem">A PROBLEM</button><button class="btn" data-kind="idea">AN IDEA</button></div>
   <textarea id="rpText" maxlength="2000" rows="5" placeholder="What happened, or what would make the game better?"></textarea>
+  <input id="rpEmail" type="email" inputmode="email" autocomplete="email" maxlength="120" placeholder="Your email (optional, if we can ask you more)" style="margin-top:8px">
   <p class="ac-small" id="rpInfo"></p>
   <p class="ac-msg" id="rpMsg"></p>
   <div class="row"><button class="btn" id="rpCancel">CANCEL</button><button class="btn primary" id="rpSend">SEND</button></div>
@@ -4414,10 +4415,11 @@ function render(){
   const W = G.level.truck.width / IN, D = G.level.truck.depth / IN;
   // truck body + walls
   ctx.fillStyle = '#121211'; ctx.fillRect(ox - wall - 4, oy - wall - 4, Wp + wall * 2 + 8, Dp + wall + 8);
-  ctx.fillStyle = '#7d7f77'; ctx.fillRect(ox - wall, oy - wall, Wp + wall * 2, Dp + wall);
-  ctx.fillStyle = '#5c5e57'; ctx.fillRect(ox - wall, oy - wall, Wp + wall * 2, wall * .35);
+  ctx.fillStyle = '#d8d8d5'; ctx.fillRect(ox - wall, oy - wall, Wp + wall * 2, Dp + wall); // the same light grey walls as the door view (Omar 2026-10-08)
+  ctx.fillStyle = '#bdbdb9'; ctx.fillRect(ox - wall, oy - wall, Wp + wall * 2, wall * .35);
+  ctx.strokeStyle = '#111'; ctx.lineWidth = 2; ctx.strokeRect(ox - wall, oy - wall, Wp + wall * 2, Dp + wall);
   // E-track slots along the side walls
-  ctx.fillStyle = '#2d2e2a';
+  ctx.fillStyle = '#5f615c';
   for (let yy = oy + 4; yy < oy + Dp - 4; yy += Math.max(6, 3 * L.s)){ ctx.fillRect(ox - wall * .62, yy, wall * .28, Math.max(2, 1.4 * L.s)); ctx.fillRect(ox + Wp + wall * .34, yy, wall * .28, Math.max(2, 1.4 * L.s)); }
   if (!G.floorCache) G.floorCache = buildFloor();
   ctx.drawImage(G.floorCache, ox, oy, Wp, Dp);
@@ -4492,8 +4494,34 @@ function render(){
         elev:((g.z || 0) + m.dz) * IN, priority:G.level.unloadSequence ? Engine.priorityOf(G.level, it.def) : null});
     }
   }
+  drawScrollHint(ctx);
   drawPuffs(ctx);
   ctx.restore();
+}
+/* ---------- phone: a ghost finger when the case in hand is off screen (Omar 2026-10-08) ----------
+   After PICK UP STACK the stack waits at the doors, which on a phone can be below the visible truck. A finger dot lands on the floor
+   and slides the way to swipe, with a fading trail and "SWIPE UP"; it loops until the case is in view, then goes away. */
+function drawScrollHint(ctx){
+  const L = G.L; drawScrollHint.on = false;
+  if (!isPhone() || G.mode !== 'play' || !G.hand || !G.ghost || doorView() || !G.scrollMax || (PH.g && PH.g.kind === 'drag')) return;
+  const {w, d} = Engine.dimsOf(itemOf(G.hand.uid).def, G.hand.rot), top = L.oy + G.ghost.y * L.cell, bot = top + d * L.cell, view = L.clipH || L.ch;
+  const dir = top > view - 30 ? 1 : bot < 30 ? -1 : 0; if (!dir) return;   // 1: it's below, swipe up · -1: it's above, swipe down
+  drawScrollHint.on = true;
+  const t = (performance.now() % 1700) / 1700, cx = L.ox + L.Wp / 2, travel = Math.min(140, view * .3);
+  const y0 = dir > 0 ? view - 60 : 70, move = t < .15 ? 0 : Math.min(1, (t - .15) / .55), y = y0 - dir * travel * (move * move * (3 - 2 * move));
+  const fade = t > .8 ? 1 - (t - .8) / .2 : 1;
+  ctx.save();
+  if (move > 0){ const g = ctx.createLinearGradient(0, y0, 0, y); g.addColorStop(0, 'rgba(235,227,203,0)'); g.addColorStop(1, `rgba(235,227,203,${.45 * fade})`);
+    ctx.strokeStyle = g; ctx.lineWidth = 22; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(cx, y0); ctx.lineTo(cx, y); ctx.stroke(); }          // the trail
+  const r = 17 * (t < .15 ? .6 + t / .15 * .4 : 1);                                                                                              // the finger lands
+  ctx.fillStyle = `rgba(255,255,255,${.85 * fade})`; ctx.strokeStyle = `rgba(17,17,17,${.8 * fade})`; ctx.lineWidth = 3;
+  ctx.beginPath(); ctx.arc(cx, y, r, 0, 7); ctx.fill(); ctx.stroke();
+  ctx.strokeStyle = `rgba(255,255,255,${.5 * fade})`; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(cx, y, r + 7 + 6 * (1 - fade), 0, 7); ctx.stroke(); // touch ring
+  const label = dir > 0 ? 'SWIPE UP' : 'SWIPE DOWN', ly = y0 + dir * 34;
+  ctx.font = "800 15px 'Barlow Condensed', sans-serif"; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; const tw = ctx.measureText(label).width + 16;
+  ctx.fillStyle = 'rgba(17,17,17,.85)'; ctx.fillRect(cx - tw / 2, ly - 11, tw, 22); ctx.fillStyle = '#f0c04a'; ctx.fillText(label, cx, ly + 1);
+  ctx.restore();
+  if (!drawScrollHint.raf) drawScrollHint.raf = requestAnimationFrame(() => { drawScrollHint.raf = 0; if (drawScrollHint.on) render(); });   // keep it moving while it's needed
 }
 /* ---------- poof: a cartoon smoke puff where a case leaves the truck (with the poof sound) ---------- */
 const PUFF_MS = 360; // a ring of little puffs: smaller than the case, spreads to just past it, fading as it goes
@@ -4579,9 +4607,9 @@ function renderDoor(ctx){
   ctx.drawImage(backWall(Wp, Hp), ox, top, Wp, Hp);
   ctx.fillStyle = 'rgba(0,0,0,.35)'; ctx.fillRect(ox, top, Wp, 4); // shadow under the header
   ctx.fillStyle = '#d8d8d5'; ctx.strokeStyle = '#111'; ctx.lineWidth = 2;
-  for (const fx of [ox - 14, ox + Wp]){ ctx.fillRect(fx, top, 14, Hp); ctx.strokeRect(fx, top, 14, Hp); }
-  ctx.fillRect(ox - 14, top - 16, Wp + 28, 16); ctx.strokeRect(ox - 14, top - 16, Wp + 28, 16);
-  for (const r of [24, 48, 72]){ const yy = floorY - r * s; ctx.fillStyle = '#5f615c'; ctx.fillRect(ox - 10, yy - 3, 6, 6); ctx.fillRect(ox + Wp + 4, yy - 3, 6, 6); }
+  for (const fx of [ox - 7, ox + Wp]){ ctx.fillRect(fx, top, 7, Hp); ctx.strokeRect(fx, top, 7, Hp); } // side walls: half the old width, matching the top view (Omar 2026-10-08)
+  ctx.fillRect(ox - 7, top - 16, Wp + 14, 16); ctx.strokeRect(ox - 7, top - 16, Wp + 14, 16);
+  for (const r of [24, 48, 72]){ const yy = floorY - r * s; ctx.fillStyle = '#5f615c'; ctx.fillRect(ox - 5.5, yy - 2, 4, 4); ctx.fillRect(ox + Wp + 1.5, yy - 2, 4, 4); }
   for (const lx of [ox + 6, ox + Wp - 6]){
     const glow = ctx.createRadialGradient(lx, top - 8, 1, lx, top - 8, 14); glow.addColorStop(0, 'rgba(255,90,70,.55)'); glow.addColorStop(1, 'rgba(255,90,70,0)');
     ctx.fillStyle = glow; ctx.fillRect(lx - 14, top - 22, 28, 28);
@@ -6075,7 +6103,7 @@ const deviceKind = () => isPhone() ? 'phone' : matchMedia('(any-pointer: fine)')
 function openReport(){
   G.reportPrev = G.mode === 'report' ? G.reportPrev : G.mode; G.mode = 'report';
   const lv = G.level, where = lv ? (lv.loop ? 'Endless Tour' : lv.demo ? 'Practice Bay' : `Level ${lv.id}`) : 'Home';
-  G.reportWhere = where; $('rpText').value = ''; $('rpMsg').textContent = ''; $('rpMsg').className = 'ac-msg';
+  G.reportWhere = where; $('rpText').value = ''; { const a = ACCOUNT.get(); $('rpEmail').value = (a && a.email) || ''; } // optional contact email, filled in when signed in $('rpMsg').textContent = ''; $('rpMsg').className = 'ac-msg';
   $('rpInfo').textContent = `Sent with: ${where} · ${deviceKind()} · your browser.`;
   openModal('report'); setTimeout(() => $('rpText').focus(), 50);
 }
@@ -6088,13 +6116,16 @@ $('rpCancel').onclick = closeReport;
 $('rpSend').onclick = async () => {
   const kind = document.querySelector('.rp-kind .btn.on').dataset.kind, message = $('rpText').value.trim(), m = $('rpMsg');
   if (!message){ m.className = 'ac-msg bad'; m.textContent = 'Write a few words first.'; return; }
+  const contact = $('rpEmail').value.trim();
+  if (contact && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact)){ m.className = 'ac-msg bad'; m.textContent = 'Check the email address, or leave it blank.'; return; }
+  const full = contact ? `Reply to: ${contact}\n\n${message}` : message; // rides in the message, so the report email shows it (no server change needed)
   if (!CLOUD_URL){ // no registry yet: hand it to the email app
-    location.href = `mailto:info@aveducate.com?subject=${encodeURIComponent(`Truck Packology ${kind} · ${G.reportWhere}`)}&body=${encodeURIComponent(`${message}\n\n${G.reportWhere} · ${deviceKind()} · ${navigator.userAgent}`)}`;
+    location.href = `mailto:info@aveducate.com?subject=${encodeURIComponent(`Truck Packology ${kind} · ${G.reportWhere}`)}&body=${encodeURIComponent(`${full}\n\n${G.reportWhere} · ${deviceKind()} · ${navigator.userAgent}`)}`;
     return;
   }
   m.className = 'ac-msg'; m.textContent = 'Sending…';
   const a = ACCOUNT.get();
-  const j = await cloud('report', {kind, message, level:G.reportWhere, device:deviceKind(), browser:navigator.userAgent, playerId:playerId(), token:a && a.token});
+  const j = await cloud('report', {kind, message:full, contact, level:G.reportWhere, device:deviceKind(), browser:navigator.userAgent, playerId:playerId(), token:a && a.token});
   if (!j.ok){ m.className = 'ac-msg bad'; m.textContent = j.error || 'That didn\'t send. Try again.'; return; }
   m.className = 'ac-msg good'; m.textContent = 'Thanks! It went straight to AV Educate.'; setTimeout(closeReport, 1400);
 };
