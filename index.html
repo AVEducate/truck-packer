@@ -81,6 +81,7 @@ body.home #game, body.home .modal-back{filter:blur(7px) saturate(.85)}
 .hud .stat span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .stat span{display:block;font-family:var(--pixel);font-weight:700;font-size:12px;letter-spacing:.06em}
 .stat b{display:block;font-family:var(--pixel);font-weight:800;font-size:22px;line-height:1.1}
+.hud .stat b{white-space:nowrap;overflow:hidden} /* one line always: a wrapped value made the top bar taller and shrank the truck */
 .stat.off{opacity:.35}
 .btn{font-family:var(--pixel);font-weight:700;letter-spacing:.04em;font-size:15px;background:#3d3e3a;color:var(--cream);border:2px solid #0d0d0c;padding:7px 12px;cursor:pointer;
   box-shadow:inset -2px -2px 0 #262724, inset 2px 2px 0 #5a5b56;white-space:nowrap}
@@ -169,6 +170,20 @@ body.crew-quiet:not(.crew-away) .coach{transform:translateY(calc(100% - 16px));c
 body.crew-quiet .coach .crew-fig, body.crew-quiet .coach .coach-body{opacity:0;transition:opacity .2s ease}
 .coach .crew-fig, .coach .coach-body{transition:opacity .25s ease}
 body.crew-quiet:not(.phone) .coach::before{content:'';position:absolute;top:5px;left:50%;transform:translateX(-50%);width:38px;height:4px;border-radius:3px;background:var(--cream-dim)}
+/* Layout A (Omar 2026-10-08): the case list and case info run to the bottom. The crew pops up in the middle column, under the truck,
+   with a mostly square speech bubble no taller than the old bar; the truck keeps that spot so it never changes size. */
+:root{--colL:264px;--colR:290px} /* the board's side columns (see .board), so the crew can stand between them */
+@media (min-width:821px){
+body:not(.phone) #game .stage{margin-bottom:107px}
+body:not(.phone) #game .board{position:relative;background:#1f201d}
+body:not(.phone) .coach{position:absolute;left:var(--colL);bottom:0;width:min(640px, calc(100% - var(--colL) - var(--colR)));height:104px;background:transparent;border-top:0;z-index:30;padding:6px 0 10px 150px;align-items:flex-end}
+body:not(.phone) .coach-body{background:#f4eedb;color:#1b1b1b;border:3px solid #0d0d0c;border-radius:12px;box-shadow:4px 4px 0 rgba(0,0,0,.45);padding:7px 12px 8px;max-height:88px}
+body:not(.phone) .coach::after{content:'';position:absolute;left:137px;bottom:30px;border-width:9px 14px 9px 0;border-style:solid;border-color:transparent #0d0d0c transparent transparent;transition:opacity .25s ease}
+body:not(.phone) .crew-name, body:not(.phone) #coachText{color:#1b1b1b}
+body.crew-quiet:not(.phone):not(.crew-away) .coach{background:#2a2b28;border-top:3px solid var(--edge)} /* quiet: a small tab to click the crew back */
+body.crew-quiet .coach::after{opacity:0}
+body:not(.phone) .crew-back{left:calc(var(--colL) + 12px)}
+}
 .crew-back{position:fixed;left:12px;bottom:12px;z-index:42;font-family:var(--pixel);font-weight:800;font-size:13px;letter-spacing:.06em;padding:6px 12px;border:2px solid var(--edge);background:var(--panel2);color:var(--cream);box-shadow:inset -2px -2px 0 #1f201d,inset 2px 2px 0 #5a5b56;cursor:pointer}
 .crew-back[hidden]{display:none}
 .keys{font-size:13px;color:var(--cream-dim)}
@@ -376,7 +391,7 @@ body.phone .stage{flex:1 1 auto}
 body.phone .stage-tools{left:10px !important;right:10px;top:auto !important;bottom:64px;width:auto !important;display:grid !important;grid-template-columns:repeat(4,1fr);gap:8px}
 body.phone .stage-tools .btn{width:auto;height:46px;font-size:20px}
 body.phone #btnHint{display:none !important}
-body.phone #btnView{order:1;display:inline-flex !important} body.phone #btnBar{order:2} body.phone #btnStrap{order:3} body.phone #btnUndoPh{order:4}
+body.phone #btnView{order:1;display:inline-flex !important} body.phone #btnBar{order:2} body.phone #btnStrap{order:3} body.phone #btnRotatePh{order:4}
 body.phone .stage-tools .btn{flex-direction:column;justify-content:center;align-items:center;gap:1px;padding:3px 2px}
 body.phone .stage-tools .btn svg{width:24px;height:24px}
 body.phone .stage-tools .btn .lock{font-size:9px;line-height:1}
@@ -397,15 +412,29 @@ body.phone .coach-body{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orie
 body.phone .coach-hd{display:inline-flex;vertical-align:1px;gap:5px;margin-right:6px}
 body.phone .crew-name{font-size:12.5px}
 body.phone .crew-fig{left:6px;width:66px}
+/* phone dock stack zone (Omar 2026-10-08): stacking gets its own space. It opens over the lower truck (the loaded cases stay in view above it);
+   tap or drag cases from the strip into it, then PICK UP STACK puts the stack at the doors to drag into place. Desktop keeps the side panel. */
+.dock-zone{display:none}
+body.phone .dock-zone:not([hidden]){display:flex;flex-direction:column;position:absolute;left:8px;right:8px;bottom:124px;height:46%;z-index:20;background:rgba(24,25,22,.95);border:3px solid var(--accent);box-shadow:0 6px 18px rgba(0,0,0,.55);padding:8px;gap:6px}
+.dz-hd{display:flex;align-items:center;justify-content:space-between;font-family:var(--pixel);font-size:17px;letter-spacing:.08em;color:var(--cream)}
+.dz-hd .btn{width:40px;height:36px;font-size:18px;padding:0}
+#dzCanvas{flex:1 1 auto;width:100%;min-height:0}
+.dz-text{font-size:12.5px;line-height:1.3;color:var(--cream-dim)}
+.dz-btns{display:grid;grid-template-columns:1fr 2fr;gap:8px}
+.dz-btns .btn{height:46px;font-size:16px}
+/* phone: the same speech bubble inside the old bar's height */
+body.phone .coach{background:transparent;border-top:0;padding:4px 8px 6px 78px}
+body.phone:not(.crew-quiet) .coach::before{display:none}
+body.phone .coach-body{background:#f4eedb;color:#1b1b1b;border:2px solid #0d0d0c;border-radius:10px;padding:3px 8px;max-height:48px;box-shadow:3px 3px 0 rgba(0,0,0,.45)}
+body.phone .coach::after{content:'';position:absolute;left:66px;bottom:16px;border-width:7px 12px 7px 0;border-style:solid;border-color:transparent #0d0d0c transparent transparent}
+body.phone .crew-name, body.phone #coachText{color:#1b1b1b}
+body.phone.crew-quiet:not(.crew-away) .coach{background:#2a2b28;border-top:3px solid var(--edge)}
 body.phone .levels-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
 body.phone .modal{max-width:calc(100vw - 20px);padding:16px 16px}
 body.phone .modal-back{padding:10px}
 .phone-menu{position:fixed;inset:0;z-index:998;background:rgba(0,0,0,.6);display:flex;align-items:flex-start;justify-content:flex-end;padding:56px 10px 10px}
 .phone-menu[hidden]{display:none}
 .pm-card{width:min(260px,100%);background:var(--panel);border:3px solid var(--edge);box-shadow:4px 4px 0 #000;padding:6px 12px 14px}
-.ph-undo{position:fixed;left:50%;transform:translateX(-50%);bottom:186px;z-index:60;display:flex;align-items:center;gap:10px;background:#1d1e1b;border:2px solid var(--cream);padding:6px 6px 6px 12px;font-family:var(--pixel);font-weight:700;font-size:15px;box-shadow:3px 3px 0 #000}
-.ph-undo[hidden]{display:none}
-.ph-undo button{font-family:var(--pixel);font-weight:800;letter-spacing:.06em;font-size:15px;background:var(--accent);color:#1a1209;border:2px solid #1a1209;padding:6px 12px}
 /* phones and touch-only tablets: a friendly note instead of a game they can't really play */
 .phone-note{position:fixed;inset:0;z-index:999;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:16px;overflow:auto}
 .phone-note[hidden]{display:none}
@@ -497,6 +526,7 @@ body.phone .home-btn kbd, body.phone .link-btn kbd{display:none}
 
 @media (max-width:1100px){
   .board{grid-template-columns:220px 1fr 240px}
+  :root{--colL:220px;--colR:240px}
   .stat{padding:3px 4px}
   .brand{font-size:14px}
 }
@@ -517,8 +547,6 @@ body.phone .home-btn kbd, body.phone .link-btn kbd{display:none}
   <div class="pm-card">
     <button class="pn-btn" data-act="levels">LEVELS</button>
     <button class="pn-btn" data-act="hint">HINT</button>
-    <button class="pn-btn" data-act="undo">UNDO</button>
-    <button class="pn-btn" data-act="redo">REDO</button>
     <button class="pn-btn" data-act="reset">RESET (START OVER)</button>
     <button class="pn-btn" data-act="help">HELP</button>
     <button class="pn-btn" data-act="sound" id="pmSound">SOUND: ON</button>
@@ -530,7 +558,6 @@ body.phone .home-btn kbd, body.phone .link-btn kbd{display:none}
   </div>
 </div>
 <div id="phoneRotate" class="phone-note" hidden><div class="pn-card"><div class="pn-logo">TRUCK<br>PACKOLOGY</div><h2>TURN YOUR PHONE UPRIGHT</h2><p>Truck Packology plays in portrait on a phone: the truck runs top to bottom.</p></div></div>
-<div id="phUndo" class="ph-undo" hidden><span id="phUndoText">Removed</span><button id="phUndoBtn">UNDO</button></div>
 <div id="phoneNote" class="phone-note" hidden role="dialog" aria-modal="true" aria-labelledby="pnTitle">
   <div class="pn-card">
     <div class="pn-logo">TRUCK<br>PACKOLOGY</div>
@@ -589,6 +616,7 @@ body.phone .home-btn kbd, body.phone .link-btn kbd{display:none}
       <div id="manifestList"></div>
     </aside>
     <div class="stage" id="stage">
+      <div class="dock-zone" id="dockZone" hidden><div class="dz-hd"><b>DOCK STACK</b><button class="btn" id="dzClose" aria-label="Close the dock stack">✕</button></div><canvas id="dzCanvas"></canvas><div class="dz-text" id="dzText"></div><div class="dz-btns"><button class="btn" id="dzClear">CLEAR</button><button class="btn primary" id="dzPick">PICK UP STACK</button></div></div>
       <canvas id="truckCanvas" aria-label="Truck floor, seen from above. Nose at the top, rear doors at the bottom."></canvas>
       <div id="toast"></div>
       <div id="transitLabel"></div>
@@ -597,7 +625,7 @@ body.phone .home-btn kbd, body.phone .link-btn kbd{display:none}
         <button class="btn" id="btnView" hidden title="Door view (V)">DOOR<span class="lock">V</span></button>
         <button class="btn" id="btnBar" hidden title="Load bar (B)">BAR<span class="lock">B</span></button>
         <button class="btn" id="btnStrap" hidden title="Strap (S)">STRAP<span class="lock">S</span></button>
-        <button class="btn phone-only" id="btnUndoPh" aria-label="Undo"><svg viewBox="0 0 40 40"><path d="M14 9 L5 17 L14 25" fill="none" stroke="#111" stroke-width="5" stroke-linejoin="round"/><path d="M14 9 L5 17 L14 25" fill="none" stroke="#f0c04a" stroke-width="2.6" stroke-linejoin="round"/><path d="M6 17 H24 A9 9 0 0 1 24 35 H15" fill="none" stroke="#111" stroke-width="5"/><path d="M6 17 H24 A9 9 0 0 1 24 35 H15" fill="none" stroke="#f0c04a" stroke-width="2.6"/></svg><span class="lock">UNDO</span></button>
+        <button class="btn phone-only" id="btnRotatePh" aria-label="Rotate"><svg viewBox="0 0 40 40"><path d="M30 13 A11 11 0 1 0 32 24" fill="none" stroke="#111" stroke-width="5"/><path d="M30 13 A11 11 0 1 0 32 24" fill="none" stroke="#f0c04a" stroke-width="2.6"/><path d="M23 12 L31 14 L32 5" fill="none" stroke="#111" stroke-width="5" stroke-linejoin="round"/><path d="M23 12 L31 14 L32 5" fill="none" stroke="#f0c04a" stroke-width="2.6" stroke-linejoin="round"/></svg><span class="lock">ROTATE</span></button>
       </div>
       <button class="btn primary" id="btnTransit">READY FOR TRANSIT</button>
     </div>
@@ -722,14 +750,14 @@ body.phone .home-btn kbd, body.phone .link-btn kbd{display:none}
   <div class="howto">
     <kbd>DRAG</kbd><span>Drag a case down from the strip into the truck. Let go to set it down. Drag a case in the truck to move it.</span>
     <kbd>TWIST</kbd><span>Two-finger twist on the truck rotates a case 90°.</span>
-    <kbd>DOUBLE-TAP</kbd><span>Takes a case (or a bar or strap) back out. UNDO brings it back.</span>
+    <kbd>DOUBLE-TAP</kbd><span>Takes a case (or a bar or strap) back out. A case taken out counts as a rehandle.</span>
     <kbd>HOLD + FLICK</kbd><span>Hold a case still for 1 second, then flick up to tip it on its side.</span>
     <kbd>DRAG FLOOR</kbd><span>Drag empty truck floor up or down to scroll a long truck.</span>
     <kbd>BAR · STRAP</kbd><span>Drag the button into the truck and let go behind a finished tier.</span>
     <kbd>VIEW</kbd><span>Flips between the top view and the door view on stacked levels.</span>
-    <kbd>UNDO</kbd><span>Takes back your last move.</span>
+    <kbd>ROTATE</kbd><span>Turns the case you're holding, or the one you just set down. A two-finger twist works too.</span>
     <kbd>BOTTOM BAR</kbd><span>Tap or pull up the crew bar at the bottom for the level goal and case info.</span>
-    <kbd>≡ MENU</kbd><span>Undo, redo, hint, reset, help and the level list.</span>
+    <kbd>≡ MENU</kbd><span>Hint, reset, help and the level list.</span>
   </div></div>
   <div class="section-label">HOW SCORING WORKS</div>
   <div class="howto">
@@ -3106,12 +3134,12 @@ const Engine = (() => {
       if (!lane.length) return null;
       const over = Math.max(...lane.map(r => r.y + r.d)) - (p.y + d);
       if (def.hardCase && over <= LIFT_OVER) return null;
-      return `You can't reach the ${def.name} to pull it out: the ${lane[0].def.name} is between it and the doors. Take that out first, or use <b>UNDO</b>.`;
+      return `You can't reach the ${def.name} to pull it out: the ${lane[0].def.name} is between it and the doors. Take that out first.`;
     }
     const occ = occupancy(state, placements, p.uid), bars = state.bars || [];
     if (canReach(freeWithBars(occ, bars), W, D, def, null, p)) return null;
-    if (bars.length && canReach(freeChecker(occ), W, D, def, null, p)) return `A load bar or strap is in the way. The ${def.name} can't come out past it. Take the bar or strap out first, or use <b>UNDO</b>.`;
-    return `The ${def.name} is boxed in. Cases come out through the rear doors, so the cases between it and the doors have to come out first. Or use <b>UNDO</b>.`;
+    if (bars.length && canReach(freeChecker(occ), W, D, def, null, p)) return `A load bar or strap is in the way. The ${def.name} can't come out past it. Take the bar or strap out first.`;
+    return `The ${def.name} is boxed in. Cases come out through the rear doors, so the cases between it and the doors have to come out first.`;
   }
   // orientation: 'upright' (spun on the floor) or 'side' (tipped). Tipping arrives with stacked levels.
   function canRotateCase(def, rot){
@@ -4075,7 +4103,7 @@ function loadLevelObj(lv, idx){
   G.items = new Map(); let n = 0;
   for (const c of G.level.cases) for (let i = 0; i < c.count; i++){ const uid = 'c' + (++n); G.items.set(uid, {uid, type:c.type, def:CASES[c.type]}); }
   G.placements = []; G.bars = []; G.staging = []; G.view = 'top'; G.tool = null; G.hist = []; G.fut = []; G.hand = null;
-  if (G.level.stacked && G.level._par == null) G.level._par = levelPar(G.level); G.ghost = null; G.hover = null; G.lastInfo = null;
+  if (G.level.stacked && G.level._par == null) G.level._par = levelPar(G.level); G.ghost = null; G.hover = null; G.lastInfo = null; G.lastPlaced = null; $('dockZone').hidden = true;
   G.coachStep = 0; G.transitView = null; G.anim = null; G.flash = null; G.floorCache = null;
   setScreen('game'); layout();
   $('hudLevel').textContent = G.level.demo ? 'DEMO' : G.level.id;
@@ -4136,7 +4164,7 @@ function showBriefing(){
       ${lv.id >= TURN_LEVEL ? `<kbd>R</kbd><span>Rotate the case you're holding (right-click works too).</span>` : ''}
       <kbd>SPACE</kbd><span>Push it in: slide it toward the nose until it touches something.</span>
       <kbd>ARROWS</kbd><span>Move the case one grid square (6") at a time. <kbd>ENTER</kbd> sets it down.</span>
-      <kbd>CLICK A CASE</kbd><span>Pick a case back up out of the truck. <kbd>⌘Z</kbd> undoes.</span>
+      <kbd>CLICK A CASE</kbd><span>Pick a case back up out of the truck.</span>
     </div>`;
   $('brBody').innerHTML = isPhone() ? phoneHowTo(phoneText(h)) : h;
   if (!G.quietLoad && abilityThenBriefing(lv)) return;
@@ -4147,19 +4175,19 @@ function phoneHowTo(h){
     [/<kbd>LOAD BAR · B<\/kbd><span>[^<]*<\/span>/, '<kbd>LOAD BAR</kbd><span>Drag the load bar button into the truck and let go right behind a finished tier. It wedges wall to wall in the E-track.</span>'],
     [/<kbd>STRAP · S<\/kbd>/, '<kbd>STRAP</kbd>'],
     [/<kbd>(?:CLICK|TAP) A BAR<\/kbd><span>Takes it back out/, '<kbd>DOUBLE-TAP A BAR</kbd><span>Takes it back out'],
-    [/<kbd>1 · BASE<\/kbd><span>.*?<\/span>/, '<kbd>1 · BASE</kbd><span>Drag a big case from the strip onto the <b>DOCK STACK</b> card. It becomes the base.</span>'],
-    [/<kbd>2 · LID<\/kbd><span>.*?<\/span>/, '<kbd>2 · LID</kbd><span>Drag smaller cases onto the card the same way. They fill the base\'s lid side by side.</span>'],
-    [/<kbd>3 · PICK UP<\/kbd><span>.*?<\/span>/, '<kbd>3 · PICK UP</kbd><span>Drag the <b>DOCK STACK</b> card into the truck. The whole stack comes with you, and a two-finger twist turns it.</span>'],
-    [/<kbd>4 · ROLL IN<\/kbd><span>.*?<\/span>/, '<kbd>4 · ROLL IN</kbd><span>Let go where it fits. One move loads two or three cases.</span>'],
+    [/<kbd>1 · BASE<\/kbd><span>.*?<\/span>/, '<kbd>1 · BASE</kbd><span>Tap the <b>DOCK STACK</b> card to open the stacking zone, then tap a big case in the strip. It becomes the base.</span>'],
+    [/<kbd>2 · LID<\/kbd><span>.*?<\/span>/, '<kbd>2 · LID</kbd><span>Tap smaller cases the same way. They fill the base\'s lid side by side.</span>'],
+    [/<kbd>3 · PICK UP<\/kbd><span>.*?<\/span>/, '<kbd>3 · PICK UP</kbd><span>Tap <b>PICK UP STACK</b>. The whole stack appears at the doors, and <b>ROTATE</b> (or a two-finger twist) turns it.</span>'],
+    [/<kbd>4 · ROLL IN<\/kbd><span>.*?<\/span>/, '<kbd>4 · ROLL IN</kbd><span>Drag it to its spot and let go. One move loads two or three cases.</span>'],
     [/<kbd>V<\/kbd><span>Flip to the DOOR VIEW/, '<kbd>VIEW</kbd><span>Tap VIEW to flip to the DOOR VIEW'],
     [/<kbd>T<\/kbd><span>.*?<\/span>/, '<kbd>HOLD + FLICK</kbd><span>Hold the case still for 1 second, then flick up: it lays on its side and width and height swap. Do it again to stand it back up.</span>'],
-    [/<kbd>R<\/kbd><span>Still turns it/, '<kbd>TWIST</kbd><span>A two-finger twist still turns it'],
+    [/<kbd>R<\/kbd><span>Still turns it/, '<kbd>TWIST</kbd><span>A two-finger twist (or <b>ROTATE</b>) still turns it'],
     [/<kbd>V<\/kbd><span>The door view works here too\./, '<kbd>VIEW</kbd><span>The door view works here too.'],
     [/<kbd>(?:CLICK|TAP)<\/kbd><span>Pick a case from the manifest.*?<\/span>/, '<kbd>DRAG</kbd><span>Drag a case down from the strip into the truck and let go to set it down.</span>'],
-    [/<kbd>R<\/kbd><span>Rotate the case.*?<\/span>/, '<kbd>TWIST</kbd><span>Twist two fingers on the truck to rotate a case.</span>'],
+    [/<kbd>R<\/kbd><span>Rotate the case.*?<\/span>/, '<kbd>ROTATE</kbd><span>Tap <b>ROTATE</b>, or twist two fingers on the truck, to turn a case.</span>'],
     [/<kbd>SPACE<\/kbd><span>.*?<\/span>/, '<kbd>MOVE</kbd><span>Drag a case already in the truck to move it.</span>'],
-    [/<kbd>ARROWS<\/kbd><span>.*?<\/span>/, '<kbd>DOUBLE-TAP</kbd><span>Takes a case back out to the dock. UNDO brings it back.</span>'],
-    [/<kbd>(?:CLICK|TAP) A CASE<\/kbd><span>Pick a case back up out of the truck\..*?<\/span>/, '<kbd>≡ MENU</kbd><span>Undo, redo, hint, reset and the level list.</span>'],
+    [/<kbd>ARROWS<\/kbd><span>.*?<\/span>/, '<kbd>DOUBLE-TAP</kbd><span>Takes a case back out to the dock. That counts as a rehandle.</span>'],
+    [/<kbd>(?:CLICK|TAP) A CASE<\/kbd><span>Pick a case back up out of the truck\..*?<\/span>/, '<kbd>≡ MENU</kbd><span>Hint, reset and the level list.</span>'],
   ];
   for (const [a, b] of rows) h = h.replace(a, b);
   return h;
@@ -4691,7 +4719,7 @@ function placeStageControls(){
   if (!G.L || !G.level) return;
   if (isPhone()){ // the phone layout positions the button row and READY with CSS
     for (const el of [$('stageTools'), $('btnTransit')]) el.removeAttribute('style');
-    $('btnUndoPh').classList.toggle('dimmed', !G.hist.length || G.mode !== 'play');
+    $('btnRotatePh').classList.toggle('dimmed', G.mode !== 'play' || turnLocked() || !(G.hand || G.placements.some(p => p.uid === G.lastPlaced)));
     return;
   }
   const L = G.L, door = doorView(), tools = $('stageTools'), btn = $('btnTransit');
@@ -4901,10 +4929,10 @@ const PHONE_WORDS = [
   [/([Pp])ress <b>T<\/b> to tip the case you\\?'re holding/g, (m, p) => `${p === 'P' ? 'H' : 'h'}old the case still for 1 second, then <b>flick up</b> to tip it`],
   [/([Pp])ress <b>T<\/b> to lay it on its side/g, (m, p) => `${p === 'P' ? 'H' : 'h'}old it still for 1 second, then <b>flick up</b> to lay it on its side`],
   [/\(T\)/g, '(hold 1 sec, flick up)'],
-  [/\(R\)/g, '(two-finger twist)'],
-  [/[Pp]ress <b>R<\/b>/g, '<b>Twist two fingers</b>'],
-  [/[Pp]ress R\b/g, 'twist two fingers'],
-  [/, R to turn,/g, ', twist two fingers to turn,'],
+  [/\(R\)/g, '(ROTATE, or a two-finger twist)'],
+  [/[Pp]ress <b>R<\/b>/g, 'Tap <b>ROTATE</b>'],
+  [/[Pp]ress R\b/g, 'tap ROTATE'],
+  [/, R to turn,/g, ', ROTATE to turn,'],
   [/Hit <b>FINISH<\/b> \(Enter\)/g, 'Tap <b>FINISH</b>'],
   [/Good spot\. Click \(or press ENTER\) to set it down\./g, 'Good spot. Let go to set it down.'],
   [/Click (it|one in the truck) to take it (back )?out/g, 'Double-tap $1 to take it $2out'],
@@ -5073,7 +5101,7 @@ function cancelHand(silent){
 function removeFromTruck(){
   const name = itemOf(G.hand.uid).def.name;
   if (!returnToDock()) return;
-  flashCoach('tip', `The ${name} is back on the dock. <b>UNDO</b> puts it back in the truck.`, 3500);
+  flashCoach('tip', `The ${name} is back on the dock.`, 3500);
 }
 // Delete while hovering a case in the truck takes it off (top cases first).
 function removeHovered(){
@@ -5086,7 +5114,7 @@ function removeHovered(){
   G.hist.push(snap()); G.fut = [];
   poofAt(G.placements.find(p => p.uid === uid));
   G.placements = G.placements.filter(p => p.uid !== uid); G.hover = null; G.rehandles = (G.rehandles || 0) + 1; sfx('out');
-  flashCoach('tip', `The ${itemOf(uid).def.name} is back on the dock. <b>UNDO</b> puts it back in the truck.`, 3500);
+  flashCoach('tip', `The ${itemOf(uid).def.name} is back on the dock.`, 3500);
   refresh();
 }
 function returnToDock(){ // true = it went back to the dock
@@ -5151,9 +5179,8 @@ function toggleView(){
 }
 
 /* ---------- dock stack ---------- */
-function renderStaging(){
-  if (!G.level || !G.level.stacked) return;
-  const cv = $('stageCanvas'), dpr = window.devicePixelRatio || 1, cw = cv.clientWidth, ch = cv.clientHeight;
+function drawStagingCanvas(cv, big){
+  const dpr = window.devicePixelRatio || 1, cw = cv.clientWidth, ch = cv.clientHeight;
   if (!cw) return;
   cv.width = cw * dpr; cv.height = ch * dpr; const ctx = cv.getContext('2d'); ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   ctx.fillStyle = '#1f201d'; ctx.fillRect(0, 0, cw, ch);
@@ -5163,7 +5190,7 @@ function renderStaging(){
   if (!stg.length){
     ctx.fillStyle = '#8b8c84'; ctx.font = "700 13px 'Barlow Condensed', sans-serif"; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
     if (cw < 100){ ctx.font = "700 11px 'Barlow Condensed', sans-serif"; ctx.fillText('EMPTY', cw / 2, ch / 2 - 6); ctx.fillText('DOCK SPOT', cw / 2, ch / 2 + 7); }
-    else ctx.fillText('EMPTY DOCK SPOT', cw / 2, ch / 2);
+    else ctx.fillText(big ? 'EMPTY DOCK SPOT: TAP A CASE ABOVE TO SET THE BASE' : 'EMPTY DOCK SPOT', cw / 2, ch / 2);
   } else {
     const bdef = itemOf(stg[0].uid).def, bd = Engine.dimsOf(bdef, stg[0].rot), bh = bdef.height;
     const bx = ox + (96 - bd.w * IN) / 2 * s;
@@ -5173,11 +5200,19 @@ function renderStaging(){
       drawCaseFront(ctx, bx + m.dx * IN * s, fy - (bh + def.height) * s, md.w * IN * s, def.height * s, {wheels:def.wheels, style:def.style, logo:false});
     }
   }
+}
+function renderStaging(){
+  if (!G.level || !G.level.stacked) return;
+  drawStagingCanvas($('stageCanvas'));
+  if (!$('dockZone').hidden) drawStagingCanvas($('dzCanvas'), true);
+  const stg = G.staging;
   const tot = stg.length ? itemOf(stg[0].uid).def.height + Math.max(0, ...stg.slice(1).map(m => itemOf(m.uid).def.height)) : 0;
   $('stagingText').textContent = !stg.length ? 'Hold a case and click ADD TO STACK to set a base. Then add what fits on its lid.'
     : `Base: ${itemOf(stg[0].uid).def.name}${stg.length > 1 ? ` · on top: ${listNames(stg.slice(1).map(m => itemOf(m.uid).def.name))}` : ''} · ${tot}" tall`;
   const canAdd = G.mode === 'play' && G.hand && G.hand.from === 'dock' && !G.hand.stack;
   $('btnStage').disabled = !canAdd; $('btnTakeStack').disabled = G.mode !== 'play' || !stg.length || !!G.hand; $('btnClearStage').disabled = G.mode !== 'play' || !stg.length;
+  $('dzPick').disabled = $('btnTakeStack').disabled; $('dzClear').disabled = $('btnClearStage').disabled;
+  $('dzText').textContent = !stg.length ? 'Tap a case in the strip above (or drag it down here) to set the base. Then add what fits on its lid.' : $('stagingText').textContent;
 }
 function stageHeld(){
   const h = G.hand; if (G.mode !== 'play' || !h || h.from !== 'dock' || h.stack) return;
@@ -5259,7 +5294,7 @@ function placeHand(){
   else G.placements.push({uid:h.uid, x:g.x, y:g.y, z:g.z || 0, rot:h.rot});
   const {w, d} = Engine.dimsOf(itemOf(h.uid).def, h.rot);
   const warn = g.warn;
-  G.hand = null; G.ghost = null; G.lastInfo = h.uid;
+  G.hand = null; G.ghost = null; G.lastInfo = h.uid; G.lastPlaced = h.uid; // ROTATE (phone) turns this one next
   if (g.z > 0 || h.stack) fire('stack');
   const sp = Engine.calculateSpaceEfficiency(state());
   const newRows = sp.fullRows.filter(y => !before.has(y) && y >= g.y && y < g.y + d);
@@ -5306,11 +5341,10 @@ function moveGhost(dx, dy){
   const {w, d} = Engine.dimsOf(itemOf(h.uid).def, h.rot), W = G.level.truck.width / IN, D = G.level.truck.depth / IN;
   setGhost(clamp(G.ghost.x + dx, 0, W - w), clamp(G.ghost.y + dy, 0, D - d)); refresh();
 }
-function undo(){ if (G.mode !== 'play') return; G.tool = null; if (G.hand) cancelHand(true); if (!G.hist.length) return refresh(); G.fut.push(snap()); restore(G.hist.pop()); refresh(); }
-function redo(){ if (G.mode !== 'play') return; G.tool = null; if (G.hand) cancelHand(true); if (!G.fut.length) return refresh(); G.hist.push(snap()); restore(G.fut.pop()); refresh(); }
+// no undo or redo (Omar 2026-10-08): it erased rehandles, so it worked as a cheat. Taking a case out is the way back, and it counts.
 function resetLevel(){ if (G.mode !== 'play') return; G.tool = null; if (G.hand) cancelHand(true);
   if (G.level.loop && G.level.offload){ flashCoach('bad', 'This truck is at the venue: unload it. RESET is for packing.'); return; }
-  if (G.level.offload){ G.hist.push(snap()); G.fut = []; loadPack(); refresh(); flashCoach('tip', 'Truck reloaded. <b>UNDO</b> goes back.'); return; } if (!G.placements.length && !G.bars.length) return; G.hist.push(snap()); G.fut = []; G.rehandles = 0; G.lastPlaced = null; G.placements = []; /* starting over is a fresh plan */ G.bars = []; G.coachStep = 0; refresh(); flashCoach('tip', 'Truck emptied. <b>UNDO</b> brings the load back.'); }
+  if (G.level.offload){ G.hist.push(snap()); G.fut = []; loadPack(); refresh(); flashCoach('tip', 'Truck reloaded.'); return; } if (!G.placements.length && !G.bars.length) return; G.hist.push(snap()); G.fut = []; G.rehandles = 0; G.lastPlaced = null; G.placements = []; /* starting over is a fresh plan */ G.bars = []; G.coachStep = 0; refresh(); flashCoach('tip', 'Truck emptied. <b>UNDO</b> brings the load back.'); }
 
 /* ---------- load bars + straps ---------- */
 function startTool(kind){
@@ -5351,7 +5385,7 @@ function barAt(px, py){
 function removeBar(b){
   G.hist.push(snap()); G.fut = [];
   G.bars = G.bars.filter(x => x !== b); G.hoverBar = null; sfx(b.kind === 'strap' ? 'unstrap' : 'baroff');
-  flashCoach('tip', `${b.kind === 'strap' ? 'Strap' : 'Load bar'} taken out. <b>UNDO</b> puts it back.`);
+  flashCoach('tip', `${b.kind === 'strap' ? 'Strap' : 'Load bar'} taken out.`);
   refresh();
 }
 
@@ -5445,8 +5479,6 @@ window.addEventListener('keydown', e => {
   if (G.mode === 'exam' || G.mode === 'certificate') return;
   if (G.mode === 'results'){ if (k === 'Enter'){ e.preventDefault(); $('rsNext').disabled ? $('rsRetry').click() : $('rsNext').click(); } return; }
   if (G.mode !== 'play') return;
-  if ((e.metaKey || e.ctrlKey) && k.toLowerCase() === 'z'){ e.preventDefault(); e.shiftKey ? redo() : undo(); return; }
-  if ((e.metaKey || e.ctrlKey) && k.toLowerCase() === 'y'){ e.preventDefault(); redo(); return; }
   if (k === 'v' || k === 'V'){ toggleView(); return; }
   if (G.level.offload){ if (k === 'Enter'){ e.preventDefault(); finishOffload(); } return; }
   if (k === 'b' || k === 'B'){ G.keyMode = !G.pointerOverCanvas; startTool('bar'); return; }
@@ -6174,7 +6206,7 @@ function loopSetTruck(depth, name){
   const L = G.loop;
   G.levelIdx = -2; G.level = loopLevel(depth, name, L.truckNo);
   G.placements = []; G.bars = []; G.staging = []; G.view = 'top'; G.tool = null; G.hist = []; G.fut = []; G.hand = null;
-  G.ghost = null; G.hover = null; G.lastInfo = null; G.coachStep = 0; G.transitView = null; G.anim = null; G.flash = null; G.floorCache = null;
+  G.ghost = null; G.hover = null; G.lastInfo = null; G.lastPlaced = null; $('dockZone').hidden = true; G.coachStep = 0; G.transitView = null; G.anim = null; G.flash = null; G.floorCache = null;
   L.event = L.truckNo >= 6 && Math.random() < .35 ? {at:4 + Math.floor(Math.random() * 6)} : null; // a production change, once enough is on the truck
   L.sent = null; L.loadIn = false;
   $('hudLevel').textContent = 'TOUR';
@@ -6412,12 +6444,7 @@ function keyInfo(code, plat){
     KeyV:['V', 'Flip between the TOP VIEW and the DOOR VIEW (stacked levels).'],
     KeyH:['H', 'Open this help screen.'],
     Backspace:[plat === 'mac' ? 'delete' : 'Backspace', 'Take a case off the truck and back to the dock: the one you\'re holding, or the one under the mouse.'],
-    KeyZ:['Z', `Hold ${mod} and press Z to UNDO. Add Shift (${mod} + Shift + Z) to REDO.`],
-    KeyY:['Y', plat === 'mac' ? 'Not used on Mac. Redo is ⌘ Command + Shift + Z.' : 'Ctrl + Y is REDO.'],
-    ShiftLeft:['Shift', `Hold with ${mod} + Z to REDO.`], ShiftRight:['Shift', `Hold with ${mod} + Z to REDO.`]
   };
-  if (plat === 'mac'){ K.MetaLeft = K.MetaRight = ['⌘ Command', 'Hold with Z to UNDO, with Shift + Z to REDO.']; }
-  else { K.ControlLeft = K.ControlRight = ['Ctrl', 'Hold with Z to UNDO, with Y (or Shift + Z) to REDO.']; }
   return K[code] || null;
 }
 function renderKeyboard(container, plat, o = {}){
@@ -6483,13 +6510,13 @@ const DEMO_LEVEL = {
     {until:'view', text:'Press <b>V</b> to flip to the door view.'},
     {until:'stack', text:'Press <b>N</b> for another case, then <b>↑</b> to lift it onto a stack, and <b>ENTER</b> to set it down.'},
     {until:'device', text:'Press <b>V</b> for the top view, then <b>B</b> for a load bar: ↑ ↓ move it, ENTER sets it.'},
-    {text:'You\'ve got the keys. Try <b>⌘Z / Ctrl+Z</b> to undo, <b>ESC</b> to cancel, and <b>ENTER</b> with empty hands for a practice transit.'}
+    {text:'You\'ve got the keys. Try <b>ESC</b> to cancel, <b>DELETE</b> to take a case back out, and <b>ENTER</b> with empty hands for a practice transit.'}
   ]
 };
 const DEMO_PHONE = {
   lesson:'No score, no pressure. This is the smallest box truck: use it to get the touch controls under your fingers.',
   objectives:['Drag a case into the truck', 'Twist two fingers to rotate one', 'Stack something, then set a load bar and a strap'],
-  hint:'Drag cases down from the strip. Twist two fingers to turn one, double-tap to take one out, tap VIEW for the door view.',
+  hint:'Drag cases down from the strip. Tap ROTATE (or twist two fingers) to turn one, double-tap to take one out, tap VIEW for the door view.',
   coach:[
     {until:'pick', text:'Drag a case down from the strip at the top into the truck.'},
     {until:'rotate', text:'Keep your finger down and <b>twist two fingers</b> on the truck to rotate it.'},
@@ -6497,7 +6524,7 @@ const DEMO_PHONE = {
     {until:'view', text:'Tap <b>VIEW</b> (bottom left) for the door view.'},
     {until:'stack', text:'Drag another case onto one in the truck to stack it on top.'},
     {until:'device', text:'Tap <b>VIEW</b> again for the top view, then drag the <b>load bar</b> button into the truck behind a tier.'},
-    {text:'You\'ve got it. Double-tap a case to take it out, and use the <b>≡ menu</b> for undo, hint and reset.'}
+    {text:'You\'ve got it. Double-tap a case to take it out, tap <b>ROTATE</b> to turn one, and use the <b>≡ menu</b> for hint and reset.'}
   ]
 };
 function startDemo(){ closeModals(); loadLevelObj(isPhone() ? {...DEMO_LEVEL, ...DEMO_PHONE} : DEMO_LEVEL, -1); }
@@ -6575,6 +6602,15 @@ $('btnView').onclick = toggleView;
 $('btnStage').onclick = stageHeld;
 $('btnTakeStack').onclick = takeStack;
 $('btnClearStage').onclick = clearStaging;
+function openDockZone(){ if (!isPhone() || G.mode !== 'play' || !G.level || !G.level.stacked) return; if (G.hand) cancelHand(true); $('dockZone').hidden = false; refresh(); }
+function closeDockZone(){ if ($('dockZone').hidden) return; $('dockZone').hidden = true; refresh(); }
+$('dzClose').onclick = closeDockZone;
+$('dzClear').onclick = clearStaging;
+$('dzPick').onclick = () => { if (!G.staging.length) return; $('dockZone').hidden = true; G.pointerOverCanvas = false; takeStack(); if (G.hand) flashCoach('tip', 'The stack is at the doors. Drag it to its spot and let go.', 3500); };
+function zoneAddCard(card){ // a tap on a strip card while the zone is open: that case goes on the stack
+  pickFromDock(card.dataset.type); if (!G.hand) return;
+  stageHeld(); if (G.hand) cancelHand(true);
+}
 $('stageCanvas').addEventListener('click', () => { if (G.hand) stageHeld(); else takeStack(); });
 $('btnBar').onclick = () => { G.keyMode = false; startTool('bar'); };
 $('btnStrap').onclick = () => { G.keyMode = false; startTool('strap'); };
@@ -6592,15 +6628,25 @@ if (window.visualViewport) visualViewport.addEventListener('resize', () => { if 
 // the coach bar can grow to several lines; re-measure the play area whenever it changes size
 if (window.ResizeObserver){ let rw = 0, rh = 0; new ResizeObserver(([en]) => { const {width, height} = en.contentRect; if (Math.abs(width - rw) > 1 || Math.abs(height - rh) > 1){ rw = width; rh = height; if (G.level) layout(); } }).observe($('stage')); }
 
+// the top bar never changes height mid-level (Omar 2026-10-08): values stay on one line, and long ones ("11 LOOSE") shrink to fit their box
+function fitHud(){
+  for (const b of document.querySelectorAll('.hud .stat b')){
+    b.style.fontSize = ''; let fs = parseFloat(getComputedStyle(b).fontSize);
+    while (b.scrollWidth > b.clientWidth + 1 && fs > 9){ fs -= 1; b.style.fontSize = fs + 'px'; }
+  }
+}
+new MutationObserver(fitHud).observe(document.querySelector('.hud'), {subtree:true, childList:true, characterData:true});
+addEventListener('resize', fitHud);
+
 enterHome();
 /* =====================================================================
    PHONE CONTROLS (body.phone: touch-only devices and narrow screens)
-   drag from the strip + let go = place · drag a placed case = move · double-tap = remove (UNDO) ·
-   hold 1 s + flick up = flip on its side · two-finger twist = rotate · drag empty floor = scroll the truck ·
-   holding a case blocks every other gesture · button row: VIEW · LOAD BAR · STRAP · UNDO ·
+   drag from the strip + let go = place · drag a placed case = move · double-tap = remove (counts as a rehandle; no undo) ·
+   hold 1 s + flick up = flip on its side · two-finger twist or ROTATE button = rotate · drag empty floor = scroll the truck ·
+   holding a case blocks every other gesture · button row: VIEW · LOAD BAR · STRAP · ROTATE ·
    drag the bar/strap button onto a tier · tap or drag the bottom bar = level goal / case info sheet
    ===================================================================== */
-const PH = {pointers:new Map(), g:null, lastTap:null, undoTimer:null};
+const PH = {pointers:new Map(), g:null, lastTap:null};
 function phoneHoldArm(g){ g.armed = true; G.coachOverride = null; flashCoach('tip', 'Flick up to flip it on its side.', 1500); if (navigator.vibrate) navigator.vibrate(20); }
 function phoneFlip(uid){
   if (!G.hand){ if (!uid) return; pickFromTruck(uid); if (!G.hand) return; }
@@ -6614,9 +6660,17 @@ function phoneRotate(mx, my){
   rotateHand();
   if (G.ghost && G.ghost.ok) placeHand(); else flashCoach('bad', (G.ghost && G.ghost.reason) || 'It doesn\'t fit turned that way here. Drag it somewhere it fits, or twist it back.', 3000);
 }
-function phoneUndoBanner(text){
-  $('phUndoText').textContent = text; $('phUndo').hidden = false;
-  clearTimeout(PH.undoTimer); PH.undoTimer = setTimeout(() => { $('phUndo').hidden = true; }, 6000);
+// the ROTATE button (Omar 2026-10-08, for fingers too big for the two-finger twist, which still works too):
+// turns the case in hand; with nothing in hand, the case last set down, turned where it sits if it fits there
+function phoneRotateBtn(){
+  if (G.mode !== 'play') return;
+  if (G.hand || turnLocked()){ rotateHand(); if (turnLocked() && !G.hand) flashCoach('tip', `You'll unlock turning a case at level ${TURN_LEVEL}. These cases already fit the way they come.`, 3000); return; }
+  const uid = G.placements.some(p => p.uid === G.lastPlaced) ? G.lastPlaced : null;
+  if (!uid){ flashCoach('tip', 'Hold a case or set one down, then tap <b>ROTATE</b> to turn it.', 2500); return; }
+  pickFromTruck(uid); if (!G.hand) return;
+  rotateHand();
+  if (G.ghost && G.ghost.ok) placeHand();
+  else { cancelHand(true); flashCoach('bad', "There's no room to turn it where it sits. Drag it somewhere with more space, then tap ROTATE.", 3000); }
 }
 function phoneScroll(dir){ const view = G.L.clipH - 50; G.scrollY = clamp((G.scrollY || 0) + dir * view * .6, 0, G.scrollMax || 0); layout(); }
 function phoneAutoScroll(clientY){
@@ -6722,22 +6776,23 @@ function phoneUp(e){
   const now = performance.now();
   if (e.type === 'pointercancel'){ if (g.kind === 'drag' && G.hand) cancelHand(); else if (g.kind === 'tooldrag'){ G.tool = null; refresh(); } return; }
   if (g.kind === 'drag' && G.hand){
-    const overStage = document.elementFromPoint(e.clientX, e.clientY), onStack = overStage && overStage.closest && overStage.closest('#stagingBox');
-    if (phoneOverCanvas(e) && G.ghost){ if (!placeHand()) cancelHand(); }
+    const overStage = document.elementFromPoint(e.clientX, e.clientY), onStack = overStage && overStage.closest && overStage.closest('#stagingBox, #dockZone');
+    if (onStack && !$('dockZone').hidden && G.hand.from === 'dock' && !G.hand.stack){ stageHeld(); if (G.hand) cancelHand(true); }
+    else if (phoneOverCanvas(e) && G.ghost){ if (!placeHand()) cancelHand(); }
     else if (onStack && G.hand.from === 'dock' && !G.hand.stack) stageHeld();
     else cancelHand();
   } else if (g.kind === 'tooldrag' && G.tool){
     if (phoneOverCanvas(e) && G.tool.ok) placeTool(); else { if (phoneOverCanvas(e)) flashCoach('bad', G.tool.reason, 3000); G.tool = null; refresh(); }
   } else if (g.kind === 'tool' && !g.moved){ startTool(g.tool); }
-  else if (g.kind === 'stack' && !g.moved && !g.noPick){ takeStack(); }
-  else if (g.kind === 'card' && !g.moved && !g.noPick){ flashCoach('tip', 'Drag the case down into the truck and let go to set it down.', 2500); }
+  else if (g.kind === 'stack' && !g.moved){ openDockZone(); }
+  else if (g.kind === 'card' && !g.moved && !g.noPick){ if (!$('dockZone').hidden) zoneAddCard(g.card); else flashCoach('tip', 'Drag the case down into the truck and let go to set it down.', 2500); }
   else if (g.kind === 'canvas' && !g.moved && !g.armed){
     if (G.hand){ const p = canvasPoint(e); pointerGhost(p.x, p.y); placeHand(); return; }
     const key = g.uid || (g.bar ? 'bar:' + g.bar.y + g.bar.tier : null);
     if (key && PH.lastTap && PH.lastTap.key === key && now - PH.lastTap.t < 340){ // double-tap = remove
       PH.lastTap = null;
-      if (g.bar){ removeBar(g.bar); phoneUndoBanner(`${g.bar.kind === 'strap' ? 'Strap' : 'Load bar'} taken out`); }
-      else { const name = itemOf(g.uid).def.name; pickFromTruck(g.uid); if (G.hand && returnToDock()) phoneUndoBanner(`${name} removed`); }
+      if (g.bar) removeBar(g.bar);
+      else { const name = itemOf(g.uid).def.name; pickFromTruck(g.uid); if (G.hand && returnToDock()) flashCoach('tip', `The ${name} is back on the dock.`, 2500); }
     } else PH.lastTap = key ? {key, t:now} : null;
   } else if (g.kind === 'strip'){ // let the strip coast a little after a flick
     let v = clamp(g.vx * 16, -30, 30); const el = g.strip;
@@ -6773,14 +6828,13 @@ window.addEventListener('pointercancel', phoneUp, true);
   sheet.addEventListener('pointerup', () => { sy = null; }); sheet.addEventListener('pointercancel', () => { sy = null; });
   $('sheetClose').onclick = () => document.body.classList.remove('sheet-open');
 })();
-$('btnUndoPh').onclick = () => { if (G.hist.length && G.mode === 'play'){ $('phUndo').hidden = true; undo(); } };
+$('btnRotatePh').onclick = phoneRotateBtn;
 $('btnMenu').onclick = () => { $('phoneMenu').hidden = false; };
-$('phUndoBtn').onclick = () => { $('phUndo').hidden = true; undo(); };
 $('phoneMenu').addEventListener('click', e => {
   const b = e.target.closest('[data-act]'); if (!b && e.target.id !== 'phoneMenu') return;
   $('phoneMenu').hidden = true;
   const act = b ? b.dataset.act : 'close';
-  if (act === 'levels') openLevels(); else if (act === 'hint') $('btnHint').click(); else if (act === 'undo') undo(); else if (act === 'redo') redo();
+  if (act === 'levels') openLevels(); else if (act === 'hint') $('btnHint').click();
   else if (act === 'reset') resetLevel(); else if (act === 'help') openHelp(); else if (act === 'home') enterHome(); else if (act === 'sound') setSound(!SOUND.on); else if (act === 'account'){ G.acctPrev = G.mode; openAccount(); } else if (act === 'signout') signOut(); else if (act === 'report') openReport();
 });
 // phone mode: touch-only devices (no mouse or trackpad) and narrow screens; landscape phones are asked to turn upright
