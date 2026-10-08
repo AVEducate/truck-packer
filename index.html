@@ -3758,6 +3758,76 @@ function ball(ctx, cx, cy, r){
   ctx.strokeStyle = 'rgba(0,0,0,.55)'; ctx.lineWidth = 1; ctx.stroke();
 }
 
+// Corner cap: square on the outside (a triangle at the corner), a curved inside edge, a dome on it. Stays inside the case.
+// Drawn for the top-left corner and mirrored for the rest (Omar 2026-10-08: replaced round balls that hung over the edge).
+function cornerCap(ctx, cx, cy, L, sx, sy){
+  ctx.save(); ctx.translate(cx, cy); ctx.scale(sx, sy);
+  ctx.beginPath(); ctx.moveTo(L, 0); ctx.lineTo(0, 0); ctx.lineTo(0, L); ctx.quadraticCurveTo(L * 1.02, L * 1.02, L, 0); ctx.closePath();
+  ctx.fillStyle = metal(ctx, 0, 0, L, L); ctx.fill(); ctx.strokeStyle = 'rgba(0,0,0,.7)'; ctx.lineWidth = Math.max(1, L * .07); ctx.stroke();
+  const br = L * .27, bx = L * .36, g = ctx.createRadialGradient(bx - br * .35, bx - br * .4, br * .1, bx, bx, br);
+  g.addColorStop(0, '#ffffff'); g.addColorStop(.45, '#b3b7b2'); g.addColorStop(1, '#5a5e59');
+  ctx.fillStyle = g; ctx.beginPath(); ctx.arc(bx, bx, br, 0, 7); ctx.fill(); ctx.strokeStyle = 'rgba(0,0,0,.6)'; ctx.lineWidth = Math.max(.8, L * .045); ctx.stroke();
+  ctx.restore();
+}
+function cornerCaps(ctx, x, y, w, h, L){ cornerCap(ctx, x, y, L, 1, 1); cornerCap(ctx, x + w, y, L, -1, 1); cornerCap(ctx, x, y + h, L, 1, -1); cornerCap(ctx, x + w, y + h, L, -1, -1); }
+// A swivel caster from the side, from the case down: a black wooden block (screwed in from inside the case), the caster's
+// mounting plate bolted under it, one wheel, and the metal fork on the outside of the wheel with the axle pin through it (Omar 2026-10-08).
+function caster(ctx, cx, top, ch){
+  const blockH = Math.max(1.5, ch * .16), blockW = ch * 1.25, plateH = Math.max(1, ch * .09), plateW = ch * .95;
+  const wr = ch * .34, axX = cx + wr * .22, axY = top + ch - wr, forkTop = top + blockH + plateH, line = Math.max(.6, ch * .025);
+  ctx.fillStyle = '#121314'; ctx.beginPath(); ctx.arc(axX, axY, wr, 0, 7); ctx.fill(); ctx.strokeStyle = '#000'; ctx.lineWidth = line; ctx.stroke(); // tire
+  ctx.fillStyle = '#2b3236'; ctx.beginPath(); ctx.arc(axX, axY, wr * .62, 0, 7); ctx.fill();                                                   // hub
+  ctx.strokeStyle = 'rgba(255,255,255,.12)'; ctx.lineWidth = Math.max(.5, wr * .06); ctx.beginPath(); ctx.arc(axX, axY, wr * .62, Math.PI * 1.1, Math.PI * 1.6); ctx.stroke();
+  const tw = plateW * .36, bw = wr * .42, g = ctx.createLinearGradient(cx - tw, 0, axX + bw, 0); g.addColorStop(0, '#d9dcd8'); g.addColorStop(.5, '#9a9e99'); g.addColorStop(1, '#6a6e69');
+  ctx.fillStyle = g; ctx.beginPath(); ctx.moveTo(cx - tw, forkTop); ctx.lineTo(cx + tw, forkTop); ctx.lineTo(axX + bw, axY); ctx.arc(axX, axY, bw, 0, Math.PI); ctx.lineTo(cx - tw, forkTop); ctx.closePath(); ctx.fill(); // fork
+  ctx.strokeStyle = 'rgba(0,0,0,.7)'; ctx.lineWidth = line; ctx.stroke();
+  const pr = Math.max(.9, wr * .17), pg = ctx.createRadialGradient(axX - pr * .3, axY - pr * .3, pr * .1, axX, axY, pr); pg.addColorStop(0, '#f2f3f0'); pg.addColorStop(1, '#5d615c');
+  ctx.fillStyle = pg; ctx.beginPath(); ctx.arc(axX, axY, pr, 0, 7); ctx.fill(); ctx.strokeStyle = 'rgba(0,0,0,.6)'; ctx.lineWidth = Math.max(.5, line * .8); ctx.stroke(); // axle pin
+  ctx.fillStyle = '#2a2c2e'; ctx.fillRect(cx - plateW / 2, top + blockH, plateW, plateH); ctx.fillStyle = 'rgba(255,255,255,.16)'; ctx.fillRect(cx - plateW / 2, top + blockH, plateW, Math.max(.5, plateH * .3)); // mounting plate
+  ctx.fillStyle = '#151515'; ctx.fillRect(cx - blockW / 2, top, blockW, blockH);                                                               // wooden block
+  ctx.fillStyle = 'rgba(255,255,255,.07)'; for (let i = 1; i < 4; i++) ctx.fillRect(cx - blockW / 2, top + blockH * i / 4, blockW, Math.max(.4, blockH * .06));
+  ctx.strokeStyle = '#000'; ctx.lineWidth = line; ctx.strokeRect(cx - blockW / 2, top, blockW, blockH);
+}
+
+// recessed latch on the lid seam (Omar 2026-10-08): the latch sits inside a riveted dish so nothing sticks out past the case face
+// and cases pack tight. The dish straddles the seam; inside: the keeper tab on the lid side, the butterfly plate with its twist boss, the hinge barrel. L = dish width
+function drawLatch(ctx, cx, seamY, L){
+  const met = (x0, y0, x1, y1) => metal(ctx, x0, y0, x1, y1), line = Math.max(.6, L * .03), big = L >= 14;
+  const H = L * 1.08, top = seamY - H * .42, x0 = cx - L / 2;
+  // the dish (holder), flush with the case face
+  ctx.fillStyle = met(x0, top, x0 + L, top + H); rr(ctx, x0, top, L, H, L * .12); ctx.fill(); ctx.strokeStyle = 'rgba(0,0,0,.8)'; ctx.lineWidth = line; ctx.stroke();
+  // the recess
+  const ins = L * .15, rx = x0 + ins, ry = top + ins, rw = L - ins * 2, rh = H - ins * 2;
+  const rg = ctx.createLinearGradient(0, ry, 0, ry + rh); rg.addColorStop(0, '#202224'); rg.addColorStop(1, '#3a3d3f');
+  ctx.fillStyle = rg; rr(ctx, rx, ry, rw, rh, L * .07); ctx.fill(); ctx.strokeStyle = 'rgba(0,0,0,.85)'; ctx.lineWidth = line; ctx.stroke();
+  // keeper tab on the lid side, with its catch
+  const kw = rw * .42, kh = rh * .22, ky = ry + rh * .06;
+  ctx.fillStyle = met(cx - kw / 2, ky, cx + kw / 2, ky + kh); rr(ctx, cx - kw / 2, ky, kw, kh, kh * .2); ctx.fill(); ctx.strokeStyle = 'rgba(0,0,0,.7)'; ctx.lineWidth = line; ctx.stroke();
+  if (big){ ctx.fillStyle = '#1a1b1c'; ctx.fillRect(cx - kw * .25, ky + kh * .38, kw * .5, kh * .3); }
+  // the butterfly plate (folded flat), the twist boss, the hinge barrel
+  const pw = rw * .62, ph = rh * .5, py = ky + kh + rh * .04, c = pw * .2;
+  ctx.beginPath(); ctx.moveTo(cx - pw / 2 + c, py); ctx.lineTo(cx + pw / 2 - c, py); ctx.lineTo(cx + pw / 2, py + c); ctx.lineTo(cx + pw / 2, py + ph); ctx.lineTo(cx - pw / 2, py + ph); ctx.lineTo(cx - pw / 2, py + c); ctx.closePath();
+  ctx.fillStyle = met(cx - pw / 2, py, cx + pw / 2, py + ph); ctx.fill(); ctx.strokeStyle = 'rgba(0,0,0,.75)'; ctx.lineWidth = line; ctx.stroke();
+  const br = pw * .24, by = py + ph * .45, bg = ctx.createRadialGradient(cx - br * .3, by - br * .3, br * .1, cx, by, br); bg.addColorStop(0, '#f4f5f2'); bg.addColorStop(1, '#8a8e89');
+  ctx.fillStyle = bg; ctx.beginPath(); ctx.arc(cx, by, br, 0, 7); ctx.fill(); ctx.strokeStyle = 'rgba(0,0,0,.6)'; ctx.lineWidth = line; ctx.stroke();
+  if (big){ ctx.fillStyle = '#6c706b'; for (const [dx, dy] of [[.3, -.25], [-.25, .3]]){ ctx.beginPath(); ctx.arc(cx + dx * br, by + dy * br, br * .18, 0, 7); ctx.fill(); } }
+  const hw = pw * .9, hh = Math.max(1.2, rh * .1), hy = py + ph, hg = ctx.createLinearGradient(0, hy, 0, hy + hh); hg.addColorStop(0, '#eceeeb'); hg.addColorStop(.5, '#a4a8a3'); hg.addColorStop(1, '#5f635e');
+  ctx.fillStyle = hg; ctx.fillRect(cx - hw / 2, hy, hw, hh); ctx.strokeStyle = 'rgba(0,0,0,.65)'; ctx.lineWidth = line; ctx.strokeRect(cx - hw / 2, hy, hw, hh);
+  // rivets around the dish: corners and the middle of each side
+  if (big){ const m = ins * .5; for (const [px, py2] of [[x0 + m, top + m], [x0 + L - m, top + m], [x0 + m, top + H - m], [x0 + L - m, top + H - m], [cx, top + m], [cx, top + H - m], [x0 + m, top + H / 2], [x0 + L - m, top + H / 2]]) rivet(ctx, px, py2, L * .035); }
+}
+function rivet(ctx, x, y, r){ const g = ctx.createRadialGradient(x - r * .3, y - r * .3, r * .1, x, y, r); g.addColorStop(0, '#ffffff'); g.addColorStop(1, '#6d716c'); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, r, 0, 7); ctx.fill(); ctx.strokeStyle = 'rgba(0,0,0,.5)'; ctx.lineWidth = Math.max(.4, r * .4); ctx.stroke(); }
+// recessed handle: a riveted dish with the bar lying in the bottom of it. W = dish width
+function drawHandle(ctx, cx, cy, W){
+  const H = W * .62, line = Math.max(.6, W * .03), big = W >= 18;
+  ctx.fillStyle = metal(ctx, cx - W / 2, cy - H / 2, cx + W / 2, cy + H / 2); rr(ctx, cx - W / 2, cy - H / 2, W, H, W * .08); ctx.fill(); ctx.strokeStyle = 'rgba(0,0,0,.75)'; ctx.lineWidth = line; ctx.stroke();
+  const iw = W * .74, ih = H * .62; ctx.fillStyle = '#121314'; rr(ctx, cx - iw / 2, cy - ih / 2, iw, ih, W * .05); ctx.fill();
+  const sh = ctx.createLinearGradient(0, cy - ih / 2, 0, cy); sh.addColorStop(0, 'rgba(0,0,0,.6)'); sh.addColorStop(1, 'rgba(0,0,0,0)'); ctx.fillStyle = sh; ctx.fillRect(cx - iw / 2, cy - ih / 2, iw, ih / 2); // the recess's shadow
+  const bw = iw * .86, bh = Math.max(1.5, ih * .3), by = cy + ih / 2 - bh - ih * .08, bg = ctx.createLinearGradient(0, by, 0, by + bh); bg.addColorStop(0, '#f0f1ee'); bg.addColorStop(.5, '#a9ada8'); bg.addColorStop(1, '#5c605b');
+  ctx.fillStyle = bg; rr(ctx, cx - bw / 2, by, bw, bh, bh / 2); ctx.fill(); ctx.strokeStyle = 'rgba(0,0,0,.7)'; ctx.lineWidth = line; ctx.stroke();
+  if (big){ for (const [dx, dy] of [[-.42, -.36], [.42, -.36], [-.42, .36], [.42, .36], [0, -.42]]) rivet(ctx, cx + dx * W, cy + dy * H, W * .028); }
+}
+
 // Road case seen from above (lid)
 // AV World case finishes (AV Educate sticker designs): body colors, patterns, and a white label plate.
 const CASE_STYLES = {
@@ -3825,9 +3895,8 @@ function drawCaseTop(ctx, x, y, w, h, def, o = {}){
       ctx.fillStyle = '#121314'; rr(ctx, cx - ww / 2 + 2, cy - hhh / 2 + 2, ww - 4, hhh - 4, 1.5); ctx.fill();
     }
   }
-  // corner balls
-  const br = e * .95;
-  for (const [cx, cy] of [[x + e * .7, y + e * .7], [x + w - e * .7, y + e * .7], [x + e * .7, y + h - e * .7], [x + w - e * .7, y + h - e * .7]]) ball(ctx, cx, cy, br);
+  // corner caps
+  cornerCaps(ctx, x, y, w, h, e * 2.3);
   // department tag
   const dc = DEPTS[def.department].color;
   ctx.fillStyle = dc; ctx.fillRect(x + w - e - Math.max(6, w * .14) - 3, y + e + 3, Math.max(6, w * .14), Math.max(4, e * .9));
@@ -3906,14 +3975,9 @@ function drawLogoPlate(ctx, cx, cy, size){
 // Road case seen from the front (title screen, door view, dock stack)
 function drawCaseFront(ctx, x, y, w, h, o = {}){
   const st = styleOf(o.style);
-  const wheelH = o.wheels ? (o.wheelH != null ? o.wheelH : Math.min(h * .16, 16)) : 0, bh = h - wheelH, e = clamp(Math.min(w, bh) * .07, 2.5, 7);
-  if (o.wheels){
-    for (const cx of [x + w * .2, x + w * .8]){
-      ctx.fillStyle = '#6f736e'; ctx.fillRect(cx - 3, y + bh, 6, wheelH * .4);
-      ctx.fillStyle = '#1a1a1a'; ctx.beginPath(); ctx.arc(cx, y + bh + wheelH * .62, Math.max(.5, wheelH * .38), 0, 7); ctx.fill();
-      ctx.fillStyle = '#555'; ctx.beginPath(); ctx.arc(cx, y + bh + wheelH * .62, Math.max(.5, wheelH * .14), 0, 7); ctx.fill();
-    }
-  }
+  // casters get 20% of the height (they had 14%) so the fork and wheel read; the case's total height doesn't change
+  const wheelH = o.wheels ? (o.wheelH != null ? Math.min(h * .2, o.wheelH / .14 * .2) : Math.min(h * .2, 20)) : 0, bh = h - wheelH, e = clamp(Math.min(w, bh) * .07, 2.5, 7);
+  if (o.wheels) for (const cx of [x + w * .17, x + w * .83]) caster(ctx, cx, y + bh, wheelH);
   const g = ctx.createLinearGradient(x, y, x, y + bh); g.addColorStop(0, st.a); g.addColorStop(1, st.b);
   ctx.fillStyle = g; ctx.fillRect(x, y, w, bh);
   casePattern(ctx, st, x + e, y + e, w - 2 * e, bh - 2 * e);
@@ -3923,15 +3987,13 @@ function drawCaseFront(ctx, x, y, w, h, o = {}){
   ctx.fillStyle = metal(ctx, x, y, x + w, y + bh); ctx.fillRect(x + e, seam - e * .35, w - 2 * e, e * .7);
   const lw = clamp(w * .12, 6, 18), lh = lw * 1.1;
   for (const cx of (o.sticker && w > 60 && bh > 40 ? [x + w * .8] : w > bh * 1.2 ? [x + w * .2, x + w * .8] : [x + w * .25, x + w * .75])){
-    ctx.fillStyle = metal(ctx, cx - lw / 2, 0, cx + lw / 2, 0); rr(ctx, cx - lw / 2, seam - lh / 2, lw, lh, 2); ctx.fill();
-    ctx.fillStyle = '#1a1b1c'; ctx.fillRect(cx - lw * .18, seam - lh * .3, lw * .36, lh * .6);
+    drawLatch(ctx, cx, seam, lw * 1.55); // recessed latch in a riveted dish (approved 2026-10-08)
   }
   // handle dishes low on the sides
   if (bh > 34 && w > 50){
     const hw = clamp(w * .16, 10, 28), hh = hw * .5, cy = y + bh * .74;
     for (const cx of [x + w * .2, x + w * .8]){
-      ctx.fillStyle = metal(ctx, cx - hw / 2, cy, cx + hw / 2, cy + hh); rr(ctx, cx - hw / 2, cy - hh / 2, hw, hh, 2); ctx.fill();
-      ctx.fillStyle = '#121314'; ctx.fillRect(cx - hw / 2 + 2.5, cy - hh / 2 + 2.5, hw - 5, hh - 5);
+      drawHandle(ctx, cx, cy, hw * 1.3); // recessed handle: riveted dish with the bar in it (approved 2026-10-08)
     }
   }
   // handling sticker on the lid band: fragile glass, this way up, keep dry
@@ -3959,7 +4021,7 @@ function drawCaseFront(ctx, x, y, w, h, o = {}){
       }
     } else if (o.logo !== false) drawLogoPlate(ctx, x + w / 2, cy, Math.min(w * .3, bh * .42));
   }
-  for (const [cx, cy] of [[x + e * .7, y + e * .7], [x + w - e * .7, y + e * .7], [x + e * .7, y + bh - e * .7], [x + w - e * .7, y + bh - e * .7]]) ball(ctx, cx, cy, e);
+  cornerCaps(ctx, x, y, w, bh, Math.max(2.5, Math.min(w, bh) * .07) * 2); /* corners scale with the case (no size cap) */
 }
 
 /* =====================================================================
@@ -4202,7 +4264,7 @@ function showAchievements(list, then, label = 'SEE RESULTS'){
   $('apTitle').textContent = list.length > 1 ? `${list.length} ACHIEVEMENTS` : list[0].kind === 'MILESTONE' ? 'MILESTONE REACHED' : `${list[0].tier} BADGE`;
   $('apList').innerHTML = list.map((a, i) => `<div class="ap-item" style="animation-delay:${.35 + i * .18}s"><img class="ap-art ${a.tier ? 'tier-' + a.tier.toLowerCase() : ''}" src="${badgeArt(a.name)}" alt="${a.name}"><small>${a.kind === 'MILESTONE' ? '<b>MILESTONE</b> · ' : `<b class="tier-${a.tier.toLowerCase()}">${a.tier}</b> · ${a.name === 'FULL TRUCK' ? `${a.times} full trucks` : `earned on ${a.times} level${a.times > 1 ? 's' : ''}`} · `}${a.desc}</small></div>`).join('');
   $('apGo').textContent = label;
-  G.achPrev = G.mode; G.mode = 'achpop'; openModal('achPop'); setTimeout(() => sfx('star3'), 350);
+  G.achPrev = G.mode; G.mode = 'achpop'; openModal('achPop'); setTimeout(() => sfx('achieve'), 350);
 }
 function closeAchievements(){ if (G.mode !== 'achpop') return; const t = achThen; achThen = null; closeModals(); if (t) t(); }
 $('achPop').addEventListener('click', closeAchievements); // a click anywhere goes on to the finish page
@@ -4386,6 +4448,13 @@ function render(){
   // ghost (case in hand)
   if (G.hand && G.ghost){
     const g = G.ghost;
+    if (G.hand.from !== 'truck'){ // carried in from the dock, it's in the air: a soft shadow under the bottom case. A case already in the truck rolls instead (that has its sound), so no shadow.
+      ctx.save(); ctx.fillStyle = 'rgba(0,0,0,.55)'; ctx.filter = `blur(${clamp(cell * .22, 3, 8)}px)`;
+      const off = clamp(cell * .4, 6, 14);
+      for (const m of handMembers()) if (!m.dz){ const {w, d} = Engine.dimsOf(itemOf(m.uid).def, m.rot);
+        rr(ctx, ox + (g.x + m.dx) * cell + off, oy + (g.y + m.dy) * cell + off, w * cell, d * cell, 6); ctx.fill(); }
+      ctx.restore();
+    }
     for (const m of handMembers()){
       const it = itemOf(m.uid), {w, d} = Engine.dimsOf(it.def, m.rot);
       drawCaseTop(ctx, ox + (g.x + m.dx) * cell, oy + (g.y + m.dy) * cell, w * cell, d * cell, it.def, {ghost:true, valid:g.ok, warn:!!g.warn, alpha:g.ok ? .92 : .7,
@@ -4951,12 +5020,12 @@ function renderCoach(){
   if (G.hand && G.ghost && G.ghost.ok) return say('good', 'Good spot. Click (or press ENTER) to set it down.', 'live');
   say('tip', lv.lesson, 'lesson');
 }
-const CREW_HMM = true; // the thumbs-up sounds: hmm, affirmatives, awww yeah every 12th (approved 2026-10-07)
-const CREW_VOICE = {stagehand:1.07, docklead:.93}; // throat clears: Lead Stagehand a touch higher, Dock Lead a touch deeper; Chief and Rigger as recorded
+const CREW_HMM = true; // the thumbs-up "hmm": on in the test copy, off on the live site until Omar has heard it
+const CREW_VOICE = {stagehand:1.07, docklead:.93}; // crew voices (throat clear, "huh?", approvals): Lead Stagehand a touch higher, Dock Lead a touch deeper; Chief and Rigger as recorded
 function flashCoach(kind, html, ms = 3500){
   G.coachOverride = {kind, html, until:performance.now() + ms}; renderCoach(); setTimeout(renderCoach, ms + 20);
   if (document.body.classList.contains('crew-away')) return; // no voice without the crew on screen (dismissed, or a menu open)
-  if ((kind === 'bad' || kind === 'warn') && performance.now() - (flashCoach.throat || 0) > 1500){ flashCoach.throat = performance.now(); setTimeout(() => sfx('throat'), 120); } // "ahem": a warning from the crew
+  if ((kind === 'bad' || kind === 'warn') && performance.now() - (flashCoach.voice || 0) > 1500){ flashCoach.voice = performance.now(); setTimeout(() => sfx(kind === 'bad' ? 'throat' : 'huh'), 120); } // red WON'T WORK: "ahem"; yellow HEADS UP: a questioning "huh?"
   if (CREW_HMM && kind === 'good' && performance.now() - (flashCoach.hmm || 0) > 1500){ flashCoach.hmm = performance.now();
     const p = G.progress, n = p.thumbs = (p.thumbs || 0) + 1; saveProgress(); // counted across levels and visits
     let pick = 'awyeah'; if (n % 12){ pick = Math.random() < .2 ? 'hmm' : 'affirm'; if (pick === 'hmm' && flashCoach.lastOk === 'hmm') pick = 'affirm'; } flashCoach.lastOk = pick; // the Aha or one of four approvals, never the same twice in a row
@@ -5281,7 +5350,7 @@ function barAt(px, py){
 }
 function removeBar(b){
   G.hist.push(snap()); G.fut = [];
-  G.bars = G.bars.filter(x => x !== b); G.hoverBar = null; if (b.kind === 'strap') sfx('unstrap');
+  G.bars = G.bars.filter(x => x !== b); G.hoverBar = null; sfx(b.kind === 'strap' ? 'unstrap' : 'baroff');
   flashCoach('tip', `${b.kind === 'strap' ? 'Strap' : 'Load bar'} taken out. <b>UNDO</b> puts it back.`);
   refresh();
 }
@@ -5473,13 +5542,17 @@ const SAMPLES = {out:{url:'assets/sounds/case-poof.mp3', vol:.33, skip:.5, buf:n
   shine3:{url:'assets/sounds/star-7.m4a', vol:.45, buf:null, loading:null},  // 'Shine 7': the third (a perfect 100)
   baydoor:{url:'assets/sounds/bay-door.m4a', vol:.25, buf:null, loading:null}, // the bay door rolling shut when you leave the Endless Tour
   crewup:{url:'assets/sounds/crew-swipe.mp3', vol:.6, buf:null, loading:null},   // the crew member pops up: a soft swipe, the quietest sound in the game
+  bar:{url:'assets/sounds/load-bar.m4a', vol:.33, buf:null, loading:null},        // load bar locks in: the briefcase latch click (Pixabay, rsellick), Omar's pick 2026-10-08
+  baroff:{from:'bar', reverse:true, vol:.33, buf:null, loading:null},               // and comes out: the same click reversed
   crewdown:{from:'crewup', reverse:true, vol:.6, buf:null, loading:null},       // and goes away: the same swipe reversed
   throat:{url:'assets/sounds/crew-throat.mp3', vol:.25, buf:null, loading:null,   // the crew clears their throat: one of four, never the same twice in a row
     parts:[[.22, .45], [1.17, .6], [2.12, .48], [2.88, .55]], last:-1},
+  huh:{url:'assets/sounds/crew-affirm.m4a', vol:.15, buf:null, loading:null,      // yellow HEADS UP: the Affirmative man's rising "huh?" (Omar's pick 2026-10-08); red WON'T WORK keeps the throat clear
+    parts:[[1.8, .68]], last:-1},
   hmm:{url:'assets/sounds/crew-hmm.m4a', vol:.15, buf:null, loading:null},      // the thumbs-up crew: an approving "hmm, ahh"
   awyeah:{url:'assets/sounds/crew-awyeah.m4a', vol:.15, buf:null, loading:null}, // every 12th thumbs-up: "awww yeah" (shaped to match the Aha's tone and loudness)
   affirm:{url:'assets/sounds/crew-affirm.m4a', vol:.15, buf:null, loading:null,  // three more approvals for the thumbs-up mix, matched to the Aha
-    parts:[[0, .96], [1.11, .54], [1.8, .68], [2.63, .69]], last:-1}};   // the 4th is Pixabay 'Mmm Hmm'
+    parts:[[0, .96], [1.11, .54], [2.63, .69]], last:-1}};   // two of his approvals (his questioning third is the warnings' "huh?") + Pixabay 'Mmm Hmm'
 function leaveTour(){ if (G.loop && !G.loop.closed){ G.loop.closed = true; sfx('baydoor'); } } // once per tour, however you leave
 // every game button clicks (the case list doesn't: picking up a case has its own sound)
 const BUTTON_TAP = false; // held: Omar is still deciding on a button sound (Pixabay 'Screen tap' is loaded and ready)
@@ -5504,7 +5577,7 @@ function sfx(name, n){
       const go = () => { const src = ctx.createBufferSource(), g = ctx.createGain(), t0 = ctx.currentTime + .005; src.buffer = smp.buf; src.connect(g).connect(ctx.destination);
         if (n === 'half'){ g.gain.setValueAtTime(smp.vol * .5, t0); g.gain.setValueAtTime(smp.vol * .5, t0 + .3); g.gain.linearRampToValueAtTime(0.0001, t0 + .6); src.start(t0, smp.skip || 0); src.stop(t0 + .62); } // a half star: softer, cut short
         else if (smp.parts){ let k; do k = Math.floor(Math.random() * smp.parts.length); while (k === smp.last && smp.parts.length > 1); smp.last = k; g.gain.value = smp.vol;
-          const rate = name === 'throat' || name === 'affirm' ? (CREW_VOICE[G.level ? crewFor(G.level) : 'chief'] || 1) : 1; src.playbackRate.value = rate; // each crew member's own voice
+          const rate = name === 'throat' || name === 'huh' || name === 'affirm' ? (CREW_VOICE[G.level ? crewFor(G.level) : 'chief'] || 1) : 1; src.playbackRate.value = rate; // each crew member's own voice
           src.start(t0, smp.parts[k][0]); src.stop(t0 + smp.parts[k][1] / rate); }
         else { g.gain.value = smp.vol; if (name === 'hmm' || name === 'awyeah') src.playbackRate.value = CREW_VOICE[G.level ? crewFor(G.level) : 'chief'] || 1; src.start(t0, smp.skip || 0); } };
       if (smp.buf){ go(); return; }
@@ -5549,6 +5622,7 @@ function sfx(name, n){
     };
     const click2 = (at, vol, f) => hiss2('bandpass', f, at, .018, vol, {q:5});
     const thump = (at, f0, f1, vol, len = .22) => { tone2('sine', f0, f1, at, len, vol, {lp:320, glide:len * .7}); hiss2('bandpass', 170, at, len * .6, vol * .7, {q:1.4}); };
+    const bell = (f, at, len, vol, wet = .45) => { tone2('sine', f, 0, at, len, vol, {wet}); tone2('triangle', f * 2, 0, at, len * .4, vol * .22, {wet}); }; // the star-ding voice
     ({
       pick:  () => { tone('sine', 150, 230, 0, .09, .22); hiss('lowpass', 900, 0, .06, .12); },                     // the case comes up off its wheels (the original; Omar 2026-10-06)
       place: () => { thump(0, 88, 42, .75); hiss2('lowpass', 1300, 0, .035, .22); click2(.035, .07, 3400); click2(.055, .05, 3000); hiss2('bandpass', 160, .01, .1, .08, {q:1, wet:.25}); }, // road case lands on the plywood floor
@@ -5558,12 +5632,12 @@ function sfx(name, n){
         if (half){ tone2('sine', f, 0, 0, .25, .07, {wet:.45}); } else { tone2('sine', f, 0, 0, .5, .14, {wet:.45}); tone2('triangle', f * 2, 0, 0, .2, .03); } },
       beeper: () => { for (let i = 0; i < 3; i++) tone2('square', 1040, 0, i * .7, .4, .06, {lp:2600, hold:.33, attack:.01}); }, // a truck backing in to the dock
       unstrap: () => { for (let i = 0; i < 6; i++){ hiss('highpass', 2400 + i * 180, i * .065, .03, .22); tone('square', 900 + i * 40, 0, i * .065, .015, .03); } }, // the original ratchet clicks (coming off)
-      bar:   () => { tone('triangle', 330, 0, 0, .35, .18); tone('triangle', 347, 0, 0, .3, .12); tone('square', 1180, 0, 0, .12, .04, 3000); hiss('bandpass', 1800, 0, .05, .2, 3); }, // metal clunk
-      row:   () => notes([[1047, 0, .16], [1568, .11, .3]], 'sine', .2),                                           // full-width row chime
+      row:   () => { bell(784, 0, .45, .12); bell(1175, .09, .6, .13); },                                          // a full row: two quick bells, a fifth apart (sound board, Omar 2026-10-08)
       out:   () => { hiss('bandpass', 1400, 0, .16, .45, 1.2); tone('sine', 260, 140, 0, .12, .12); },                                                        // a case back out
       pass:  () => notes([[523, 0, .14], [659, .12, .14], [784, .24, .32]]),
-      star3: () => notes([[523, 0, .12], [659, .1, .12], [784, .2, .12], [1047, .32, .45]], 'triangle', .26),
-      fail:  () => notes([[392, 0, .18], [311, .18, .35]], 'triangle', .2)
+      fail:  () => { bell(392, 0, .35, .12, .35); bell(311, .2, .8, .13, .35); thump(.2, 90, 50, .2, .18); },        // failed: two soft falling bells and a low thud (sound board, Omar 2026-10-08)
+      achieve: () => { thump(0, 100, 50, .55, .2); hiss2('lowpass', 1200, 0, .03, .2);                                // the badge stamped down, then a rising bell run with a sparkle (sound board, Omar 2026-10-08)
+        [784, 988, 1175, 1568].forEach((f, i) => bell(f, .08 + i * .07, .6, .1)); [2349, 2794, 3136].forEach((f, i) => tone2('sine', f, 0, .4 + i * .06, .2, .03, {wet:.7})); }
     })[name]();
     setTimeout(() => out.disconnect(), 1500);
   } catch(e){}
@@ -5789,7 +5863,7 @@ function tryUnload(uid){
 function tryRemoveDevice(b){
   const why = offDeviceBlockSt(state(), b); if (why){ flashCoach('bad', why, 3000); return; }
   G.hist.push(snap()); G.fut = [];
-  G.bars = G.bars.filter(x => x !== b); G.hoverBar = null; if (b.kind === 'strap') sfx('unstrap');
+  G.bars = G.bars.filter(x => x !== b); G.hoverBar = null; sfx(b.kind === 'strap' ? 'unstrap' : 'baroff');
   toast(b.kind === 'strap' ? 'UNSTRAPPED' : 'BAR OUT', b.tier === 'high' ? 'Upper tier' : 'Tier');
   refresh();
 }
