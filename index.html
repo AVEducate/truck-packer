@@ -7036,10 +7036,8 @@ function clStep(){ // one 6" step toward the nose, or it stops
   if (clFree(a.c, a.r - 1, a.w, a.h)){ a.r--; return; }
   CL.placed.push({...a}); CL.sel = a.id; CL.active = null; CL.down = (CL.down || 0) + 1; CL.breakDone = false; sfx('place'); if (!clSettle()) clNextCase();
 }
-// every 4th case down, a break before the next one (Omar 2026-10-09): as long as a case takes to roll halfway up the truck,
-// so there's time to drag cases and fix the load. ↑, SPACE or FASTER ends it early.
-const clHalfFull = () => CL.placed.some(p => p.r + p.h > CL.rows / 2); // the load reaches past the middle of the truck
-function clNextCase(){ if (CL.over) return; if (CL.down > 0 && CL.down % 4 === 0 && !CL.breakDone && clHalfFull()){ /* breaks only once the truck is half full (Omar 2026-10-09) */ CL.breakLeft = (CL.rows / 2) * clSpeed(); CL.breakDone = true; clHud(); return; } CL.breakDone = false; clSpawn(); }
+// no breaks any more (Omar 2026-10-09): the next case comes straight after the last one
+function clNextCase(){ if (CL.over) return; clSpawn(); }
 function clEndBreak(){ if (!(CL.breakLeft > 0)) return false; CL.breakLeft = 0; clSpawn(); return true; }
 function clSlam(){ const a = CL.active; if (!a || CL.paused || CL.over) return; while (clFree(a.c, a.r - 1, a.w, a.h)) a.r--; clStep(); clDraw(); }
 // one case rolls toward the nose until something stops it (a case you drop or turn); the others stay put
