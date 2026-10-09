@@ -54,8 +54,51 @@ body.home #game, body.home .modal-back{filter:blur(7px) saturate(.85)}
 .home-btn{font-family:var(--pixel);font-weight:800;letter-spacing:.08em;font-size:clamp(17px,1.6vw,22px);height:56px;width:100%;background:#2b2c29;color:var(--cream);
   border:3px solid var(--cream);cursor:pointer;box-shadow:4px 4px 0 #000;display:flex;align-items:center;justify-content:center;gap:8px}
 .home-btn:hover{background:var(--accent);color:#1a1209;border-color:#1a1209}
+.home-btn.locked{opacity:.55;position:relative;white-space:nowrap}
+.home-lock{position:absolute;right:14px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;align-items:center;gap:1px;line-height:1}
+.home-lock svg{width:15px;height:17px}
+.home-lock b{font-size:13px;letter-spacing:.04em}
 .home-btn.primary{background:var(--cream);color:#111;animation:pulse 1.4s ease-in-out infinite}
 .home-btn.primary:hover{background:var(--accent)}
+/* Classic (Omar 2026-10-08) */
+.classic{position:fixed;inset:0;z-index:70;background:var(--bg,#1d1e1b);display:grid;grid-template-columns:250px 1fr;grid-template-rows:1fr;gap:0}
+.classic[hidden]{display:none}
+.cl-side{display:flex;flex-direction:column;gap:12px;padding:16px;background:var(--panel);border-right:3px solid var(--edge);overflow:auto}
+.cl-brand{font-family:var(--pixel);font-weight:800;letter-spacing:.08em;font-size:13px;color:var(--cream-dim)}
+.cl-brand b{display:block;font-size:30px;color:var(--cream);letter-spacing:.06em}
+.cl-stats{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.cl-stats .stat{max-width:none}
+.cl-next{display:flex;flex-direction:column;gap:4px;font-family:var(--pixel);font-weight:800;font-size:12px;letter-spacing:.08em;color:var(--cream-dim)}
+#clNext{width:100%;height:96px;border:2px solid var(--edge)}
+.cl-btns{display:grid;gap:8px}
+.cl-btns .btn{height:44px}
+.cl-stage{position:relative;min-width:0;min-height:0;overflow:hidden;touch-action:none}
+#clCanvas{position:absolute;inset:0;touch-action:none}
+.cl-pad{display:none}
+.cl-msg{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:min(420px,calc(100% - 32px));background:rgba(24,25,22,.96);border:3px solid var(--accent);padding:18px;text-align:center;color:var(--cream);box-shadow:0 10px 30px rgba(0,0,0,.6)}
+.cl-msg h2{font-family:var(--pixel);font-weight:800;letter-spacing:.06em;font-size:30px;margin:0 0 8px}
+.cl-msg p{margin:6px 0;color:var(--cream-dim);line-height:1.4}
+.cl-msg .cl-keys{font-size:13.5px}
+.cl-msg .cl-best{color:#f0c04a;font-family:var(--pixel);font-weight:800;font-size:20px}
+.cl-sum{display:grid;grid-template-columns:repeat(3,1fr);margin:10px 0;font-family:var(--pixel)}
+.cl-sum b{font-size:30px;grid-row:1}
+.cl-sum span{font-size:12px;letter-spacing:.08em;color:var(--cream-dim);grid-row:2}
+.cl-row{display:flex;gap:10px;justify-content:center;margin-top:12px}
+.cl-row .btn{min-width:130px;height:46px}
+.cl-toast{position:absolute;left:50%;top:40%;transform:translate(-50%,-50%);font-family:var(--pixel);font-weight:800;font-size:40px;color:var(--cream);text-shadow:3px 0 0 #111,-3px 0 0 #111,0 3px 0 #111,0 -3px 0 #111;opacity:0;pointer-events:none;text-align:center}
+.cl-toast small{display:block;font-size:16px}
+.cl-toast.show{animation:toast 1.6s ease-out forwards}
+body.phone .classic{grid-template-columns:1fr;grid-template-rows:auto 1fr auto}
+body.phone .cl-side{flex-direction:row;flex-wrap:wrap;align-items:stretch;gap:6px;padding:6px 8px;border-right:0;border-bottom:3px solid var(--edge)}
+body.phone .cl-brand{display:none}
+body.phone .cl-stats{flex:1 1 auto;grid-template-columns:repeat(4,1fr);gap:4px}
+body.phone .cl-stats .stat span{font-size:8.5px} body.phone .cl-stats .stat b{font-size:15px}
+body.phone .cl-next{flex:0 0 70px;font-size:8.5px} body.phone #clNext{height:44px}
+body.phone .cl-btns{flex:1 1 100%;grid-template-columns:repeat(3,1fr);gap:6px} body.phone .cl-btns .btn{height:34px;font-size:14px}
+body.phone .cl-pad #clRot[hidden]{display:none}
+body.phone .cl-pad{display:grid;grid-template-columns:1fr 1.4fr 1fr 1.4fr;gap:8px;padding:8px;border-top:3px solid var(--edge);background:var(--panel)}
+body.phone .cl-pad .btn{height:52px;font-size:20px}
+body.classic-on .coach, body.classic-on .crew-back{display:none}
 .home-btn kbd{font-family:var(--pixel);font-size:12px;background:var(--cream);color:#111;padding:0 5px;border-radius:2px}
 .title-overlay-unused{position:absolute;left:0;right:0;top:1.2%;display:flex;flex-direction:column;align-items:center;text-align:center;pointer-events:none;padding:0 16px}
 .presents{font-family:var(--pixel);font-weight:700;font-size:clamp(13px,1.4vw,17px);letter-spacing:.25em;color:var(--cream);text-shadow:2px 2px 0 #111;margin-bottom:6px}
@@ -584,6 +627,8 @@ body.phone .home-btn kbd, body.phone .link-btn kbd{display:none}
     <div class="home-menu">
       <button id="pressEnter" class="home-btn primary">START</button>
       <button id="titleLevels" class="home-btn">LEVEL SELECT</button>
+      <button id="titleTour" class="home-btn">ENDLESS TOUR</button>
+      <button id="titleClassic" class="home-btn">CLASSIC</button>
       <button id="titleHelp" class="home-btn">HELP</button>
       <button id="titleDemo" class="home-btn">PRACTICE BAY</button>
     </div>
@@ -648,6 +693,17 @@ body.phone .home-btn kbd, body.phone .link-btn kbd{display:none}
     <div class="crew-fig" id="crewFig" aria-hidden="true"><img id="crewImg" alt="" src="assets/crew/chief-tip.webp"></div>
     <div class="coach-body"><div class="coach-hd"><span class="crew-name" id="crewName">CREW CHIEF</span><span class="tag">TIP</span></div><span id="coachText"></span></div>
   </div>
+</section>
+
+<section class="classic" id="classic" hidden aria-label="Classic">
+  <aside class="cl-side">
+    <div class="cl-brand">TRUCK PACKOLOGY<b>CLASSIC</b></div>
+    <div class="cl-stats"><div class="stat"><span>SCORE</span><b id="clScore">0</b></div><div class="stat"><span>ROWS</span><b id="clLines">0</b></div><div class="stat"><span>LEVEL</span><b id="clLevel">1</b></div><div class="stat"><span>BEST</span><b id="clBest">0</b></div></div>
+    <div class="cl-next"><span>NEXT CASE</span><canvas id="clNext"></canvas></div>
+    <div class="cl-btns"><button class="btn" id="clPause">PAUSE</button><button class="btn" id="clMusic">MUSIC ON</button><button class="btn" id="clQuit">QUIT</button></div>
+  </aside>
+  <div class="cl-stage" id="clStage"><canvas id="clCanvas"></canvas><div class="cl-toast" id="clToast"></div><div class="cl-msg" id="clMsg" hidden></div></div>
+  <div class="cl-pad"><button class="btn" id="clLeft" aria-label="Left">◀</button><button class="btn" id="clRot">ROTATE</button><button class="btn" id="clRight" aria-label="Right">▶</button><button class="btn primary" id="clDrop">FASTER</button></div>
 </section>
 
 <!-- ================= MODALS ================= -->
@@ -3047,6 +3103,11 @@ const EXAM = [
   ['Truss carts run the full length along both walls. How do you stack the nose?', ['Bar the nose tier first, as usual', 'Build the nose stack on the dock and roll it in finished, because there\'s no tier face to bar', 'Don\'t stack at all', 'Stack on the truss carts'], 1, 'With no tier face for a bar, the nose stack is built on the dock.']
 ];
 LEVELS.forEach((lv, i) => { lv.id = i + 1; });
+// slope levels (Omar 2026-10-08, from a real load-in on an incline): the truck is parked on a 30% grade, nose uphill, so cases on
+// wheels roll slowly back toward the doors until a load bar or strap stops them. Existing levels only, spread out after the strap lesson.
+const SLOPE_LEVELS = ['Corporate Gig', 'Lighting Day', 'LED Wall', 'Second Leg', 'Side Stage', 'The Bigger Pack'];
+for (const lv of LEVELS) if (SLOPE_LEVELS.includes(lv.title)){ lv.slope = 30;
+  lv.lesson += ' <b>This truck is parked on a 30% slope.</b> Cases on wheels roll back toward the doors until a load bar or strap stops them, so bar or strap each row as soon as it\'s in.'; }
 
 /* =====================================================================
    ENGINE — pure rules. No DOM, no drawing.
@@ -4110,7 +4171,7 @@ function loadLevelObj(lv, idx){
   G.items = new Map(); let n = 0;
   for (const c of G.level.cases) for (let i = 0; i < c.count; i++){ const uid = 'c' + (++n); G.items.set(uid, {uid, type:c.type, def:CASES[c.type]}); }
   G.placements = []; G.bars = []; G.staging = []; G.view = 'top'; G.tool = null; G.hist = []; G.fut = []; G.hand = null;
-  if (G.level.stacked && G.level._par == null) G.level._par = levelPar(G.level); G.ghost = null; G.hover = null; G.lastInfo = null; G.lastPlaced = null; $('dockZone').hidden = true;
+  if (G.level.stacked && G.level._par == null) G.level._par = levelPar(G.level); G.ghost = null; G.hover = null; G.lastInfo = null; G.lastPlaced = null; G.slide = {}; $('dockZone').hidden = true;
   G.coachStep = 0; G.transitView = null; G.anim = null; G.flash = null; G.floorCache = null;
   setScreen('game'); layout();
   $('hudLevel').textContent = G.level.demo ? 'DEMO' : G.level.id;
@@ -4445,7 +4506,15 @@ function render(){
   for (let f = 0; f * 12 <= G.level.truck.depth; f += 2){ const yy = oy + f * 12 * L.s; ctx.fillRect(ox - wall - 12, yy, 6, 1); ctx.fillText(f + "'", ox - wall - 15, yy); }
   // labels
   ctx.textAlign = 'center'; ctx.fillStyle = '#ebe3cb'; ctx.font = "800 19px 'Barlow Condensed', sans-serif";
-  ctx.fillText('▲ NOSE ▲', ox + Wp / 2, oy - wall - 16);
+  if (!G.level.slope) ctx.fillText('▲ NOSE ▲', ox + Wp / 2, oy - wall - 16);
+  else { // parked on a slope: NOSE and the slope marker side by side, centred together
+    const t = `${G.level.slope}% SLOPE · DOORS DOWNHILL`, align = ctx.textAlign, nw = ctx.measureText('▲ NOSE ▲').width, f = ctx.font;
+    ctx.save(); ctx.font = "800 12px 'Barlow Condensed', sans-serif"; const tw = ctx.measureText(t).width + 14; ctx.restore();
+    const x0 = ox + Wp / 2 - (nw + 10 + tw) / 2, ny = oy - wall - 16;
+    ctx.textAlign = 'left'; ctx.fillText('▲ NOSE ▲', x0, ny); ctx.textAlign = align;
+    ctx.save(); ctx.font = "800 12px 'Barlow Condensed', sans-serif"; const bx = x0 + nw + 10, by = ny - 9;
+    ctx.fillStyle = '#f0c04a'; ctx.fillRect(bx, by, tw, 18); ctx.strokeStyle = '#111'; ctx.lineWidth = 2; ctx.strokeRect(bx, by, tw, 18);
+    ctx.fillStyle = '#111'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(t, bx + tw / 2, by + 9.5); ctx.restore(); }
   // lip + doors
   const lipY = oy + Dp, lipH = Math.max(10, 5 * L.s);
   ctx.fillStyle = metal(ctx, 0, lipY, 0, lipY + lipH); ctx.fillRect(ox - wall, lipY, Wp + wall * 2, lipH);
@@ -4472,7 +4541,7 @@ function render(){
   const shifted = G.anim ? G.anim.shiftedNow : G.transitView ? G.transitView.shifted : null;
   for (const p of pos){
     const it = itemOf(p.uid), {w, d} = Engine.dimsOf(it.def, p.rot);
-    drawCaseTop(ctx, ox + p.x * cell, oy + p.y * cell, w * cell, d * cell, it.def, {
+    drawCaseTop(ctx, ox + p.x * cell, oy + (p.y + (G.slide && G.slide[p.uid] ? G.slide[p.uid].f : 0)) * cell, w * cell, d * cell, it.def, {
       hover:G.hover === p.uid && !G.hand, shifted:shifted && shifted.has(p.uid), elev:(p.z || 0) * IN,
       priority:G.level.unloadSequence ? Engine.priorityOf(G.level, it.def) : null
     });
@@ -4526,6 +4595,50 @@ function drawScrollHint(ctx){
   ctx.restore();
   if (!drawScrollHint.raf) drawScrollHint.raf = requestAnimationFrame(() => { drawScrollHint.raf = 0; if (drawScrollHint.on) render(); });   // keep it moving while it's needed
 }
+/* ---------- slope levels: cases on wheels roll toward the doors ----------
+   Each case on wheels (not laid on its side, nothing on top of it) creeps toward the doors, a little faster the farther it goes,
+   until a load bar or strap line or another case is in the way. A case that reaches the doors rolls out: back to the dock, a rehandle.
+   Rolling pauses while a case is in hand, so picking one up never fights the slope. */
+const SLOPE = {settle:3, secs:3.5, fastest:2}; // a case holds still this long after it's set down, then takes this long per 6", speeding up to the quickest (Omar 2026-10-08: slower)
+function slopeBlocked(p, w, d){
+  const back = p.y + d;
+  if (G.bars.some(b => b.y === back)) return true;                                                    // a bar or strap line right behind it
+  return G.placements.some(q => q !== p && !(q.z > 0) && q.y === back && q.x < p.x + w && p.x < q.x + Engine.dimsOf(itemOf(q.uid).def, q.rot).w); // a case right behind it
+}
+function slopeTick(dt){
+  const lv = G.level; if (!lv || !lv.slope || G.mode !== 'play' || G.hand || G.anim) return;
+  if (G.staging.length || !$('dockZone').hidden) return; // building a dock stack happens off the truck: nothing rolls meanwhile (Omar 2026-10-08)
+  const D = lv.truck.depth / IN, slide = G.slide || (G.slide = {});
+  let moved = false, rolling = false;
+  for (const p of [...G.placements].sort((a, b) => b.y - a.y)){ // door side first, so a row moves together
+    const def = itemOf(p.uid).def, {w, d} = Engine.dimsOf(def, p.rot);
+    const onTop = G.placements.some(q => q.z > 0 && q.x < p.x + w && p.x < q.x + Engine.dimsOf(itemOf(q.uid).def, q.rot).w && q.y < p.y + d && p.y < q.y + Engine.dimsOf(itemOf(q.uid).def, q.rot).d);
+    if (!def.wheels || (p.rot & 2) || p.z > 0 || onTop){ delete slide[p.uid]; continue; }
+    const s = slide[p.uid] || (slide[p.uid] = {f:0, steps:0, wait:SLOPE.settle});
+    if (slopeBlocked(p, w, d)){ s.f = 0; continue; }
+    if (s.wait > 0){ s.wait -= dt; continue; } // just set down: it settles before it starts to roll
+    rolling = true;
+    if (!s.warned){ s.warned = true; slopeWarn(def); }
+    s.f += dt / Math.max(SLOPE.fastest, SLOPE.secs - s.steps * .08);
+    while (s.f >= 1){
+      s.f -= 1; p.y += 1; s.steps++; moved = true;
+      if (p.y + d > D){ slopeRollOut(p, def); break; }
+      if (slopeBlocked(p, w, d)){ s.f = 0; break; }
+    }
+  }
+  if (moved && G.tool && G.tool.L != null) setToolLine(G.tool.L);
+  if (moved) refresh(); else if (rolling) render();
+}
+function slopeWarn(def){
+  if (performance.now() - (slopeWarn.t || 0) < 6000) return; slopeWarn.t = performance.now();
+  flashCoach('warn', `The truck's on a slope: the ${def.name} is rolling toward the doors. Bar or strap the row behind it.`, 3500);
+}
+function slopeRollOut(p, def){
+  poofAt({...p, y:p.y - 1}); G.placements = G.placements.filter(q => q !== p); delete G.slide[p.uid];
+  G.rehandles = (G.rehandles || 0) + 1; sfx('out');
+  flashCoach('bad', `The ${def.name} rolled out the back. On a slope, bar or strap each row as soon as it's in.`, 4000);
+}
+{ let last = performance.now(); setInterval(() => { const now = performance.now(), dt = Math.min(.25, (now - last) / 1000); last = now; slopeTick(dt); }, 100); }
 /* ---------- poof: a cartoon smoke puff where a case leaves the truck (with the poof sound) ---------- */
 const PUFF_MS = 360; // a ring of little puffs: smaller than the case, spreads to just past it, fading as it goes
 function poofAt(p){ // p: the case's placement (grid cells), taken before it leaves
@@ -5329,7 +5442,7 @@ function placeHand(){
   else G.placements.push({uid:h.uid, x:g.x, y:g.y, z:g.z || 0, rot:h.rot});
   const {w, d} = Engine.dimsOf(itemOf(h.uid).def, h.rot);
   const warn = g.warn;
-  G.hand = null; G.ghost = null; G.lastInfo = h.uid; G.lastPlaced = h.uid; // ROTATE (phone) turns this one next
+  G.hand = null; G.ghost = null; G.lastInfo = h.uid; G.lastPlaced = h.uid; if (G.slide) delete G.slide[h.uid]; // ROTATE (phone) turns this one next; a case set down starts a fresh roll
   if (g.z > 0 || h.stack) fire('stack');
   const sp = Engine.calculateSpaceEfficiency(state());
   const newRows = sp.fullRows.filter(y => !before.has(y) && y >= g.y && y < g.y + d);
@@ -5400,14 +5513,34 @@ function doorToolLine(){
   return Math.max(1, Engine.calculateSpaceEfficiency(st).loadLength || 1);
 }
 function setToolLine(L){
-  const res = Engine.canPlaceDevice(state(), G.level, G.tool.kind, L);
-  G.tool.L = L; G.tool.ok = res.ok; G.tool.reason = res.reason; G.tool.tier = res.tier || 'low';
+  let res = Engine.canPlaceDevice(state(), G.level, G.tool.kind, L), pull = null;
+  if (!res.ok && G.level.slope){ const g = slopeGrace(L); if (g){ res = g.res; pull = g.pulls; } }
+  G.tool.L = L; G.tool.ok = res.ok; G.tool.reason = res.reason; G.tool.tier = res.tier || 'low'; G.tool.pull = pull;
+}
+// slope grace (Omar 2026-10-08): a row that has rolled a little past a bar or strap line, up to a quarter of the case's depth,
+// still takes it; placing it pulls that row back up tight against it. Nothing else about where bars and straps go changes.
+function slopeGrace(L){
+  const pulls = [];
+  for (const p of G.placements){
+    if (p.z > 0) continue;
+    const {d} = Engine.dimsOf(itemOf(p.uid).def, p.rot), over = p.y + d - L;
+    if (p.y < L && over > 0){ if (over > Math.max(1, Math.floor(d / 4))) return null; pulls.push([p, over]); }
+  }
+  if (!pulls.length || G.placements.some(q => q.z > 0)) return null;
+  const was = pulls.map(([p]) => p.y); pulls.forEach(([p, o]) => { p.y -= o; });
+  const box = q => { const {w, d} = Engine.dimsOf(itemOf(q.uid).def, q.rot); return [q.x, q.y, q.x + w, q.y + d]; };
+  const clash = pulls.some(([p]) => { const a = box(p); return a[1] < 0 || G.placements.some(q => q !== p && !(q.z > 0) && (() => { const b = box(q); return a[0] < b[2] && b[0] < a[2] && a[1] < b[3] && b[1] < a[3]; })()); });
+  const res = clash ? {ok:false} : Engine.canPlaceDevice(state(), G.level, G.tool.kind, L);
+  pulls.forEach(([p], i) => { p.y = was[i]; });
+  return res.ok ? {res, pulls:pulls.map(([p, o]) => [p.uid, o])} : null;
 }
 function toolFromPointer(py){ const D = G.level.truck.depth / IN; setToolLine(clamp(Math.round((py - G.L.oy) / G.L.cell), 1, D)); }
 function placeTool(){
   const t = G.tool; if (!t || t.L == null || G.mode !== 'play') return;
+  if (G.level.slope) setToolLine(t.L); // the row may have rolled since the line was aimed: check it again now
   if (!t.ok){ sfx('bad'); flashCoach('bad', t.reason, 3000); return; }
   G.hist.push(snap()); G.fut = [];
+  if (t.pull) for (const [uid, o] of t.pull){ const p = G.placements.find(q => q.uid === uid); if (p){ p.y -= o; if (G.slide) delete G.slide[uid]; } } // pulled back up against it
   G.bars.push({kind:t.kind, y:t.L, tier:t.tier || 'low'}); G.tool = null; sfx(t.kind === 'strap' ? 'strap' : 'bar');
   toast(t.kind === 'strap' ? 'STRAPPED!' : 'BARRED!', t.tier === 'high' ? 'Upper tier locked in' : 'Tier locked in');
   fire('device'); refresh();
@@ -6244,7 +6377,7 @@ function loopSetTruck(depth, name){
   const L = G.loop;
   G.levelIdx = -2; G.level = loopLevel(depth, name, L.truckNo);
   G.placements = []; G.bars = []; G.staging = []; G.view = 'top'; G.tool = null; G.hist = []; G.fut = []; G.hand = null;
-  G.ghost = null; G.hover = null; G.lastInfo = null; G.lastPlaced = null; $('dockZone').hidden = true; G.coachStep = 0; G.transitView = null; G.anim = null; G.flash = null; G.floorCache = null;
+  G.ghost = null; G.hover = null; G.lastInfo = null; G.lastPlaced = null; G.slide = {}; $('dockZone').hidden = true; G.coachStep = 0; G.transitView = null; G.anim = null; G.flash = null; G.floorCache = null;
   L.event = L.truckNo >= 6 && Math.random() < .35 ? {at:4 + Math.floor(Math.random() * 6)} : null; // a production change, once enough is on the truck
   L.sent = null; L.loadIn = false;
   $('hudLevel').textContent = 'TOUR';
@@ -6607,7 +6740,7 @@ function enterHome(){
   const nx = nextLevelIdx(), home = LEVELS[nx] && LEVELS[nx].exam ? nx - 1 : nx; // past level 100: put level 100 behind the title, not the exam
   G.quietLoad = true; try { loadLevel(home); } finally { G.quietLoad = false; } // loaded behind the title: don't use up its how-to or ability slide
   closeModals(); openLevels(); G.prevMode = 'briefing'; G.mode = 'title';
-  document.body.classList.add('home');
+  document.body.classList.add('home'); homeTourButton();
   const t = $('title'); t.hidden = false; t.classList.remove('focus');
 }
 // Put the chosen screen in place behind the strip, then fade the strip while the game comes into focus.
@@ -6628,6 +6761,10 @@ const showTitle = enterHome;
 /* ---------- wiring ---------- */
 $('pressEnter').onclick = () => homeGo(HOME.enter);
 $('titleLevels').onclick = () => homeGo(HOME.levels);
+// Endless Tour on the home screen (Omar 2026-10-08): open after level 60, as in the level list
+function homeTourButton(){ const b = $('titleTour'), open = G.progress && G.progress.unlocked > 60; b.classList.toggle('locked', !open); b.innerHTML = open ? 'ENDLESS TOUR' : 'ENDLESS TOUR<span class="home-lock" aria-label="Unlocks after level 60"><svg viewBox="0 0 20 22" aria-hidden="true"><path d="M5 10V7a5 5 0 0 1 10 0v3" fill="none" stroke="currentColor" stroke-width="2.6"/><rect x="2" y="10" width="16" height="11" rx="2" fill="currentColor"/></svg><b>60</b></span>'; } // locked: a small lock with the level number, the name stays centred (Omar 2026-10-09)
+$('titleTour').onclick = () => { if (!(G.progress && G.progress.unlocked > 60)){ sfx('bad'); return; } homeGo(() => { closeModals(); leaveTour(); startLoop(false); }); };
+$('titleClassic').onclick = () => homeGo(() => openClassic());
 $('btnLevels').onclick = () => { if (G.mode === 'play'){ if (G.hand) cancelHand(true); openLevels(); } };
 $('brStart').onclick = startPlay;
 $('brLevels').onclick = openLevels;
@@ -6675,6 +6812,418 @@ function fitHud(){
 }
 new MutationObserver(fitHud).observe(document.querySelector('.hud'), {subtree:true, childList:true, characterData:true});
 addEventListener('resize', fitHud);
+
+
+/* ---------- Classic music (Omar 2026-10-09): "Tight Pack" (an original loop) by default, or our folk arrangement of "Korobeiniki"
+   (a public-domain Russian folk song from the 1800s; nothing taken from any game's version). Both speed up a touch each level.
+   Code shared with art-reference/sound-board.html, kept in its own scope so none of its names touch the game's. ---------- */
+const CLASSIC_MUSIC = (() => {
+function noiseBuf(ctx){ const b = ctx.createBuffer(1, ctx.sampleRate * 2, ctx.sampleRate), d = b.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1; return b; }
+function makeVerb(ctx, dest){ // small room: a short decaying noise impulse
+  const len = ctx.sampleRate * 1.3, ir = ctx.createBuffer(2, len, ctx.sampleRate);
+  for (let ch = 0; ch < 2; ch++){ const d = ir.getChannelData(ch); for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 3.2); }
+  const c = ctx.createConvolver(); c.buffer = ir; const g = ctx.createGain(); g.gain.value = .9; c.connect(g).connect(dest); return c;
+}
+// a toolkit bound to one context + output, scheduled from t0
+function kit(ctx, out, t0, wetDest){
+  const NB = ctx._nb || (ctx._nb = noiseBuf(ctx));
+  const send = (node, wet) => { node.connect(out); if (wet && wetDest){ const g = ctx.createGain(); g.gain.value = wet; node.connect(g).connect(wetDest); } };
+  const filt = (type, f, q) => { const n = ctx.createBiquadFilter(); n.type = type; n.frequency.value = f; if (q) n.Q.value = q; return n; };
+  const tone = (type, f0, f1, at, len, vol, o = {}) => {
+    const osc = ctx.createOscillator(), g = ctx.createGain(), s = t0 + at; osc.type = type; if (o.detune) osc.detune.value = o.detune;
+    osc.frequency.setValueAtTime(f0, s); if (f1) osc.frequency.exponentialRampToValueAtTime(f1, s + (o.glide || len));
+    if (o.vib){ const l = ctx.createOscillator(), lg = ctx.createGain(); l.frequency.value = o.vib[0]; lg.gain.value = o.vib[1]; l.connect(lg).connect(osc.frequency); l.start(s); l.stop(s + len + .05); }
+    const a = o.attack || .006; g.gain.setValueAtTime(0.0001, s); g.gain.exponentialRampToValueAtTime(vol, s + a);
+    if (o.hold) g.gain.setValueAtTime(vol, s + a + o.hold); g.gain.exponentialRampToValueAtTime(0.0001, s + len);
+    let n = osc; if (o.lp){ const f = filt('lowpass', o.lp, o.q); n.connect(f); n = f; } if (o.hp){ const f = filt('highpass', o.hp); n.connect(f); n = f; }
+    n.connect(g); send(g, o.wet); osc.start(s); osc.stop(s + len + .05); return osc;
+  };
+  const hiss = (type, f, at, len, vol, o = {}) => {
+    const src = ctx.createBufferSource(), fl = filt(type, f, o.q), g = ctx.createGain(), s = t0 + at; src.buffer = NB; if (o.loop) src.loop = true;
+    if (o.to) fl.frequency.exponentialRampToValueAtTime(o.to, s + len);
+    const a = o.attack || .004; g.gain.setValueAtTime(0.0001, s); g.gain.exponentialRampToValueAtTime(vol, s + a);
+    if (o.hold) g.gain.setValueAtTime(vol, s + a + o.hold); g.gain.exponentialRampToValueAtTime(0.0001, s + len);
+    src.connect(fl).connect(g); send(g, o.wet); src.start(s, Math.random()); src.stop(s + len + .05); return g;
+  };
+  const click = (at, vol = .2, f = 3000) => hiss('bandpass', f, at, .018, vol, {q:5});
+  const notes = (seq, type, vol, o = {}) => seq.forEach(([hz, at, len]) => tone(type, hz, 0, at, len, vol, o));
+  return {tone, hiss, click, notes, filt, send, NB};
+}
+
+
+const MUSIC = {
+  tightpack: {gain:.64, title:'TIGHT PACK', desc:'Original: a bouncy minor-key hook on marimba over a pumping bass and snappy drums. Puzzle-game energy, all ours.', bpm:128, bars:8,
+    play(k, t, beat, bar){ const s = 60 / this.bpm, i = bar % 8, ch = TIGHT.ch[i];
+      MX.melody(k, TIGHT.mel[i], t, s, (n, at, len) => MX.mallet(k, n, at, .09));
+      for (let b = 0; b < 8; b++) MX.bass(k, ch[0] - 12 + (b % 2 ? 12 : 0), t + b * s / 2, s * .4, .1, 600);
+      MX.keys(k, ch, t, s * .5, .02); MX.keys(k, ch, t + 1.5 * s, s * .5, .018); MX.keys(k, ch, t + 3 * s, s * .5, .018);
+      drum(k, 'kick', t, .55); drum(k, 'kick', t + 2 * s, .5); drum(k, 'kick', t + 2.5 * s, .35); drum(k, 'snare', t + s, .45); drum(k, 'snare', t + 3 * s, .45);
+      for (let b = 0; b < 8; b++) drum(k, 'hat', t + b * s / 2, b % 2 ? .35 : .2); } },
+  koroFolk: {gain:.68, title:"PEDDLER'S SONG · FOLK", desc:'The old folk tune ("Korobeiniki"), our own arrangement: picked guitar melody, oom-pah bass, tambourine. Lively.', bpm:126, bars:8,
+    play(k, t, beat, bar){ const s = 60 / this.bpm, i = bar % 8;
+      MX.melody(k, KORO.mel[i], t, s, (n, at, len) => MX.pluck(k, n, at, .09));
+      const ch = KORO.ch[i]; for (let b = 0; b < 4; b++){ if (b % 2 === 0) MX.bass(k, ch[0] - 12 + (b === 2 ? 7 : 0), t + b * s, s * .8, .15); else MX.strum(k, ch, t + b * s, .035); }
+      drum(k, 'softkick', t, .6); drum(k, 'softkick', t + 2 * s, .5); drum(k, 'tamb', t + s, .55); drum(k, 'tamb', t + 3 * s, .55);
+      for (let b = 0; b < 8; b++) drum(k, 'shaker', t + b * s / 2, b % 2 ? .4 : .2); } },
+  koroDrive: {gain:.8, title:"PEDDLER'S SONG · SYNTH", desc:'The same folk tune as a night-drive synth track, in the sound of Cruise Control (G): soft synth lead, pad, pulsing bass.', bpm:116, bars:8,
+    play(k, t, beat, bar){ const s = 60 / this.bpm, i = bar % 8, ch = KORO.ch[i];
+      MX.melody(k, KORO.mel[i], t, s, (n, at, len) => MX.synthLead(k, n, at, len, .03));
+      for (const n of ch) for (const dt of [-8, 8]) k.tone('sawtooth', MX.f(n), 0, t - k.t0, s * 4, .009, {attack:s * .5, hold:s * 2.8, lp:800, detune:dt, wet:.5});
+      for (let b = 0; b < 8; b++) k.tone('sawtooth', MX.f(ch[0] - 12), 0, t - k.t0 + b * s / 2, s * .4, .06, {lp:420, attack:.004});
+      for (let b = 0; b < 4; b++){ drum(k, 'kick', t + b * s, .5); drum(k, 'hat', t + b * s + s / 2, .3); } drum(k, 'snare', t + s, .45); drum(k, 'snare', t + 3 * s, .45); } },
+  koroLounge: {gain:.7, title:"PEDDLER'S SONG · LOUNGE", desc:'The folk tune slowed down and swung, late-night lounge: electric piano melody, upright bass, brushes and ride.', bpm:88, bars:8,
+    play(k, t, beat, bar){ const s = 60 / this.bpm, i = bar % 8, ch = KORO.ch[i], sw = s * .14;
+      MX.melody(k, KORO.mel[i], t, s, (n, at, len) => MX.keys(k, [n], at + ((at - t) / s % 1 > .4 ? sw : 0), len * .9, .06), sw);
+      MX.keys(k, ch.map(n => n - 12), t, s * 1.8, .02); MX.keys(k, ch.map(n => n - 12), t + 2 * s + sw, s * 1.6, .018);
+      [0, 1, 2, 3].forEach(b => MX.bass(k, ch[0] - 24 + [0, 7, 12, 7][b], t + b * s, s * .85, .15, 900));
+      for (let b = 0; b < 4; b++){ drum(k, 'ride', t + b * s, .45); if (b % 2) drum(k, 'ride', t + b * s + s / 2 + sw, .3); } drum(k, 'brush', t + s); drum(k, 'brush', t + 3 * s); } },
+};
+// melodies: per bar, [midi note, start beat, length in beats]; chords per bar (midi)
+const Am = [57, 60, 64], Dm = [62, 65, 69], E7 = [56, 59, 62, 64], F = [53, 57, 60], G = [55, 59, 62], C = [60, 64, 67];
+const KORO = { // "Korobeiniki", Russian folk song (public domain); harmony and everything around it are ours
+  mel:[[[76, 0, 1], [71, 1, .5], [72, 1.5, .5], [74, 2, 1], [72, 3, .5], [71, 3.5, .5]],
+       [[69, 0, 1], [69, 1, .5], [72, 1.5, .5], [76, 2, 1], [74, 3, .5], [72, 3.5, .5]],
+       [[71, 0, 1.5], [72, 1.5, .5], [74, 2, 1], [76, 3, 1]],
+       [[72, 0, 1], [69, 1, 1], [69, 2, 2]],
+       [[74, .5, 1], [77, 1.5, .5], [81, 2, 1], [79, 3, .5], [77, 3.5, .5]],
+       [[76, 0, 1.5], [72, 1.5, .5], [76, 2, 1], [74, 3, .5], [72, 3.5, .5]],
+       [[71, 0, 1], [71, 1, .5], [72, 1.5, .5], [74, 2, 1], [76, 3, 1]],
+       [[72, 0, 1], [69, 1, 1], [69, 2, 2]]],
+  ch:[Am, Am, E7, Am, Dm, Am, E7, Am]};
+const TIGHT = { // original
+  mel:[[[74, 0, .5], [77, .5, .5], [81, 1, 1], [79, 2, .5], [77, 2.5, .5], [76, 3, 1]],
+       [[77, 0, .5], [76, .5, .5], [74, 1, .5], [72, 1.5, .5], [69, 2, 1.5]],
+       [[70, 0, .5], [72, .5, .5], [74, 1, 1], [77, 2, .5], [76, 2.5, .5], [74, 3, 1]],
+       [[73, 0, 1], [76, 1, 1], [69, 2, 2]],
+       [[81, 0, .5], [79, .5, .5], [77, 1, 1], [79, 2, .5], [81, 2.5, .5], [82, 3, 1]],
+       [[81, 0, .5], [77, .5, .5], [74, 1, 1], [77, 2, 1], [76, 3, 1]],
+       [[74, 0, .5], [76, .5, .5], [77, 1, .5], [79, 1.5, .5], [81, 2, .5], [79, 2.5, .5], [77, 3, .5], [76, 3.5, .5]],
+       [[74, 0, 1.5], [69, 1.5, .5], [74, 2, 2]]],
+  ch:[Dm, Dm, [58, 62, 65], [57, 61, 64], F, [58, 62, 65], [57, 61, 64, 67], Dm]};
+const Em = [64, 67, 71], Cm7 = [60, 64, 67, 71], Am7 = [57, 60, 64, 67], B7 = [59, 63, 66, 69], D = [62, 66, 69];
+const LINE = { // original
+  mel:[[[76, 0, .5], [79, .5, .5], [83, 1, .5], [81, 1.5, 1], [79, 2.5, .5], [78, 3, 1]],
+       [[76, 0, .5], [74, .5, .5], [76, 1, 1.5], [71, 2.5, 1.5]],
+       [[72, 0, .5], [76, .5, .5], [79, 1, .5], [78, 1.5, 1], [76, 2.5, .5], [74, 3, 1]],
+       [[71, 0, 1], [74, 1, .5], [75, 1.5, 2.5]],
+       [[76, 0, .5], [79, .5, .5], [83, 1, .5], [81, 1.5, 1], [79, 2.5, .5], [78, 3, 1]],
+       [[79, 0, .5], [78, .5, .5], [76, 1, 1], [74, 2, 1], [72, 3, 1]],
+       [[72, 0, .5], [74, .5, .5], [76, 1, .5], [79, 1.5, 1], [78, 2.5, .5], [74, 3, 1]],
+       [[75, 0, 1], [78, 1, 1], [76, 2, 2]]],
+  ch:[Em, Cm7, Am7, B7, Em, Cm7, D, B7]};
+const TAIL = { // original
+  mel:[[[69, 0, .5], [72, .5, .5], [76, 1, 1], [76, 2, .5], [74, 2.5, .5], [72, 3, 1]],
+       [[74, 0, .5], [72, .5, .5], [71, 1, 1], [67, 2, 1], [71, 3, 1]],
+       [[72, 0, .5], [71, .5, .5], [69, 1, 1], [72, 2, .5], [76, 2.5, .5], [79, 3, 1]],
+       [[77, 0, 1], [76, 1, .5], [74, 1.5, .5], [76, 2, 2]],
+       [[81, 0, .5], [79, .5, .5], [77, 1, 1], [76, 2, .5], [74, 2.5, .5], [72, 3, 1]],
+       [[74, 0, .5], [76, .5, .5], [77, 1, 1], [76, 2, 1], [74, 3, 1]],
+       [[72, 0, .5], [74, .5, .5], [76, 1, .5], [72, 1.5, .5], [71, 2, 1], [68, 3, 1]],
+       [[69, 0, 1.5], [64, 1.5, .5], [69, 2, 2]]],
+  ch:[Am, G, Am, E7, F, Dm, E7, Am]};
+const MX = {
+  f: n => 440 * Math.pow(2, (n - 69) / 12),
+  keys(k, notes, at, len, vol){ notes.forEach((n, i) => { const f = MX.f(n), a = at - k.t0 + i * .012; k.tone('sine', f, 0, a, len, vol, {attack:.008, wet:.45, vib:[4.8, 1.2]}); k.tone('triangle', f * 2, 0, a, len * .35, vol * .25, {attack:.005, wet:.45}); }); }, // electric piano
+  bass(k, n, at, len, vol, lp = 380){ k.tone('triangle', MX.f(n), 0, at - k.t0, len, vol, {attack:.01, lp}); k.tone('sine', MX.f(n), 0, at - k.t0, len, vol * .8, {attack:.01}); },
+  piano(k, n, at, vol){ const f = MX.f(n); k.tone('sine', f, 0, at - k.t0, 1.6, vol, {attack:.004, wet:.7}); k.tone('triangle', f * 2, 0, at - k.t0, .4, vol * .2, {attack:.003, wet:.7}); },
+  pluck(k, n, at, vol){ const f = MX.f(n); k.tone('triangle', f, 0, at - k.t0, .9, vol, {attack:.003, lp:2600, wet:.25}); k.tone('sawtooth', f, 0, at - k.t0, .12, vol * .35, {attack:.002, lp:3200}); k.hiss('bandpass', f * 4, at - k.t0, .02, vol * .4, {q:3}); }, // a nylon-ish guitar string
+  melody(k, bar, t, s, voice){ for (const [n, b, len] of bar) voice(n, t + b * s, len * s); },
+  synthLead(k, n, at, len, vol){ for (const dt of [-6, 6]) k.tone('sawtooth', MX.f(n), 0, at - k.t0, Math.max(.12, len * .92), vol, {attack:.01, lp:1700, detune:dt, wet:.4}); },
+  mallet(k, n, at, vol){ const f = MX.f(n); k.tone('sine', f, 0, at - k.t0, .45, vol, {attack:.002, wet:.3}); k.tone('sine', f * 4, 0, at - k.t0, .08, vol * .25, {attack:.001}); },
+  strum(k, notes, at, vol){ notes.forEach((n, j) => MX.pluck(k, n, at + j * .012, vol)); },
+  crackle(k, t, len){ k.hiss('highpass', 3000, t - k.t0, len, .012, {attack:.05, hold:len * .9}); for (let i = 0; i < 6; i++) k.hiss('bandpass', 2000 + Math.random() * 3000, t - k.t0 + Math.random() * len, .01, .04, {q:3}); }
+};
+function drum(k, type, at, v = 1){ const a = at - k.t0;
+  if (type === 'rim'){ k.hiss('bandpass', 1800, a, .03, .2 * v, {q:4}); k.tone('triangle', 820, 0, a, .03, .08 * v); }
+  if (type === 'brush'){ k.hiss('bandpass', 2600, a, .28, .07 * v, {q:.6, attack:.04}); }
+  if (type === 'ride'){ k.hiss('highpass', 6000, a, .38, .05 * v); k.tone('sine', 5100, 0, a, .3, .006 * v); }
+  if (type === 'shaker'){ k.hiss('highpass', 6500, a, .05, .05 * v, {attack:.012}); }
+  if (type === 'tamb'){ for (let i = 0; i < 3; i++) k.hiss('highpass', 7500, a + i * .012, .06, .06 * v); }
+  if (type === 'kick'){ k.tone('sine', 130, 45, a, .3, .5 * v, {glide:.12}); k.click(a, .08 * v, 1200); }
+  if (type === 'snare'){ k.hiss('bandpass', 1900, a, .16, .22 * v, {q:.8}); k.tone('triangle', 210, 160, a, .09, .12 * v); }
+  if (type === 'hat'){ k.hiss('highpass', 7500, a, .035, .08 * v); }
+  if (type === 'chipkick'){ k.tone('square', 160, 50, a, .12, .12 * v, {lp:1200, glide:.08}); }
+  if (type === 'chipsnare'){ k.hiss('highpass', 1500, a, .1, .12 * v); }
+  if (type === 'chiphat'){ k.hiss('highpass', 9000, a, .02, .06 * v); }
+  if (type === 'softkick'){ k.tone('sine', 110, 50, a, .28, .32 * v, {glide:.1, lp:400}); }
+  if (type === 'softsnare'){ k.hiss('bandpass', 1500, a, .2, .09 * v, {q:.7, wet:.5}); }
+}
+
+let timer = 0, bus = null, verbN = null, next = 0, bar = 0;
+let track = 'tight';
+function pick(level){ // Tight Pack by default, Peddler's Song (folk) as the second choice (Omar 2026-10-09); both speed up a touch each level
+  const m = track === 'folk' ? MUSIC.koroFolk : MUSIC.tightpack;
+  return Object.assign(Object.create(m), {bpm:Math.min(m.bpm + 30, m.bpm + (level - 1) * 3)});
+}
+function start(levelOf){
+  if (timer || !SOUND.on) return;
+  const AC = window.AudioContext || window.webkitAudioContext; if (!AC) return;
+  const ctx = SOUND.ctx || (SOUND.ctx = new AC()); if (ctx.state !== 'running') ctx.resume();
+  bus = ctx.createGain(); bus.gain.value = .5; bus.connect(ctx.destination); verbN = makeVerb(ctx, bus); next = ctx.currentTime + .15; bar = 0;
+  const tick = () => { if (!bus) return; while (next < ctx.currentTime + .3){ const m = pick(levelOf()), g = ctx.createGain(); g.gain.value = m.gain || 1; g.connect(bus); setTimeout(() => g.disconnect(), 9000);
+    const k = kit(ctx, g, 0, verbN); k.t0 = 0; m.play(k, next, 0, bar); next += 4 * 60 / m.bpm; bar++; } };
+  tick(); timer = setInterval(tick, 80);
+}
+function stop(){ clearInterval(timer); timer = 0; if (bus){ const b = bus; bus = null; try { b.gain.setTargetAtTime(0.0001, b.context.currentTime, .08); } catch(e){} setTimeout(() => b.disconnect(), 500); } }
+return {start, stop, playing:() => !!timer, setTrack:t => { track = t === 'folk' ? 'folk' : 'tight'; }};
+})();
+
+/* =====================================================================
+   CLASSIC (Omar 2026-10-08/09): an endless arcade mode on the game's own 24 ft box truck (96" x 288"), with the game's real cases at
+   their real footprints on the same 6" grid. Cases roll in at the rear doors and travel toward the nose on their own, faster each level.
+   ← → move it, ↑ makes it roll in faster, ↓ (or R) turns it (only cases that turn on the floor), SPACE slams it to the nose.
+   A row clears only when it's one solid band (same start line, same depth, wall to wall); it lights up for a second, then everything slides toward the nose.
+   Cases that are down can still be dragged to a new spot (nothing locks). Game over when the next case can't get in at the doors.
+   ===================================================================== */
+const CL_TRUCK = {name:'Box truck · 24 ft', width:96, depth:288};
+const CL = {cols:CL_TRUCK.width / 6, rows:CL_TRUCK.depth / 6, on:false, paused:false, over:false, placed:[], active:null, next:null, score:0, lines:0, level:1, best:0, t:0, raf:0, drag:null, id:0, music:true, flash:null, fast:false};
+// Classic-only cases (Omar 2026-10-09): sizes that open up more solid rows. Never in the regular levels.
+const CL_DEFS = {
+  cl_drape: {name:'Pipe & Drape Trunk', department:'SCENIC', style:'black', weightClass:'HEAVY', width:72, depth:30, height:30, wheels:true, floorRotate:true},
+  cl_ledcart: {name:'LED Wall Cart', department:'LED', style:'pink', weightClass:'VERY_HEAVY', width:48, depth:60, height:48, wheels:true, floorRotate:true},
+  cl_truss: {name:'Truss on Dolly', department:'RIGGING', style:'black', weightClass:'HEAVY', width:96, depth:30, height:24, wheels:true, floorRotate:false, truss:true} // the full-width rescue piece, always crosswise
+};
+const clDef = key => CL_DEFS[key] || CASES[key];
+// 24" lanes (Omar 2026-10-09): cases move and land a full 24" at a time, so they always line up and never leave a gap no case can fill
+const CL_LANE = 2; // 12" steps: 8 positions across the same 96" truck (Omar 2026-10-09), closer to Tetris's 10 columns
+const clLanes = (w, near) => { const out = []; for (let c = 0; c + w <= CL.cols; c += CL_LANE) out.push(c); return out.sort((a, b) => Math.abs(a - near) - Math.abs(b - near)); };
+const clSnap = (c, w) => w % CL_LANE ? c : clamp(Math.round(c / CL_LANE) * CL_LANE, 0, CL.cols - w);
+const CL_PIECES = [ // real cases from the game, by how often they come up. Standard sizes only (24" or 48" wide, 30" or 60" deep), so every
+  // case can be part of a solid row; the small hard cases and the Pelican are left out (Omar 2026-10-09). Turned arrivals stay as a challenge.
+  ['utility_trunk', 9], ['big_trunk', 12], ['cable_trunk', 8], ['hard_l', 3], // 24x24 cubes about a third as common (Omar 2026-10-09: too easy)
+  ['monitor', 8], ['video_rack', 3], ['audio_rack', 2], ['distro', 2], ['speaker_cart', 4],
+  ['cl_drape', 6], ['cl_ledcart', 5], ['cl_truss', 1.2]].filter(([k]) => clDef(k)); // the truss: about 2 in 100, a rare rescue
+const clStore = {get(k, d){ try { const v = localStorage.getItem('truckPackology.' + k); return v == null ? d : v; } catch(e){ return d; } }, set(k, v){ try { localStorage.setItem('truckPackology.' + k, v); } catch(e){} }};
+// Classic block sizes (Omar 2026-10-09): every side a multiple of 24", so a turned case always fits a 24" lane and never leaves a gap.
+// Same cases and art as the game, a little squarer than their real 30"/60" depths.
+const CL_SIZE = {utility_trunk:[24, 24], video_rack:[24, 24], audio_rack:[24, 24], distro:[24, 24], hard_l:[24, 24],
+  big_trunk:[48, 24], cable_trunk:[48, 24], speaker_cart:[48, 24], monitor:[24, 48], cl_ledcart:[48, 48], cl_drape:[72, 24], cl_truss:[96, 24]};
+const clDims = (key, rot) => { const [wi, di] = CL_SIZE[key] || [clDef(key).width, clDef(key).depth], w = Math.round(wi / 6), h = Math.round(di / 6); return rot & 1 ? {w:h, h:w} : {w, h}; }; // in 6" cells
+function clRandom(){ const tot = CL_PIECES.reduce((s, p) => s + p[1], 0); let r = Math.random() * tot; for (const [key, n] of CL_PIECES){ r -= n; if (r < 0){ const rot = Math.random() < .1 ? 1 : 0; /* about 1 in 10 arrive turned; with block sizes a turn always fits a lane */ return {key, rot, ...clDims(key, rot)}; } } return {key:'utility_trunk', rot:0, ...clDims('utility_trunk', 0)}; } // always straight: no turning in Classic (Omar 2026-10-09: a turned case is 30" or 60" wide and always leaves a gap no case can fill)
+const clSpeed = () => Math.max(56, 340 * Math.pow(.82, CL.level - 1)); /* each level 18% faster (was 13%) */ // ms per 6": 1.7 s per 30" at level 1 (Omar 2026-10-09: half the old speed, time to rearrange while cases come in)
+function clFree(c, r, w, h, skip){
+  if (c < 0 || r < 0 || c + w > CL.cols || r + h > CL.rows) return false;
+  return !CL.placed.some(p => p !== skip && c < p.c + p.w && p.c < c + w && r < p.r + p.h && p.r < r + h);
+}
+function clSpawn(){
+  const n = CL.next || clRandom(); CL.next = clRandom();
+  const a = {id:++CL.id, key:n.key, rot:n.rot, w:n.w, h:n.h, c:clSnap(Math.floor((CL.cols - n.w) / 2), n.w), r:CL.rows - n.h};
+  if (!clFree(a.c, a.r, a.w, a.h)){ CL.active = null; clGameOver(); return; }
+  CL.active = a; CL.t = 0; clDrawNext();
+}
+function clMove(dc){ const a = CL.active; if (!a || CL.paused || CL.over) return; const c = clamp(a.c + dc * CL_LANE, 0, CL.cols - a.w); if (c !== a.c && clFree(c, a.r, a.w, a.h)){ a.c = c; clDraw(); } }
+const CL_TURNING = true; // block-sized cases make turning safe (Omar 2026-10-09)
+function clRotate(){ // a real quarter turn, only for cases that turn on the floor
+  if (!CL_TURNING) return;
+  if (!CL.active && CL.breakLeft > 0) return clRotatePlaced(); // during a break: the case you last touched (or the one that just went down)
+  const a = CL.active; if (!a || CL.paused || CL.over) return; // every Classic case can turn (the truss too: lengthwise it's 24" wide)
+  const rot = a.rot ^ 1, {w, h} = clDims(a.key, rot);
+  const cs = w % CL_LANE ? [0, -1, 1, -2, 2, -3, 3, -4, 4].map(dc => a.c + dc) : clLanes(w, a.c);
+  for (let dr = 0; dr >= -Math.max(0, h - a.h); dr--) for (const c of cs) if (clFree(c, a.r + dr, w, h)){ Object.assign(a, {rot, w, h, c, r:a.r + dr}); sfx('pick'); clDraw(); return; } // shifts toward the nose if it needs the room
+  sfx('bad');
+}
+function clRotatePlaced(){ // Omar 2026-10-09: rotate cases during the break too
+  if (!CL_TURNING) return;
+  const p = CL.placed.find(q => q.id === CL.sel); if (!p || CL.paused || CL.over || CL.clearing) return;
+  const rot = p.rot ^ 1, {w, h} = clDims(p.key, rot);
+  const drs = [0, 1, -1, 2]; for (let k = 2; k <= Math.max(2, h - p.h); k++) drs.push(-k);
+  const cs = w % CL_LANE ? [0, -1, 1, -2, 2, -3, 3, -4, 4].map(dc => p.c + dc) : clLanes(w, p.c);
+  for (const c of cs) for (const dr of drs) if (clFree(c, p.r + dr, w, h, p)){ Object.assign(p, {rot, w, h, c, r:p.r + dr}); clRollForward(p); sfx('pick'); if (!clSettle()) clHud(); clDraw(); return; }
+  sfx('bad');
+}
+function clStep(){ // one 6" step toward the nose, or it stops
+  const a = CL.active; if (!a) return;
+  if (clFree(a.c, a.r - 1, a.w, a.h)){ a.r--; return; }
+  CL.placed.push({...a}); CL.sel = a.id; CL.active = null; CL.down = (CL.down || 0) + 1; CL.breakDone = false; sfx('place'); if (!clSettle()) clNextCase();
+}
+// every 4th case down, a break before the next one (Omar 2026-10-09): as long as a case takes to roll halfway up the truck,
+// so there's time to drag cases and fix the load. ↑, SPACE or FASTER ends it early.
+const clHalfFull = () => CL.placed.some(p => p.r + p.h > CL.rows / 2); // the load reaches past the middle of the truck
+function clNextCase(){ if (CL.over) return; if (CL.down > 0 && CL.down % 4 === 0 && !CL.breakDone && clHalfFull()){ /* breaks only once the truck is half full (Omar 2026-10-09) */ CL.breakLeft = (CL.rows / 2) * clSpeed(); CL.breakDone = true; clHud(); return; } CL.breakDone = false; clSpawn(); }
+function clEndBreak(){ if (!(CL.breakLeft > 0)) return false; CL.breakLeft = 0; clSpawn(); return true; }
+function clSlam(){ const a = CL.active; if (!a || CL.paused || CL.over) return; while (clFree(a.c, a.r - 1, a.w, a.h)) a.r--; clStep(); clDraw(); }
+// one case rolls toward the nose until something stops it (a case you drop or turn); the others stay put
+function clRollForward(p){ while (clFree(p.c, p.r - 1, p.w, p.h, p)) p.r--; }
+function clGravity(){ let moved = true; while (moved){ moved = false; for (const p of [...CL.placed].sort((x, y) => x.r - y.r)) while (clFree(p.c, p.r - 1, p.w, p.h, p)){ p.r--; moved = true; } } }
+// a row clears only when it's a solid block (Omar 2026-10-09): a straight line across the truck in front, another behind, and in
+// between nothing but cases, wall to wall, with no case sticking out past either line. One row deep or more (a 60" case beside
+// two 30" rows makes a solid double row). The block nearest the nose goes first.
+function clFindBand(){
+  const tops = [...new Set(CL.placed.map(p => p.r))].sort((a, b) => a - b), ends = [...new Set(CL.placed.map(p => p.r + p.h))].sort((a, b) => a - b);
+  for (const A of tops) for (const B of ends){
+    if (B <= A) continue;
+    const S = CL.placed.filter(p => p.r < B && A < p.r + p.h);
+    if (S.some(p => p.r < A || p.r + p.h > B)) continue;                       // a case sticks out front or back
+    if (S.reduce((n, p) => n + p.w * p.h, 0) === CL.cols * (B - A)) return S; // cases never overlap, so a full area means no gaps
+  }
+  return null;
+}
+function clSettle(){ // holes stay holes (Omar 2026-10-09): nothing slides into a gap on its own
+  const band = clFindBand();
+  if (band){ CL.clearing = {cases:band, until:performance.now() + 1100}; sfx('row'); return true; } // it lights up first, then goes (clFrame finishes it)
+  clHud(); return false;
+}
+function clFinishClear(){
+  const band = CL.clearing.cases; CL.clearing = null;
+  const A = Math.min(...band.map(p => p.r)), B = Math.max(...band.map(p => p.r + p.h));
+  CL.placed = CL.placed.filter(p => !band.includes(p)); for (const p of CL.placed) if (p.r >= B) p.r -= B - A; // the load behind moves up as one block, its gaps intact
+  CL.lines++; CL.streak = (CL.streak || 0) + 1;
+  CL.score += 100 * CL.level * CL.streak; // back-to-back rows from one case score more
+  const lvl = 1 + Math.floor(CL.lines / 6); if (lvl > CL.level){ CL.level = lvl; clToast('LEVEL ' + lvl, 'Cases roll in faster'); }
+  if (!clSettle()){ CL.streak = 0; if (!CL.active) clNextCase(); }
+  clHud();
+}
+function clGameOver(){
+  CL.over = true; CLASSIC_MUSIC.stop(); sfx('fail');
+  const best = Math.max(CL.best, CL.score), isBest = CL.score > CL.best && CL.score > 0; CL.best = best; clStore.set('classicBest', String(best)); clHud();
+  clMessage(`<h2>LOADED TO THE DOORS</h2><p>The next case has nowhere to go.</p><div class="cl-sum"><b>${CL.score}</b><span>SCORE</span><b>${CL.lines}</b><span>ROWS</span><b>${CL.level}</b><span>LEVEL</span></div>${isBest ? '<p class="cl-best">New best!</p>' : `<p>Best: ${best}</p>`}<div class="cl-row"><button class="btn primary" data-cl="again">PLAY AGAIN</button><button class="btn" data-cl="quit">QUIT</button></div>`);
+}
+function clToast(big, small){ const t = $('clToast'); t.innerHTML = big + (small ? `<small>${small}</small>` : ''); t.classList.remove('show'); void t.offsetWidth; t.classList.add('show'); }
+function clMessage(html){ const m = $('clMsg'); if (html == null){ m.hidden = true; return; } m.innerHTML = html; m.hidden = false; }
+function clHud(){ $('clScore').textContent = CL.score; $('clLines').textContent = CL.lines; $('clLevel').textContent = CL.level; $('clBest').textContent = Math.max(CL.best, CL.score); $('clPause').textContent = CL.paused ? 'RESUME' : 'PAUSE'; $('clMusic').textContent = CL.music === 'folk' ? 'MUSIC: FOLK TUNE' : CL.music ? 'MUSIC: TIGHT PACK' : 'MUSIC: OFF'; }
+function clStart(){
+  Object.assign(CL, {placed:[], active:null, next:null, score:0, lines:0, level:1, paused:false, over:false, drag:null, flash:null, fast:false, clearing:null, streak:0, down:0, breakLeft:0, breakDone:false, sel:null});
+  clMessage(null); clSpawn(); clHud(); if (CL.music) CLASSIC_MUSIC.start(() => CL.level);
+}
+function clPause(on){
+  if (CL.over || (!CL.active && !(CL.breakLeft > 0))) return; CL.paused = on == null ? !CL.paused : on; clHud();
+  if (CL.paused){ CLASSIC_MUSIC.stop(); clMessage(`<h2>PAUSED</h2><div class="cl-row"><button class="btn primary" data-cl="resume">RESUME</button><button class="btn" data-cl="quit">QUIT</button></div>`); }
+  else { clMessage(null); if (CL.music) CLASSIC_MUSIC.start(() => CL.level); }
+}
+function openClassic(){
+  closeModals(); G.mode = 'classic'; CL.on = true; CL.best = +clStore.get('classicBest', 0) || 0; CL.music = clStore.get('classicMusic', 'tight'); if (CL.music === 'on') CL.music = 'tight'; if (CL.music === 'off') CL.music = false; CLASSIC_MUSIC.setTrack(CL.music || 'tight');
+  $('classic').hidden = false; document.body.classList.add('classic-on');
+  Object.assign(CL, {placed:[], active:null, next:clRandom(), over:false, paused:false}); clLayout(); clHud();
+  clMessage(`<h2>CLASSIC</h2><p>Cases roll in from the rear doors toward the nose of a 24 ft truck. Build a solid row: straight front, straight back, cases wall to wall with no gaps. Then it clears.</p><p class="cl-keys">${isPhone() ? 'Drag left or right to move it 12" · ROTATE turns it · FASTER rolls it in quicker · drag a case that\'s down to move it' : '← → move it 12" · ↓ turns it · ↑ rolls it in faster · SPACE slams it to the nose · P pauses · drag a case that\'s down to move it'}</p><div class="cl-row"><button class="btn primary" data-cl="start">START</button><button class="btn" data-cl="quit">QUIT</button></div>`);
+  if (!CL.raf) CL.raf = requestAnimationFrame(clFrame);
+}
+function closeClassic(){ CL.on = false; CLASSIC_MUSIC.stop(); cancelAnimationFrame(CL.raf); CL.raf = 0; $('classic').hidden = true; document.body.classList.remove('classic-on'); enterHome(); }
+let clLast = 0;
+function clFrame(now){
+  CL.raf = requestAnimationFrame(clFrame); if (!CL.on) return;
+  const dt = Math.min(100, now - (clLast || now)); clLast = now;
+  if (CL.clearing && !CL.paused && now >= CL.clearing.until) clFinishClear();
+  if (CL.breakLeft > 0 && !CL.paused && !CL.over){ CL.breakLeft -= dt; if (CL.breakLeft <= 0){ CL.breakLeft = 0; clSpawn(); } }
+  if (CL.active && !CL.paused && !CL.over && !CL.clearing){ CL.t += dt * (CL.fast ? 5 : 1); while (CL.active && CL.t >= clSpeed()){ CL.t -= clSpeed(); clStep(); } }
+  clDraw();
+}
+/* ---- drawing: the 24 ft truck from above, like the regular levels (nose at the top, doors at the bottom) ---- */
+function clLayout(){
+  const cv = $('clCanvas'), box = $('clStage').getBoundingClientRect(), dpr = window.devicePixelRatio || 1, rulerW = 34;
+  const cell = Math.max(3, Math.min((box.width - rulerW - 40) / (CL.cols + 1.4), (box.height - 76) / CL.rows)), wall = cell * .7;
+  CL.L = {cell, wall, W:cell * CL.cols, H:cell * CL.rows}; CL.L.ox = Math.max(rulerW + wall + 6, (box.width - CL.L.W) / 2); CL.L.oy = 34 + wall;
+  cv.width = box.width * dpr; cv.height = box.height * dpr; cv.style.width = box.width + 'px'; cv.style.height = box.height + 'px'; CL.dpr = dpr; CL.floor = null; clDraw(); clDrawNext();
+}
+function clFloor(){ // wood floor planks, drawn once per size
+  const {W, H, cell} = CL.L, c = document.createElement('canvas'), dpr = CL.dpr; c.width = Math.ceil(W * dpr); c.height = Math.ceil(H * dpr);
+  const x = c.getContext('2d'); x.scale(dpr, dpr); x.fillStyle = '#b08856'; x.fillRect(0, 0, W, H);
+  const plank = cell * .92; let seed = 11; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+  for (let px = 0; px < W; px += plank){ let py = -rnd() * 10 * cell; while (py < H){ const len = (8 + rnd() * 12) * cell, sh = .95 + rnd() * .09;
+    x.fillStyle = `rgb(${Math.round(176 * sh)},${Math.round(136 * sh)},${Math.round(86 * sh)})`; x.fillRect(px, py, plank, len); x.fillStyle = 'rgba(80,50,20,.5)'; x.fillRect(px, py, plank, 1); py += len; } }
+  return c;
+}
+function clCase(ctx, p, x, y, o = {}){ const def = clDef(p.key), w = p.w * CL.L.cell, h = p.h * CL.L.cell; if (def.truss){ clTruss(ctx, x, y, w, h, o); return; } drawCaseTop(ctx, x, y, w, h, def, o); }
+// two 12" box-truss sections side by side on a black dolly, seen from above: chords, zigzag lacing, bolted end plates, casters at the corners
+function clTruss(ctx, x, y, w, h, o = {}){
+  ctx.save(); if (o.ghost) ctx.globalAlpha = .85;
+  const m = Math.max(2, h * .07);
+  ctx.fillStyle = 'rgba(0,0,0,.38)'; rr(ctx, x + 2, y + 3, w, h, 4); ctx.fill();                                               // shadow
+  ctx.fillStyle = '#1b1c1d'; rr(ctx, x, y, w, h, 4); ctx.fill(); ctx.strokeStyle = '#000'; ctx.lineWidth = 1.5; ctx.stroke();      // the dolly deck
+  ctx.fillStyle = '#2c2e30'; ctx.fillRect(x + m, y + h / 2 - 1, w - 2 * m, 2);                                                       // centre rail
+  for (const [cx, cy] of [[x + m * 1.6, y + m * 1.6], [x + w - m * 1.6, y + m * 1.6], [x + m * 1.6, y + h - m * 1.6], [x + w - m * 1.6, y + h - m * 1.6]]){
+    ctx.fillStyle = '#3a4d53'; ctx.beginPath(); ctx.arc(cx, cy, Math.max(1.5, m * .9), 0, 7); ctx.fill(); ctx.strokeStyle = '#000'; ctx.lineWidth = 1; ctx.stroke(); } // casters
+  const bandH = (h - 3 * m) / 2, x0 = x + m * 2.6, x1 = x + w - m * 2.6;
+  for (const by of [y + m, y + 2 * m + bandH]){
+    const t = Math.max(1.5, bandH * .16), top = by + t / 2, bot = by + bandH - t / 2, g = ctx.createLinearGradient(0, by, 0, by + bandH);
+    g.addColorStop(0, '#f2f3f0'); g.addColorStop(.5, '#a9ada8'); g.addColorStop(1, '#6d716c');
+    ctx.strokeStyle = '#c9ccc8'; ctx.lineWidth = Math.max(1, t * .55); ctx.beginPath(); const step = Math.max(6, bandH * 1.1);   // lacing
+    for (let xx = x0, up = true; xx < x1; xx += step / 2, up = !up){ ctx.moveTo(xx, up ? bot : top); ctx.lineTo(Math.min(x1, xx + step / 2), up ? top : bot); } ctx.stroke();
+    ctx.strokeStyle = 'rgba(0,0,0,.45)'; ctx.lineWidth = .8; ctx.stroke();
+    ctx.fillStyle = g; for (const cy of [by, by + bandH - t]){ ctx.fillRect(x0, cy, x1 - x0, t); ctx.strokeStyle = 'rgba(0,0,0,.6)'; ctx.lineWidth = .8; ctx.strokeRect(x0, cy, x1 - x0, t); } // chords
+    for (const ex of [x0 - t * .6, x1 - t * .4]){ ctx.fillStyle = '#d9dcd8'; ctx.fillRect(ex, by - t * .3, t, bandH + t * .6); ctx.strokeStyle = 'rgba(0,0,0,.6)'; ctx.strokeRect(ex, by - t * .3, t, bandH + t * .6); // end plates
+      ctx.fillStyle = '#3a3c3e'; for (const fy of [by + bandH * .25, by + bandH * .75]){ ctx.beginPath(); ctx.arc(ex + t / 2, fy, Math.max(.6, t * .2), 0, 7); ctx.fill(); } }
+  }
+  if (h > 26 && w > 120){ const tag = 'TRUSS'; ctx.font = `800 ${Math.max(9, Math.min(14, h * .22))}px 'Barlow Condensed', sans-serif`; const tw = ctx.measureText(tag).width + 10, th = Math.max(12, h * .3);
+    ctx.fillStyle = '#ec8a33'; ctx.fillRect(x + w / 2 - tw / 2, y + h / 2 - th / 2, tw, th); ctx.strokeStyle = '#111'; ctx.lineWidth = 1.2; ctx.strokeRect(x + w / 2 - tw / 2, y + h / 2 - th / 2, tw, th);
+    ctx.fillStyle = '#111'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(tag, x + w / 2, y + h / 2 + .5); }
+  if (o.ghost){ ctx.globalAlpha = 1; ctx.strokeStyle = o.valid ? '#8fcf6a' : '#e8604a'; ctx.lineWidth = 3; ctx.strokeRect(x + 1.5, y + 1.5, w - 3, h - 3); }
+  ctx.restore();
+}
+function clDraw(){
+  const cv = $('clCanvas'); if (!cv || !CL.L) return; const ctx = cv.getContext('2d'), {cell, wall, W, H, ox, oy} = CL.L;
+  ctx.setTransform(CL.dpr, 0, 0, CL.dpr, 0, 0); ctx.fillStyle = '#1f201d'; ctx.fillRect(0, 0, cv.width, cv.height);
+  // body, walls and E-track, the same as the regular top view
+  ctx.fillStyle = '#121211'; ctx.fillRect(ox - wall - 4, oy - wall - 4, W + wall * 2 + 8, H + wall + 8);
+  ctx.fillStyle = '#d8d8d5'; ctx.fillRect(ox - wall, oy - wall, W + wall * 2, H + wall); ctx.fillStyle = '#bdbdb9'; ctx.fillRect(ox - wall, oy - wall, W + wall * 2, wall * .35);
+  ctx.strokeStyle = '#111'; ctx.lineWidth = 2; ctx.strokeRect(ox - wall, oy - wall, W + wall * 2, H + wall);
+  ctx.fillStyle = '#5f615c'; for (let yy = oy + 4; yy < oy + H - 4; yy += Math.max(6, cell * .5)){ ctx.fillRect(ox - wall * .62, yy, wall * .28, Math.max(2, cell * .23)); ctx.fillRect(ox + W + wall * .34, yy, wall * .28, Math.max(2, cell * .23)); }
+  if (!CL.floor) CL.floor = clFloor(); ctx.drawImage(CL.floor, ox, oy, W, H);
+  ctx.strokeStyle = 'rgba(40,24,8,.13)'; ctx.lineWidth = 1; for (let i = 1; i < CL.cols; i++){ ctx.beginPath(); ctx.moveTo(ox + i * cell + .5, oy); ctx.lineTo(ox + i * cell + .5, oy + H); ctx.stroke(); }
+  for (let j = 1; j < CL.rows; j++){ ctx.beginPath(); ctx.moveTo(ox, oy + j * cell + .5); ctx.lineTo(ox + W, oy + j * cell + .5); ctx.stroke(); }
+  ctx.strokeStyle = 'rgba(40,24,8,.32)'; ctx.setLineDash([6, 6]); for (let i = 4; i < CL.cols; i += 4){ ctx.beginPath(); ctx.moveTo(ox + i * cell + .5, oy); ctx.lineTo(ox + i * cell + .5, oy + H); ctx.stroke(); } ctx.setLineDash([]);
+  // ruler in feet, and the labels
+  ctx.fillStyle = '#8f8a78'; ctx.font = "700 12px 'Barlow Condensed', sans-serif"; ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+  for (let f = 0; f * 12 <= CL_TRUCK.depth; f += 2){ const yy = oy + f * 2 * cell; ctx.fillRect(ox - wall - 12, yy, 6, 1); ctx.fillText(f + "'", ox - wall - 15, yy); }
+  ctx.fillStyle = '#ebe3cb'; ctx.font = "800 17px 'Barlow Condensed', sans-serif"; ctx.textAlign = 'center';
+  ctx.fillText('▲ NOSE ▲', ox + W / 2, oy - wall - 14); ctx.fillText('▼ REAR DOORS / RAMP ▼', ox + W / 2, oy + H + 18);
+  for (const p of CL.placed) if (!CL.drag || CL.drag.p !== p) clCase(ctx, p, ox + p.c * cell, oy + p.r * cell);
+  if (CL.clearing){ const b = CL.clearing.cases, top = Math.min(...b.map(p => p.r)), h = Math.max(...b.map(p => p.r + p.h)) - top, pulse = .35 + .3 * Math.sin(performance.now() / 90); // the solid row lights up before it goes
+    ctx.fillStyle = `rgba(255,240,180,${pulse})`; ctx.fillRect(ox, oy + top * cell, W, h * cell); ctx.strokeStyle = '#f0c04a'; ctx.lineWidth = 4; ctx.strokeRect(ox + 2, oy + top * cell + 2, W - 4, h * cell - 4);
+    ctx.fillStyle = '#111'; ctx.font = "800 20px 'Barlow Condensed', sans-serif"; ctx.fillText('SOLID ROW!', ox + W / 2, oy + (top + h / 2) * cell); }
+  const a = CL.active;
+  if (a){ let r = a.r; while (clFree(a.c, r - 1, a.w, a.h)) r--; // where it will stop
+    if (r !== a.r){ ctx.save(); ctx.setLineDash([6, 5]); ctx.strokeStyle = 'rgba(235,227,203,.75)'; ctx.lineWidth = 2; ctx.strokeRect(ox + a.c * cell + 2, oy + r * cell + 2, a.w * cell - 4, a.h * cell - 4); ctx.restore(); }
+    clCase(ctx, a, ox + a.c * cell, oy + a.r * cell); ctx.strokeStyle = '#f0c04a'; ctx.lineWidth = 3; ctx.strokeRect(ox + a.c * cell + 1.5, oy + a.r * cell + 1.5, a.w * cell - 3, a.h * cell - 3); }
+  if (CL.breakLeft > 0 && CL_TURNING){ const sp = CL.placed.find(q => q.id === CL.sel); if (sp && !(CL.drag && CL.drag.p === sp)){ ctx.save(); ctx.setLineDash([5, 4]); ctx.strokeStyle = '#ebe3cb'; ctx.lineWidth = 3; ctx.strokeRect(ox + sp.c * cell + 1.5, oy + sp.r * cell + 1.5, sp.w * cell - 3, sp.h * cell - 3); ctx.restore(); } }
+  if (CL.breakLeft > 0){ const sec = Math.ceil(CL.breakLeft / 1000), t1 = 'BREAK · FIX YOUR LOAD', t2 = `NEXT CASE IN ${sec} · ${isPhone() ? 'ROTATE turns it · FASTER skips' : '↓ turns it · ↑ skips'}`, by = oy + H - 6 * cell;
+    ctx.save(); ctx.fillStyle = 'rgba(17,17,17,.85)'; ctx.fillRect(ox + 4, by - 22, W - 8, 46); ctx.strokeStyle = '#f0c04a'; ctx.lineWidth = 2; ctx.strokeRect(ox + 4, by - 22, W - 8, 46);
+    ctx.fillStyle = '#f0c04a'; ctx.font = "800 17px 'Barlow Condensed', sans-serif"; ctx.textAlign = 'center'; ctx.fillText(t1, ox + W / 2, by - 6); ctx.fillStyle = '#ebe3cb'; ctx.font = "700 13px 'Barlow Condensed', sans-serif"; ctx.fillText(t2, ox + W / 2, by + 13); ctx.restore(); }
+  const d = CL.drag; if (d){ const ok = clFree(d.c, d.r, d.p.w, d.p.h, d.p); clCase(ctx, d.p, ox + d.c * cell, oy + d.r * cell, {ghost:true, valid:ok}); }
+}
+function clDrawNext(){
+  const cv = $('clNext'); if (!cv || !CL.next) return; const dpr = window.devicePixelRatio || 1, w = cv.clientWidth || 120, h = cv.clientHeight || 90;
+  cv.width = w * dpr; cv.height = h * dpr; const ctx = cv.getContext('2d'); ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.fillStyle = '#1f201d'; ctx.fillRect(0, 0, w, h);
+  const n = CL.next, s = Math.min((w - 16) / n.w, (h - 16) / n.h); const nd = clDef(n.key); if (nd.truss) clTruss(ctx, (w - n.w * s) / 2, (h - n.h * s) / 2, n.w * s, n.h * s); else drawCaseTop(ctx, (w - n.w * s) / 2, (h - n.h * s) / 2, n.w * s, n.h * s, nd, {noText:true});
+}
+/* ---- input ---- */
+document.addEventListener('keydown', e => {
+  if (!CL.on || $('classic').hidden) return; const k = e.key;
+  const map = {ArrowLeft:() => clMove(-1), ArrowRight:() => clMove(1), ArrowUp:() => { if (!clEndBreak()) CL.fast = true; }, ArrowDown:clRotate, r:clRotate, R:clRotate, ' ':() => { if (!clEndBreak()) clSlam(); }, p:() => clPause(), P:() => clPause(), Escape:() => clPause(true)};
+  if (map[k]){ e.preventDefault(); e.stopPropagation(); map[k](); }
+}, true);
+document.addEventListener('keyup', e => { if (CL.on && e.key === 'ArrowUp') CL.fast = false; }, true);
+function clCell(e){ const r = $('clCanvas').getBoundingClientRect(), {cell, ox, oy} = CL.L; return {x:e.clientX - r.left, y:e.clientY - r.top, c:Math.floor((e.clientX - r.left - ox) / cell), r:Math.floor((e.clientY - r.top - oy) / cell)}; }
+$('clCanvas').addEventListener('pointerdown', e => {
+  if ((!CL.active && !(CL.breakLeft > 0)) || CL.paused || CL.over) return; e.preventDefault(); const q = clCell(e), a = CL.active;
+  const hit = CL.placed.find(p => q.c >= p.c && q.c < p.c + p.w && q.r >= p.r && q.r < p.r + p.h);
+  try { $('clCanvas').setPointerCapture(e.pointerId); } catch(x){} // keeps the drag even if the finger leaves the canvas
+  if (hit){ CL.sel = hit.id; CL.drag = {p:hit, dc:q.c - hit.c, dr:q.r - hit.r, c:hit.c, r:hit.r, id:e.pointerId}; sfx('pick'); return; } // move a case that's already down (and it's the one ROTATE turns in a break)
+  if (a) CL.swipe = {x0:q.x, c0:a.c, id:e.pointerId};                                                                            // steer the incoming one
+});
+$('clCanvas').addEventListener('pointermove', e => {
+  const q = clCell(e), d = CL.drag;
+  if (d && d.id === e.pointerId){ d.c = clSnap(clamp(q.c - d.dc, 0, CL.cols - d.p.w), d.p.w); d.r = clamp(q.r - d.dr, 0, CL.rows - d.p.h); clDraw(); return; }
+  const s = CL.swipe, a = CL.active; if (!s || s.id !== e.pointerId || !a) return;
+  const want = clSnap(clamp(s.c0 + Math.round((q.x - s.x0) / CL.L.cell), 0, CL.cols - a.w), a.w); const st = a.w % CL_LANE ? 1 : CL_LANE; while (a.c < want && clFree(a.c + st, a.r, a.w, a.h)) a.c += st; while (a.c > want && clFree(a.c - st, a.r, a.w, a.h)) a.c -= st;
+});
+const clUp = e => {
+  const d = CL.drag;
+  if (d && d.id === e.pointerId){ CL.drag = null; if (clFree(d.c, d.r, d.p.w, d.p.h, d.p)){ d.p.c = d.c; d.p.r = d.r; clRollForward(d.p); sfx('place'); if (!CL.clearing) clSettle(); } else sfx('bad'); clDraw(); return; }
+  if (CL.swipe && CL.swipe.id === e.pointerId) CL.swipe = null;
+};
+$('clCanvas').addEventListener('pointerup', clUp); $('clCanvas').addEventListener('pointercancel', () => { CL.drag = null; CL.swipe = null; });
+// phone pad: hold ◀ ▶ to keep moving, hold FASTER to roll it in quicker
+const clHold = (id, down, up) => { const b = $(id); let t = 0; const stop = () => { clearInterval(t); t = 0; if (up) up(); };
+  b.addEventListener('pointerdown', e => { e.preventDefault(); down(); if (!up) t = setInterval(down, 110); }); for (const ev of ['pointerup', 'pointerleave', 'pointercancel']) b.addEventListener(ev, stop); };
+clHold('clLeft', () => clMove(-1)); clHold('clRight', () => clMove(1)); clHold('clDrop', () => { if (!clEndBreak()) CL.fast = true; }, () => { CL.fast = false; });
+$('clRot').onclick = clRotate;
+$('clPause').onclick = () => clPause(); $('clQuit').onclick = closeClassic;
+$('clMusic').onclick = () => { CL.music = CL.music === 'tight' ? 'folk' : CL.music === 'folk' ? false : 'tight'; clStore.set('classicMusic', CL.music || 'off'); CLASSIC_MUSIC.stop();
+  if (CL.music){ CLASSIC_MUSIC.setTrack(CL.music); if (CL.active && !CL.paused && !CL.over) CLASSIC_MUSIC.start(() => CL.level); } clHud(); };
+$('clMsg').addEventListener('click', e => { const b = e.target.closest('[data-cl]'); if (!b) return; const a = b.dataset.cl;
+  if (a === 'start' || a === 'again') clStart(); else if (a === 'resume') clPause(false); else if (a === 'quit') closeClassic(); });
+addEventListener('resize', () => { if (CL.on) clLayout(); });
+document.addEventListener('visibilitychange', () => { if (document.hidden && CL.on && CL.active && !CL.paused && !CL.over) clPause(true); });
 
 enterHome();
 /* =====================================================================
