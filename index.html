@@ -22,7 +22,7 @@
 <link rel="icon" type="image/svg+xml" href="assets/icon-boxes.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Silkscreen:wght@700&family=Barlow+Condensed:wght@600;700;800&family=Barlow:wght@500;600;700&family=Anton&family=Open+Sans:ital,wght@0,400;0,600;0,700;1,400;1,700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Silkscreen:wght@700&family=Press+Start+2P&family=Barlow+Condensed:wght@600;700;800&family=Barlow:wght@500;600;700&family=Anton&family=Open+Sans:ital,wght@0,400;0,600;0,700;1,400;1,700&display=swap" rel="stylesheet">
 <style>
 :root{
   --bg:#242522; --panel:#2f302d; --panel2:#393a36; --line:#4b4c47; --edge:#121211;
@@ -93,11 +93,31 @@ body.phone .cl-side{flex-direction:row;flex-wrap:wrap;align-items:stretch;gap:6p
 body.phone .cl-brand{display:none}
 body.phone .cl-stats{flex:1 1 auto;grid-template-columns:repeat(4,1fr);gap:4px}
 body.phone .cl-stats .stat span{font-size:8.5px} body.phone .cl-stats .stat b{font-size:15px}
-body.phone .cl-next{flex:0 0 70px;font-size:8.5px} body.phone #clNext{height:44px}
-body.phone .cl-btns{flex:1 1 100%;grid-template-columns:repeat(3,1fr);gap:6px} body.phone .cl-btns .btn{height:34px;font-size:14px}
-body.phone .cl-pad #clRot[hidden]{display:none}
-body.phone .cl-pad{display:grid;grid-template-columns:1fr 1.4fr 1fr 1.4fr;gap:8px;padding:8px;border-top:3px solid var(--edge);background:var(--panel)}
-body.phone .cl-pad .btn{height:52px;font-size:20px}
+body.phone .cl-next{flex:0 0 104px;justify-content:center} body.phone .cl-next span{display:none} body.phone #clNext{height:40px} /* no NEXT CASE label on the phone: a wider preview, and the row is only as tall as the numbers (Omar 2026-10-09) */
+body.phone .cl-side{align-items:center} body.phone .cl-stats .stat{padding:2px 4px}
+body.phone .cl-btns{display:none} /* START pauses, SELECT goes home, MUSIC lives on the pause screen (Omar 2026-10-09) */
+/* phone controller (Omar 2026-10-09): NES-style pad, A and B stacked on a tilted pill so the thumb moves up and down */
+body.phone .cl-pad{display:block;background:#d9d4c4;border-top:3px solid var(--edge);padding:7px 10px 10px;user-select:none;-webkit-user-select:none;touch-action:none}
+.clp-brand{display:flex;justify-content:space-between;align-items:center;padding:0 2px}
+.clp-brand span{font-family:'Press Start 2P',monospace;font-size:11px;letter-spacing:.06em;color:#2b2c2a}
+.clp-brand b{font-family:var(--pixel);font-weight:800;font-size:11px;letter-spacing:.14em;color:#3b3b38}
+.clp-face{position:relative;height:146px;margin-top:6px;background:#2b2c2a;border-radius:10px;box-shadow:inset 0 0 0 3px #1b1c1a;overflow:hidden}
+.clp-dpad{position:absolute;left:12px;top:22px;width:100px;height:100px}
+.clp-dpad svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.clp-dpad button{position:absolute;width:33.4%;height:33.4%;padding:0;border:0;background:transparent;border-radius:4px;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.clp-dpad button:active,.clp-dpad button.on{background:rgba(235,227,203,.12)}
+#clDrop{left:33.3%;top:0} #clRot{left:33.3%;bottom:0} #clLeft{left:0;top:33.3%} #clRight{right:0;top:33.3%}
+.clp-lbl{position:absolute;font-family:var(--pixel);font-weight:800;font-size:10.5px;letter-spacing:.06em;color:#bdb7a4;white-space:nowrap;pointer-events:none}
+.clp-lbl i{font-style:normal;color:#e0484f;font-size:13px;margin-right:3px}
+.clp-pill{position:absolute;right:10px;top:18px;width:150px;height:72px;border-radius:14px;background:#d9d4c4;box-shadow:inset 0 0 0 3px #b9b3a1}
+.clp-ab{position:absolute;width:56px;height:56px;border-radius:50%;padding:0;cursor:pointer;background:radial-gradient(circle at 35% 30%,#e0484f,#b3242e 55%,#6e1218);border:3px solid #000;box-shadow:0 4px 0 #000;-webkit-tap-highlight-color:transparent}
+.clp-ab:active,.clp-ab.on{transform:translateY(3px);box-shadow:0 1px 0 #000}
+#clA{right:18px;top:26px} #clB{right:86px;top:26px}
+.clp-ss{position:absolute;left:118px;bottom:2px;display:flex;gap:4px}
+.clp-ss button{display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 8px;border:0;background:transparent;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.clp-ss button i{display:block;width:46px;height:14px;border-radius:8px;background:#141514;border:2px solid #000}
+.clp-ss button:active i{background:#3a3b39}
+.clp-ss button span{font-family:var(--pixel);font-weight:800;font-size:11px;letter-spacing:.1em;color:#e0484f}
 body.classic-on .coach, body.classic-on .crew-back{display:none}
 .home-btn kbd{font-family:var(--pixel);font-size:12px;background:var(--cream);color:#111;padding:0 5px;border-radius:2px}
 .title-overlay-unused{position:absolute;left:0;right:0;top:1.2%;display:flex;flex-direction:column;align-items:center;text-align:center;pointer-events:none;padding:0 16px}
@@ -703,7 +723,20 @@ body.phone .home-btn kbd, body.phone .link-btn kbd{display:none}
     <div class="cl-btns"><button class="btn" id="clPause">PAUSE</button><button class="btn" id="clMusic">MUSIC ON</button><button class="btn" id="clQuit">QUIT</button></div>
   </aside>
   <div class="cl-stage" id="clStage"><canvas id="clCanvas"></canvas><div class="cl-toast" id="clToast"></div><div class="cl-msg" id="clMsg" hidden></div></div>
-  <div class="cl-pad"><button class="btn" id="clLeft" aria-label="Left">◀</button><button class="btn" id="clRot">ROTATE</button><button class="btn" id="clRight" aria-label="Right">▶</button><button class="btn primary" id="clDrop">FASTER</button></div>
+  <div class="cl-pad">
+    <div class="clp-brand"><span>AVE GAMES</span><b>CLASSIC</b></div>
+    <div class="clp-face">
+      <div class="clp-dpad">
+        <svg viewBox="0 0 120 120" aria-hidden="true"><path d="M40 2H80V40H118V80H80V118H40V80H2V40H40Z" fill="#161716" stroke="#000" stroke-width="3" stroke-linejoin="round"/><circle cx="60" cy="60" r="11" fill="#0c0c0c"/><path d="M60 11l8 11h-16zM60 109l8-11h-16zM11 60l11-8v16zM109 60l-11-8v16z" fill="#4a4b48"/></svg>
+        <button id="clDrop" aria-label="Faster"></button><button id="clRot" aria-label="Rotate"></button><button id="clLeft" aria-label="Left"></button><button id="clRight" aria-label="Right"></button>
+      </div>
+      <div class="clp-lbl" style="left:44px;top:5px">FASTER</div><div class="clp-lbl" style="left:43px;top:124px">ROTATE</div>
+      <div class="clp-pill"></div>
+      <button class="clp-ab" id="clA" aria-label="A: rotate"></button><button class="clp-ab" id="clB" aria-label="B: slam"></button>
+      <div class="clp-lbl" style="right:20px;top:93px"><i>A</i>ROTATE</div><div class="clp-lbl" style="right:96px;top:93px"><i>B</i>SLAM</div>
+      <div class="clp-ss"><button id="clSelectBtn" aria-label="Select: home"><i></i><span>SELECT</span></button><button id="clStartBtn" aria-label="Start / pause"><i></i><span>START</span></button></div>
+    </div>
+  </div>
 </section>
 
 <!-- ================= MODALS ================= -->
@@ -7005,8 +7038,11 @@ function clFree(c, r, w, h, skip){
   if (c < 0 || r < 0 || c + w > CL.cols || r + h > CL.rows) return false;
   return !CL.placed.some(p => p !== skip && c < p.c + p.w && p.c < c + w && r < p.r + p.h && p.r < r + h);
 }
+// the next few cases, in order; CL.next is the first. On the phone they ride the conveyor on the right (Omar 2026-10-09)
+function clFillQueue(){ CL.queue = CL.queue || []; while (CL.queue.length < 5) CL.queue.push(clRandom()); CL.next = CL.queue[0]; }
 function clSpawn(){
-  const n = CL.next || clRandom(); CL.next = clRandom();
+  clFillQueue(); const n = CL.queue.shift(); clFillQueue();
+  if (CL.L && CL.L.belt && !CL.beltSeat){ CL.beltGone = n; CL.beltGoal += n.h * clBeltS(n) + CL.L.belt.s * 4; const tg = clBeltTargets(), q = CL.queue[CL.queue.length - 1]; q.bp = tg[tg.length - 1] - CL.beltGoal; } // the belt owes one slot: the bottom case rides off, everything moves down, a new case comes on at the top
   const a = {id:++CL.id, key:n.key, rot:n.rot, w:n.w, h:n.h, c:clSnap(Math.floor((CL.cols - n.w) / 2), n.w), r:CL.rows - n.h};
   if (!clFree(a.c, a.r, a.w, a.h)){ CL.active = null; clGameOver(); return; }
   CL.active = a; CL.t = 0; clDrawNext();
@@ -7039,7 +7075,7 @@ function clStep(){ // one 6" step toward the nose, or it stops
 // no breaks any more (Omar 2026-10-09): the next case comes straight after the last one
 function clNextCase(){ if (CL.over) return; clSpawn(); }
 function clEndBreak(){ if (!(CL.breakLeft > 0)) return false; CL.breakLeft = 0; clSpawn(); return true; }
-function clSlam(){ const a = CL.active; if (!a || CL.paused || CL.over) return; while (clFree(a.c, a.r - 1, a.w, a.h)) a.r--; clStep(); clDraw(); }
+function clSlam(){ const a = CL.active; if (!a || CL.paused || CL.over) return; while (clFree(a.c, a.r - 1, a.w, a.h)) a.r--; CL.beltPos = CL.beltGoal; clStep(); clDraw(); }
 // one case rolls toward the nose until something stops it (a case you drop or turn); the others stay put
 function clRollForward(p){ while (clFree(p.c, p.r - 1, p.w, p.h, p)) p.r--; }
 function clGravity(){ let moved = true; while (moved){ moved = false; for (const p of [...CL.placed].sort((x, y) => x.r - y.r)) while (clFree(p.c, p.r - 1, p.w, p.h, p)){ p.r--; moved = true; } } }
@@ -7080,36 +7116,68 @@ function clToast(big, small){ const t = $('clToast'); t.innerHTML = big + (small
 function clMessage(html){ const m = $('clMsg'); if (html == null){ m.hidden = true; return; } m.innerHTML = html; m.hidden = false; }
 function clHud(){ $('clScore').textContent = CL.score; $('clLines').textContent = CL.lines; $('clLevel').textContent = CL.level; $('clBest').textContent = Math.max(CL.best, CL.score); $('clPause').textContent = CL.paused ? 'RESUME' : 'PAUSE'; $('clMusic').textContent = CL.music === 'folk' ? 'MUSIC: FOLK TUNE' : CL.music ? 'MUSIC: TIGHT PACK' : 'MUSIC: OFF'; }
 function clStart(){
-  Object.assign(CL, {placed:[], active:null, next:null, score:0, lines:0, level:1, paused:false, over:false, drag:null, flash:null, fast:false, clearing:null, streak:0, down:0, breakLeft:0, breakDone:false, sel:null});
+  Object.assign(CL, {started:true, view:0, queue:[], beltGone:null, beltSeat:true, placed:[], active:null, next:null, score:0, lines:0, level:1, paused:false, over:false, drag:null, flash:null, fast:false, clearing:null, streak:0, down:0, breakLeft:0, breakDone:false, sel:null});
   clMessage(null); clSpawn(); clHud(); if (CL.music) CLASSIC_MUSIC.start(() => CL.level);
 }
 function clPause(on){
   if (CL.over || (!CL.active && !(CL.breakLeft > 0))) return; CL.paused = on == null ? !CL.paused : on; clHud();
-  if (CL.paused){ CLASSIC_MUSIC.stop(); clMessage(`<h2>PAUSED</h2><div class="cl-row"><button class="btn primary" data-cl="resume">RESUME</button><button class="btn" data-cl="quit">QUIT</button></div>`); }
+  if (CL.paused){ CLASSIC_MUSIC.stop(); clMessage(`<h2>PAUSED</h2><div class="cl-row"><button class="btn primary" data-cl="resume">RESUME</button><button class="btn" data-cl="quit">QUIT</button></div>${isPhone() ? `<div class="cl-row"><button class="btn" data-cl="music">${$('clMusic').textContent}</button></div>` : ''}`); }
   else { clMessage(null); if (CL.music) CLASSIC_MUSIC.start(() => CL.level); }
 }
 function openClassic(){
   closeModals(); G.mode = 'classic'; CL.on = true; CL.best = +clStore.get('classicBest', 0) || 0; CL.music = clStore.get('classicMusic', 'tight'); if (CL.music === 'on') CL.music = 'tight'; if (CL.music === 'off') CL.music = false; CLASSIC_MUSIC.setTrack(CL.music || 'tight');
   $('classic').hidden = false; document.body.classList.add('classic-on');
-  Object.assign(CL, {placed:[], active:null, next:clRandom(), over:false, paused:false}); clLayout(); clHud();
-  clMessage(`<h2>CLASSIC</h2><p>Cases roll in from the rear doors toward the nose of a 24 ft truck. Build a solid row: straight front, straight back, cases wall to wall with no gaps. Then it clears.</p><p class="cl-keys">${isPhone() ? 'Drag left or right to move it 12" · ROTATE turns it · FASTER rolls it in quicker · drag a case that\'s down to move it' : '← → move it 12" · ↓ turns it · ↑ rolls it in faster · SPACE slams it to the nose · P pauses · drag a case that\'s down to move it'}</p><div class="cl-row"><button class="btn primary" data-cl="start">START</button><button class="btn" data-cl="quit">QUIT</button></div>`);
+  Object.assign(CL, {started:false, view:0, queue:[], beltGone:null, beltSeat:true, placed:[], active:null, over:false, paused:false}); clFillQueue(); clLayout(); clHud();
+  clMessage(`<h2>CLASSIC</h2><p>Cases roll in from the rear doors toward the nose of a 24 ft truck. Build a solid row: straight front, straight back, cases wall to wall with no gaps. Then it clears.</p><p class="cl-keys">${isPhone() ? '◀ ▶ move it 12" · ▲ faster · ▼ or A turns it · B slams it down · START pauses · SELECT goes home · drag a case that\'s down to move it' : '← → move it 12" · ↓ turns it · ↑ rolls it in faster · SPACE slams it to the nose · P pauses · drag a case that\'s down to move it'}</p><div class="cl-row"><button class="btn primary" data-cl="start">START</button><button class="btn" data-cl="quit">QUIT</button></div>`);
   if (!CL.raf) CL.raf = requestAnimationFrame(clFrame);
 }
 function closeClassic(){ CL.on = false; CLASSIC_MUSIC.stop(); cancelAnimationFrame(CL.raf); CL.raf = 0; $('classic').hidden = true; document.body.classList.remove('classic-on'); enterHome(); }
 let clLast = 0;
+// conveyor: slots stack up from the bottom; each tick the belt pushes everything one 6" step (on screen, the same distance the case just rolled)
+const clBeltS = q => Math.min(CL.L.belt.s, (CL.L.belt.w - 14) / q.w); // belt scale; only the 8 ft truss gets shrunk to fit
+function clBeltTargets(){ const B = CL.L.belt, gap = B.s * 4, out = []; let yb = B.h - 10; for (const q of CL.queue){ yb -= q.h * clBeltS(q); out.push(yb); yb -= gap; } return out; }
+// The cases are fixed to the belt (q.bp = their spot on it), so belt, cleats and cases always move together.
+// Each time a case goes into the truck the belt owes one slot (beltGoal); it pays it off a step per 6" the incoming case rolls,
+// spread so it finishes the moment that case lands. A slam pays it off at once. (Omar 2026-10-09: keep the belt in sync with the play)
+function clBeltSeat(){ const tg = clBeltTargets(); CL.beltGoal = CL.beltPos = CL.beltShow = CL.beltPos || 0; CL.queue.forEach((q, i) => q.bp = tg[i] - CL.beltGoal); CL.beltGone = null; CL.beltSeat = false; }
+function clBeltTick(){ const B = CL.L && CL.L.belt; if (!B || CL.beltSeat) return; const a = CL.active; let rows = 1;
+  if (a){ let r = a.r; while (clFree(a.c, r - 1, a.w, a.h)) r--; rows = a.r - r + 1; } // steps left before this case lands
+  CL.beltPos += (CL.beltGoal - CL.beltPos) / Math.max(1, rows); }
+function clBelt(ctx, dt){ const B = CL.L.belt; if (!B) return; clFillQueue(); if (CL.beltSeat) clBeltSeat();
+  CL.beltShow += (CL.beltPos - CL.beltShow) * Math.min(1, dt / 70); const pos = CL.beltShow; // push, then stop
+  ctx.save(); ctx.fillStyle = '#121211'; ctx.fillRect(B.x - 3, B.top - 3, B.w + 6, B.h + 6);
+  ctx.fillStyle = '#6d6e6a'; ctx.fillRect(B.x - 3, B.top, 4, B.h); ctx.fillRect(B.x + B.w - 1, B.top, 4, B.h);                // side rails
+  ctx.beginPath(); ctx.rect(B.x + 1, B.top, B.w - 2, B.h); ctx.clip();
+  ctx.fillStyle = '#1d1e1c'; ctx.fillRect(B.x, B.top, B.w, B.h);                                                                // belt
+  const pitch = Math.max(8, CL.L.cell); ctx.fillStyle = '#2e2f2c'; for (let y = B.top + (((pos % pitch) + pitch) % pitch) - pitch; y < B.top + B.h; y += pitch) ctx.fillRect(B.x, y, B.w, 2); // cleats ride with the cases
+  const ride = q => { const qs = clBeltS(q), w = q.w * qs; ctx.save(); ctx.translate(B.x + (B.w - w) / 2, B.top + q.bp + pos); ctx.scale(qs / CL.L.cell, qs / CL.L.cell); clCase(ctx, q, 0, 0, {noText:true}); ctx.restore(); };
+  for (const q of CL.queue) if (q.bp != null) ride(q);
+  if (CL.beltGone){ ride(CL.beltGone); if (CL.beltGone.bp + pos > B.h + 4) CL.beltGone = null; }
+  ctx.restore();
+  for (const ry of [B.top - 3, B.top + B.h - 3]){ const gr = ctx.createLinearGradient(0, ry, 0, ry + 6); gr.addColorStop(0, '#d8d8d5'); gr.addColorStop(1, '#6d6e6a'); ctx.fillStyle = gr; ctx.fillRect(B.x - 3, ry, B.w + 6, 6); } // end rollers
+  ctx.fillStyle = '#ebe3cb'; ctx.font = "800 12px 'Barlow Condensed', sans-serif"; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('NEXT UP ▼', B.x + B.w / 2, B.top - 13);
+}
+const clFront = () => CL.placed.reduce((m, p) => Math.max(m, p.r + p.h), 0); // how far back the load reaches
+// the closest spot to the nose a new case can still reach: the shortest lane. The phone view follows this, not the deepest case,
+// so one case stuck far back doesn't slide the view past open space (Omar 2026-10-09: "it advances when it does not need to")
+const clOpenFront = () => { let m = CL.rows; for (let c = 0; c < CL.cols; c++){ let d = 0; for (const p of CL.placed) if (c >= p.c && c < p.c + p.w) d = Math.max(d, p.r + p.h); m = Math.min(m, d); } return m; };
 function clFrame(now){
   CL.raf = requestAnimationFrame(clFrame); if (!CL.on) return;
-  const dt = Math.min(100, now - (clLast || now)); clLast = now;
+  const dt = Math.min(100, now - (clLast || now)); clLast = now; CL.dtLast = dt;
+  if (CL.scroll && CL.L){ const deep = clFront() - CL.L.vis, want = clamp(Math.min(deep + 12, Math.max(clOpenFront() - 4, deep + 4)), 0, Math.max(0, CL.rows - CL.L.vis)); /* slide only when the deepest stack gets within 6 ft of the bottom; stop at the shortest lane, but always keep the deepest stack 2 ft clear of the bottom edge */ CL.view += (want - CL.view) * Math.min(1, dt / 700); } // keep the back 3 ft of the load in view, slide slowly
   if (CL.clearing && !CL.paused && now >= CL.clearing.until) clFinishClear();
   if (CL.breakLeft > 0 && !CL.paused && !CL.over){ CL.breakLeft -= dt; if (CL.breakLeft <= 0){ CL.breakLeft = 0; clSpawn(); } }
-  if (CL.active && !CL.paused && !CL.over && !CL.clearing){ CL.t += dt * (CL.fast ? 5 : 1); while (CL.active && CL.t >= clSpeed()){ CL.t -= clSpeed(); clStep(); } }
+  if (CL.active && !CL.paused && !CL.over && !CL.clearing){ CL.t += dt * (CL.fast ? 5 : 1); while (CL.active && CL.t >= clSpeed()){ CL.t -= clSpeed(); clStep(); clBeltTick(); } }
   clDraw();
 }
 /* ---- drawing: the 24 ft truck from above, like the regular levels (nose at the top, doors at the bottom) ---- */
 function clLayout(){
   const cv = $('clCanvas'), box = $('clStage').getBoundingClientRect(), dpr = window.devicePixelRatio || 1, rulerW = 34;
-  const cell = Math.max(3, Math.min((box.width - rulerW - 40) / (CL.cols + 1.4), (box.height - 76) / CL.rows)), wall = cell * .7;
-  CL.L = {cell, wall, W:cell * CL.cols, H:cell * CL.rows}; CL.L.ox = Math.max(rulerW + wall + 6, (box.width - CL.L.W) / 2); CL.L.oy = 34 + wall;
+  CL.scroll = isPhone(); // phone (Omar 2026-10-09): the truck fills the width, part of it shows, and the view slides toward the doors as the load builds
+  const cell = Math.max(3, CL.scroll ? (box.width - rulerW - 40) / (CL.cols + 1.4) * .68 /* zoomed out so more of the truck shows; the space on the right is the conveyor (Omar 2026-10-09) */ : Math.min((box.width - rulerW - 40) / (CL.cols + 1.4), (box.height - 76) / CL.rows)), wall = cell * .7;
+  CL.L = {cell, wall, W:cell * CL.cols, H:cell * CL.rows}; CL.L.ox = CL.scroll ? rulerW + wall + 6 : Math.max(rulerW + wall + 6, (box.width - CL.L.W) / 2); CL.L.oy = (CL.scroll ? 26 : 34) + wall;
+  CL.L.visH = CL.scroll ? Math.min(CL.L.H, box.height - CL.L.oy - 22) : CL.L.H;
+  if (CL.scroll){ const bx = CL.L.ox + CL.L.W + wall + 16, bw = box.width - 6 - bx; CL.L.belt = {x:bx, w:bw, top:CL.L.oy - wall, h:CL.L.visH + wall, s:Math.min(cell * .9, (bw - 14) / 12)}; CL.beltSeat = true; } else CL.L.belt = null; CL.L.vis = CL.L.visH / cell; CL.view = clamp(CL.view || 0, 0, CL.rows - CL.L.vis);
   cv.width = box.width * dpr; cv.height = box.height * dpr; cv.style.width = box.width + 'px'; cv.style.height = box.height + 'px'; CL.dpr = dpr; CL.floor = null; clDraw(); clDrawNext();
 }
 function clFloor(){ // wood floor planks, drawn once per size
@@ -7148,8 +7216,9 @@ function clTruss(ctx, x, y, w, h, o = {}){
   ctx.restore();
 }
 function clDraw(){
-  const cv = $('clCanvas'); if (!cv || !CL.L) return; const ctx = cv.getContext('2d'), {cell, wall, W, H, ox, oy} = CL.L;
+  const cv = $('clCanvas'); if (!cv || !CL.L) return; const ctx = cv.getContext('2d'), {cell, wall, W, H, ox} = CL.L, oy = CL.L.oy - (CL.scroll ? CL.view : 0) * cell;
   ctx.setTransform(CL.dpr, 0, 0, CL.dpr, 0, 0); ctx.fillStyle = '#1f201d'; ctx.fillRect(0, 0, cv.width, cv.height);
+  ctx.save(); if (CL.scroll){ ctx.beginPath(); ctx.rect(0, CL.L.oy - wall - 3, cv.width, CL.L.visH + wall + 3 + (CL.view + CL.L.vis >= CL.rows - .5 ? 10 : 0)); ctx.clip(); } // only the part of the truck in view
   // body, walls and E-track, the same as the regular top view
   ctx.fillStyle = '#121211'; ctx.fillRect(ox - wall - 4, oy - wall - 4, W + wall * 2 + 8, H + wall + 8);
   ctx.fillStyle = '#d8d8d5'; ctx.fillRect(ox - wall, oy - wall, W + wall * 2, H + wall); ctx.fillStyle = '#bdbdb9'; ctx.fillRect(ox - wall, oy - wall, W + wall * 2, wall * .35);
@@ -7162,8 +7231,6 @@ function clDraw(){
   // ruler in feet, and the labels
   ctx.fillStyle = '#8f8a78'; ctx.font = "700 12px 'Barlow Condensed', sans-serif"; ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
   for (let f = 0; f * 12 <= CL_TRUCK.depth; f += 2){ const yy = oy + f * 2 * cell; ctx.fillRect(ox - wall - 12, yy, 6, 1); ctx.fillText(f + "'", ox - wall - 15, yy); }
-  ctx.fillStyle = '#ebe3cb'; ctx.font = "800 17px 'Barlow Condensed', sans-serif"; ctx.textAlign = 'center';
-  ctx.fillText('▲ NOSE ▲', ox + W / 2, oy - wall - 14); ctx.fillText('▼ REAR DOORS / RAMP ▼', ox + W / 2, oy + H + 18);
   for (const p of CL.placed) if (!CL.drag || CL.drag.p !== p) clCase(ctx, p, ox + p.c * cell, oy + p.r * cell);
   if (CL.clearing){ const b = CL.clearing.cases, top = Math.min(...b.map(p => p.r)), h = Math.max(...b.map(p => p.r + p.h)) - top, pulse = .35 + .3 * Math.sin(performance.now() / 90); // the solid row lights up before it goes
     ctx.fillStyle = `rgba(255,240,180,${pulse})`; ctx.fillRect(ox, oy + top * cell, W, h * cell); ctx.strokeStyle = '#f0c04a'; ctx.lineWidth = 4; ctx.strokeRect(ox + 2, oy + top * cell + 2, W - 4, h * cell - 4);
@@ -7177,6 +7244,14 @@ function clDraw(){
     ctx.save(); ctx.fillStyle = 'rgba(17,17,17,.85)'; ctx.fillRect(ox + 4, by - 22, W - 8, 46); ctx.strokeStyle = '#f0c04a'; ctx.lineWidth = 2; ctx.strokeRect(ox + 4, by - 22, W - 8, 46);
     ctx.fillStyle = '#f0c04a'; ctx.font = "800 17px 'Barlow Condensed', sans-serif"; ctx.textAlign = 'center'; ctx.fillText(t1, ox + W / 2, by - 6); ctx.fillStyle = '#ebe3cb'; ctx.font = "700 13px 'Barlow Condensed', sans-serif"; ctx.fillText(t2, ox + W / 2, by + 13); ctx.restore(); }
   const d = CL.drag; if (d){ const ok = clFree(d.c, d.r, d.p.w, d.p.h, d.p); clCase(ctx, d.p, ox + d.c * cell, oy + d.r * cell, {ghost:true, valid:ok}); }
+  ctx.restore();
+  // labels above and below the truck; on the phone they say which way the rest of the truck is, and a strip shows where the view is
+  const atNose = !CL.scroll || CL.view < .5, atDoors = !CL.scroll || CL.view + CL.L.vis >= CL.rows - .5, y0 = CL.L.oy;
+  ctx.fillStyle = '#ebe3cb'; ctx.font = `800 ${CL.scroll ? 14 : 17}px 'Barlow Condensed', sans-serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText(atNose ? '▲ NOSE ▲' : '▲ TOWARD THE NOSE ▲', ox + W / 2, y0 - wall - (CL.scroll ? 13 : 14));
+  ctx.fillText(atDoors ? '▼ REAR DOORS / RAMP ▼' : '▼ TOWARD THE DOORS ▼', ox + W / 2, y0 + CL.L.visH + (CL.scroll ? 12 : 18));
+  if (CL.scroll) clBelt(ctx, CL.dtLast || 16);
+  if (CL.scroll && CL.L.vis < CL.rows){ const sx = ox + W + wall + 5, sh = CL.L.visH; ctx.fillStyle = '#3a3b38'; ctx.fillRect(sx, y0, 5, sh); ctx.fillStyle = '#e8892f'; ctx.fillRect(sx, y0 + CL.view / CL.rows * sh, 5, CL.L.vis / CL.rows * sh); }
 }
 function clDrawNext(){
   const cv = $('clNext'); if (!cv || !CL.next) return; const dpr = window.devicePixelRatio || 1, w = cv.clientWidth || 120, h = cv.clientHeight || 90;
@@ -7190,7 +7265,7 @@ document.addEventListener('keydown', e => {
   if (map[k]){ e.preventDefault(); e.stopPropagation(); map[k](); }
 }, true);
 document.addEventListener('keyup', e => { if (CL.on && e.key === 'ArrowUp') CL.fast = false; }, true);
-function clCell(e){ const r = $('clCanvas').getBoundingClientRect(), {cell, ox, oy} = CL.L; return {x:e.clientX - r.left, y:e.clientY - r.top, c:Math.floor((e.clientX - r.left - ox) / cell), r:Math.floor((e.clientY - r.top - oy) / cell)}; }
+function clCell(e){ const r = $('clCanvas').getBoundingClientRect(), {cell, ox} = CL.L, oy = CL.L.oy - (CL.scroll ? CL.view : 0) * cell; return {x:e.clientX - r.left, y:e.clientY - r.top, c:Math.floor((e.clientX - r.left - ox) / cell), r:Math.floor((e.clientY - r.top - oy) / cell)}; }
 $('clCanvas').addEventListener('pointerdown', e => {
   if ((!CL.active && !(CL.breakLeft > 0)) || CL.paused || CL.over) return; e.preventDefault(); const q = clCell(e), a = CL.active;
   const hit = CL.placed.find(p => q.c >= p.c && q.c < p.c + p.w && q.r >= p.r && q.r < p.r + p.h);
@@ -7215,11 +7290,16 @@ const clHold = (id, down, up) => { const b = $(id); let t = 0; const stop = () =
   b.addEventListener('pointerdown', e => { e.preventDefault(); down(); if (!up) t = setInterval(down, 110); }); for (const ev of ['pointerup', 'pointerleave', 'pointercancel']) b.addEventListener(ev, stop); };
 clHold('clLeft', () => clMove(-1)); clHold('clRight', () => clMove(1)); clHold('clDrop', () => { if (!clEndBreak()) CL.fast = true; }, () => { CL.fast = false; });
 $('clRot').onclick = clRotate;
+// A turns it (same as ▼), B slams it down, SELECT goes home, START starts or pauses (Omar 2026-10-09)
+$('clA').addEventListener('pointerdown', e => { e.preventDefault(); clRotate(); });
+$('clB').addEventListener('pointerdown', e => { e.preventDefault(); clSlam(); });
+$('clSelectBtn').onclick = closeClassic;
+$('clStartBtn').onclick = () => { if (!CL.started || CL.over) clStart(); else clPause(); };
 $('clPause').onclick = () => clPause(); $('clQuit').onclick = closeClassic;
 $('clMusic').onclick = () => { CL.music = CL.music === 'tight' ? 'folk' : CL.music === 'folk' ? false : 'tight'; clStore.set('classicMusic', CL.music || 'off'); CLASSIC_MUSIC.stop();
   if (CL.music){ CLASSIC_MUSIC.setTrack(CL.music); if (CL.active && !CL.paused && !CL.over) CLASSIC_MUSIC.start(() => CL.level); } clHud(); };
 $('clMsg').addEventListener('click', e => { const b = e.target.closest('[data-cl]'); if (!b) return; const a = b.dataset.cl;
-  if (a === 'start' || a === 'again') clStart(); else if (a === 'resume') clPause(false); else if (a === 'quit') closeClassic(); });
+  if (a === 'start' || a === 'again') clStart(); else if (a === 'resume') clPause(false); else if (a === 'quit') closeClassic(); else if (a === 'music'){ $('clMusic').click(); b.textContent = $('clMusic').textContent; } });
 addEventListener('resize', () => { if (CL.on) clLayout(); });
 document.addEventListener('visibilitychange', () => { if (document.hidden && CL.on && CL.active && !CL.paused && !CL.over) clPause(true); });
 
