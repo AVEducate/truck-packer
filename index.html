@@ -242,7 +242,7 @@ body:not(.phone) #game .board{position:relative;background:#1f201d}
 body:not(.phone) .coach{position:absolute;left:calc(var(--colL) - 78px);bottom:0;width:calc(100% - var(--colL) - var(--colR) + 118px);height:104px;background:transparent;border-top:0;z-index:30;padding:6px 0 10px 150px;align-items:flex-end}
 body:not(.phone) .coach-body{background:#f4eedb;color:#1b1b1b;border:3px solid #0d0d0c;border-radius:12px;box-shadow:4px 4px 0 rgba(0,0,0,.45);padding:7px 12px 8px;max-height:88px}
 body:not(.phone) .coach::after{content:'';position:absolute;left:137px;bottom:30px;border-width:9px 14px 9px 0;border-style:solid;border-color:transparent #0d0d0c transparent transparent;transition:opacity .25s ease}
-body:not(.phone) .crew-name, body:not(.phone) #coachText{color:#1b1b1b}
+body:not(.phone) .coach-body .crew-name, body:not(.phone) #coachText{color:#1b1b1b} /* dark only on the light tip bubble; the how-to cards keep the cream name (Omar 2026-10-10) */
 body:not(.phone) .coach-body{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;line-height:1.35} /* name + tag lead the first line, so the words get three full lines */
 body:not(.phone) .coach-hd{display:inline-flex;vertical-align:1px;gap:6px;margin-right:8px}
 body:not(.phone) #coachText{display:inline}
@@ -496,7 +496,7 @@ body.phone .coach{background:transparent;border-top:0;padding:4px 8px 6px 78px}
 body.phone:not(.crew-quiet) .coach::before{display:none}
 body.phone .coach-body{background:#f4eedb;color:#1b1b1b;border:2px solid #0d0d0c;border-radius:10px;padding:3px 8px;max-height:48px;box-shadow:3px 3px 0 rgba(0,0,0,.45)}
 body.phone .coach::after{content:'';position:absolute;left:66px;bottom:16px;border-width:7px 12px 7px 0;border-style:solid;border-color:transparent #0d0d0c transparent transparent}
-body.phone .crew-name, body.phone #coachText{color:#1b1b1b}
+body.phone .coach-body .crew-name, body.phone #coachText{color:#1b1b1b}
 body.phone.crew-quiet:not(.crew-away) .coach{background:#2a2b28;border-top:3px solid var(--edge)}
 body.phone .levels-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
 body.phone .modal{max-width:calc(100vw - 20px);padding:16px 16px}
@@ -847,7 +847,6 @@ body.phone .home-btn kbd, body.phone .link-btn kbd{display:none}
     <kbd>DRAG</kbd><span>Drag a case down from the strip into the truck. Let go to set it down. Drag a case in the truck to move it.</span>
     <kbd>TWIST</kbd><span>Two-finger twist on the truck rotates a case 90°.</span>
     <kbd>DOUBLE-TAP</kbd><span>Takes a case (or a bar or strap) back out. A case taken out counts as a rehandle.</span>
-    <kbd>HOLD + FLICK</kbd><span>Hold a case still for 1 second, then flick up to tip it on its side.</span>
     <kbd>DRAG FLOOR</kbd><span>Drag empty truck floor up or down to scroll a long truck.</span>
     <kbd>BAR · STRAP</kbd><span>Drag the button into the truck and let go behind a finished tier.</span>
     <kbd>VIEW</kbd><span>Flips between the top view and the door view on stacked levels.</span>
@@ -933,9 +932,6 @@ const ABILITY_INFO = {
   dock:   {level:33, title:'DOCK STACK',
            phone:'Unlocked at level 33. From here on, you can build a stack on the dock: drag cases onto the DOCK STACK card, then drag the card into the truck.',
            desktop:'Unlocked at level 33. From here on, you can build a stack on the dock: ADD TO STACK, then PICK UP STACK and place it in one piece.'},
-  tip:    {level:61, title:'LAY A CASE ON ITS SIDE',
-           phone:'Unlocked at level 61. From here on, you can lay a case on its side: hold it still for 1 second, then flick up.',
-           desktop:'Unlocked at level 61. From here on, you can lay a case on its side: press T. Width and height swap.'},
   pocket: {level:62, title:'HARD CASES IN POCKETS',
            phone:'Unlocked at level 62. From here on, small hard cases can ride on the lids: drag one into a pocket and let the next row close it in.',
            desktop:'Unlocked at level 62. From here on, small hard cases can ride on the lids: drop one into a pocket and let the next row close it in.'},
@@ -1994,11 +1990,11 @@ function caseDef(o){
 
 // width = across the truck at rotation 0, depth = nose-to-door at rotation 0 (inches)
 const CASES = {
-  utility_trunk: caseDef({name:'Utility Trunk', department:'GENERAL', width:24, depth:30, height:30, weightClass:'MEDIUM', allowedOrientations:['upright','side'],
+  utility_trunk: caseDef({name:'Utility Trunk', department:'GENERAL', width:24, depth:30, height:30, weightClass:'MEDIUM', 
     note:'The 24" × 30" footprint is the building block of modular road cases. Four of them fit side by side across a 96"-wide truck.'}),
-  big_trunk: caseDef({name:'Large Utility Trunk', department:'GENERAL', width:48, depth:30, height:30, weightClass:'MEDIUM', allowedOrientations:['upright','side'],
+  big_trunk: caseDef({name:'Large Utility Trunk', department:'GENERAL', width:48, depth:30, height:30, weightClass:'MEDIUM', 
     note:'Double-wide 48" × 30". Two of these side by side make a full-width wall.'}),
-  cable_trunk: caseDef({name:'Cable Trunk', department:'GENERAL', width:48, depth:30, height:30, weightClass:'VERY_HEAVY', allowedOrientations:['upright','side'],
+  cable_trunk: caseDef({name:'Cable Trunk', department:'GENERAL', width:48, depth:30, height:30, weightClass:'VERY_HEAVY', 
     note:'Dense, heavy and square. Classic foundation material for the nose of the truck.'}),
   feeder_trunk: caseDef({name:'Feeder Cable Trunk', department:'POWER', width:48, depth:30, height:30, weightClass:'VERY_HEAVY',
     note:'Power feeder cable. Power goes in early at the venue, right after rigging.'}),
@@ -2014,9 +2010,9 @@ const CASES = {
     note:'Heavy and fragile. Rides upright.'}),
   camera: caseDef({name:'Camera Case', department:'CAMERA', width:24, depth:30, height:24, weightClass:'MEDIUM', fragile:true,
     note:'Fragile. Block it in so it cannot slide.'}),
-  lens: caseDef({name:'Lens Case', department:'CAMERA', width:18, depth:24, height:12, weightClass:'LIGHT', wheels:false, fragile:true, allowedOrientations:['upright','side'],
+  lens: caseDef({name:'Lens Case', department:'CAMERA', width:18, depth:24, height:12, weightClass:'LIGHT', wheels:false, fragile:true, 
     note:'Not on the 24 × 30 footprint. Small cases leave holes unless you plan a row for them.'}),
-  pelican: caseDef({name:'Misc Pelican Case', department:'GENERAL', width:18, depth:24, height:12, weightClass:'LIGHT', wheels:false, allowedOrientations:['upright','side'],
+  pelican: caseDef({name:'Misc Pelican Case', department:'GENERAL', width:18, depth:24, height:12, weightClass:'LIGHT', wheels:false, 
     note:'Very small cases must be blocked in by larger cases, or they slide around in transit.'}),
   monitor: caseDef({name:'Monitor Case', department:'VIDEO', width:24, depth:60, height:42, weightClass:'MEDIUM', fragile:true, doNotTip:true,
     note:'Double-length 24" × 60". Same width as the 24 × 30 family, so it lines up with them.'}),
@@ -2041,18 +2037,18 @@ const CASES = {
     note:'A thin case that rides on its edge on a dolly. Turn a 48" case 90° in a 96" truck and you get 48 + 30 = 78", leaving an 18" gap. That is where this goes.'}),
   audio_console: caseDef({name:'Audio Console', department:'AUDIO', width:18, depth:48, height:60, weightClass:'HEAVY', fragile:true, doNotTip:true, stackable:false,
     note:'Mixing desk on its edge in a thin case. Like the lighting console, it fills the 18" gap next to a turned 48" case.'}),
-  lx_parts: caseDef({name:'Lighting Parts Case', department:'LIGHTING', width:18, depth:24, height:12, weightClass:'LIGHT', wheels:false, allowedOrientations:['upright','side'],
+  lx_parts: caseDef({name:'Lighting Parts Case', department:'LIGHTING', width:18, depth:24, height:12, weightClass:'LIGHT', wheels:false, 
     note:'Clamps, safeties and spares. Turned 24" across, two of these fill a 48" × 18" spot.'}),
   speaker_cart: caseDef({name:'Speaker Cart', department:'AUDIO', width:48, depth:30, height:48, weightClass:'HEAVY',
     note:'Line-array boxes on a dolly. Heavy.'}),
-  mic_case: caseDef({name:'Mic Case', department:'AUDIO', width:18, depth:24, height:12, weightClass:'LIGHT', wheels:false, fragile:true, allowedOrientations:['upright','side'],
+  mic_case: caseDef({name:'Mic Case', department:'AUDIO', width:18, depth:24, height:12, weightClass:'LIGHT', wheels:false, fragile:true, 
     note:'Small and light. Turned 24" across, four of them make an 18"-deep full row.'}),
-  hard_s: caseDef({name:'Small Hard Case', department:'GENERAL', width:12, depth:18, height:12, weightClass:'LIGHT', wheels:false, hardCase:true, allowedOrientations:['upright','side'],
+  hard_s: caseDef({name:'Small Hard Case', department:'GENERAL', width:12, depth:18, height:12, weightClass:'LIGHT', wheels:false, hardCase:true, 
     note:'A small waterproof hard case (Pelican / Nanuk style). No wheels and too small to strap: ride it on top of other cases, trapped in a pocket.'}),
-  hard_m: caseDef({name:'Medium Hard Case', department:'GENERAL', width:18, depth:24, height:12, weightClass:'LIGHT', wheels:false, hardCase:true, allowedOrientations:['upright','side'],
+  hard_m: caseDef({name:'Medium Hard Case', department:'GENERAL', width:18, depth:24, height:12, weightClass:'LIGHT', wheels:false, hardCase:true, 
     note:'A medium hard case. Too small to strap, so it rides in a pocket: walls or taller cases on every side. You can still lift it over one row, but not two.'}),
-  hard_l: caseDef({name:'Large Hard Case', department:'GENERAL', width:24, depth:30, height:18, weightClass:'LIGHT', wheels:false, hardCase:true, allowedOrientations:['upright','side'],
-    note:'Same 24" × 30" footprint as a comms case lid. On its side (T) it is 18" wide and 24" tall.'}),
+  hard_l: caseDef({name:'Large Hard Case', department:'GENERAL', width:24, depth:30, height:18, weightClass:'LIGHT', wheels:false, hardCase:true, 
+    note:'Same 24" × 30" footprint as a comms case lid, so it rides on one in a pocket.'}),
   playback: caseDef({name:'Playback Rack', department:'VIDEO', width:24, depth:30, height:42, weightClass:'MEDIUM', doNotTip:true, mustStayOnWheels:true,
     note:'Media servers. Shock rack, stays upright.'})
 };
@@ -2719,13 +2715,13 @@ const STACK_LEVELS = [
   }
 ];
 for (const lv of STACK_LEVELS) LEVELS.push(lv);
-// ---------------- EXPERT: stacking + tipping + hard-case pockets (levels 61-90) ----------------
+// ---------------- EXPERT: stacking + turning + hard-case pockets (levels 61-90; tipping removed 2026-10-09) ----------------
 const NARROW_TRUCK = (depth, name) => ({name, width:90, depth, height:96});
 // solution helpers: a row of cases at depth y; each item is [type, x, rot?]
 const ROW = (y, items) => items.map(([t, x, rot]) => rot ? [t, x, y, rot] : [t, x, y]);
 const A4 = t => [[t, 0], [t, 4], [t, 8], [t, 12]];          // four 24"-wide cases across a 96" truck
 const B2 = t => [[t, 0], [t, 8]];                            // two 48"-wide cases
-const T3 = t => [[t, 0, 2], [t, 5, 2], [t, 10, 2]];          // three cases on their side (30" wide) across a 90" truck
+const U3 = t => [[t, 0, 1], [t, 5, 1], [t, 10, 1]];          // three trunks turned on the floor (30" wide) across a 90" truck
 const C3 = t => [[t, 0], [t, 4], [t, 8]];                    // three 24"-wide cases in a 90" truck
 const TIE = y => [['strap', y], ['strap', y, 'high']];       // strap a tier low and high
 const NOSE = (floor, tops, high = true) => [...ROW(0, floor), ['bar', 5], ...tops.flatMap(t => ROW(0, t)), ...(high ? [['strap', 5, 'high']] : [])];
@@ -2733,45 +2729,48 @@ const TIER = (y, floor, tops, high = true) => [...ROW(y, floor), ['strap', y + 5
 const EX = (o) => Object.assign({stacked:true, unloadSequence:null, rules:{heavyBase:false}, availableLoadBars:1, timer:null}, o);
 const EXPERT_LEVELS = [
   EX({
-    title:'Lay It on Its Side', focus:'space', truck:NARROW_TRUCK(120, '90" box truck · 10 ft bay · 96" tall inside'),
-    cases:[{type:'utility_trunk', count:12},{type:'big_trunk', count:6}],
-    availableStraps:3, tipHowTo:true,
-    lesson:'Some cases are built to ride <b>on their side</b>. Press <b>T</b> to tip the case you\'re holding: a 24" × 30" trunk on its side is <b>30" wide and 24" tall</b>. In a 90" truck, three of them close the row exactly, and four layers reach the 96" ceiling. Most trucks won\'t need this: it\'s a tool for the odd row, not the default.',
-    objectives:['Load all 18 trunks', 'Tip them on their side (T)', 'Three across, wall to wall'],
-    hint:'Tip every trunk (T). Utility trunks: three across, four layers high. Large trunks on their side stand 48" tall: three across, two high.',
+    title:'Turn the Row', focus:'space', truck:NARROW_TRUCK(120, '90" box truck · 10 ft bay · 96" tall inside'),
+    cases:[{type:'utility_trunk', count:18},{type:'big_trunk', count:6}],
+    availableStraps:7,
+    lesson:'A 90" truck again, and now it\'s stacked. Turn each trunk on the floor so its <b>30" side runs across</b>: three of them fill 90" wall to wall. Turned trunks still stack: each one sits on a trunk of the same size, so its casters land in the caster cups. Every case rides the way it\'s built, on its wheels.',
+    objectives:['Load all 24 trunks', 'Turn them: three across, wall to wall', 'Every tier tied in'],
+    hint:'Turn every trunk (R). Turned utility trunks make 24"-deep rows, turned large trunks 48". Utility, utility, large, utility, each two high. Bar the nose tier, strap every tier.',
     coach:[
-      {until:'tip', text:'Pick up a <b>Utility Trunk</b> and press <b>T</b> to lay it on its side. Watch the size in CASE INFO.'},
-      {until:'place', text:'Now it\'s 30" wide. Three of those fill this 90" truck exactly. Set it against the nose.'},
-      {text:'Tip every trunk. Utility trunks go four layers high, the large ones two high. Bar and strap as you go.'}
+      {until:'rotate', text:'Pick up a <b>Utility Trunk</b>. Press <b>R</b> to turn it: the 30" side now runs across the truck.'},
+      {until:'place', text:'Three turned trunks fill this 90" truck exactly. Set the first one against the nose.'},
+      {text:'Turn every trunk. Rows of utility trunks are 24" deep, the large trunks 48". Two high, bar the nose, strap every tier.'}
     ],
-    solution:[...NOSE(T3('utility_trunk'), [T3('utility_trunk'), T3('utility_trunk'), T3('utility_trunk')]), ...TIER(5, T3('big_trunk'), [T3('big_trunk')])]
+    solution:[...ROW(0, U3('utility_trunk')), ['bar', 4], ...ROW(0, U3('utility_trunk')), ['strap', 4, 'high'],
+              ...ROW(4, U3('utility_trunk')), ['strap', 8], ...ROW(4, U3('utility_trunk')), ['strap', 8, 'high'],
+              ...ROW(8, U3('big_trunk')), ['strap', 16], ...ROW(8, U3('big_trunk')), ['strap', 16, 'high'],
+              ...ROW(16, U3('utility_trunk')), ['strap', 20], ...ROW(16, U3('utility_trunk')), ['strap', 20, 'high']]
   }),
   EX({
-    title:'Odd One Out', practice:true, focus:'space', truck:STACK_TRUCK(120, 'Box truck · 10 ft bay · 96" tall inside'),
-    cases:[{type:'big_trunk', count:3},{type:'utility_trunk', count:7},{type:'hard_l', count:1},{type:'comms', count:2}],
+    title:'Stand Them Up', practice:true, focus:'space', truck:STACK_TRUCK(120, 'Box truck · 10 ft bay · 96" tall inside'),
+    cases:[{type:'big_trunk', count:3},{type:'utility_trunk', count:8},{type:'comms', count:2}],
     availableStraps:3,
-    lesson:'Most of this load rides the way it\'s built. One row doesn\'t add up: a 48" trunk, a 24" trunk and a 24" hard case leave the row short. Tip the trunk (30") and the hard case (18"): 48 + 30 + 18 = 96. Two tips, not twenty.',
-    objectives:['Load all 13 cases', 'Tip only the two cases that need it', 'Every row wall to wall'],
-    hint:'Big trunks with utility trunks on top across the nose. Then a big trunk, one utility trunk on its side and the hard case on its side. Utility trunks on the big trunk, comms cases on the tipped pair.',
-    solution:[...NOSE(B2('big_trunk'), [A4('utility_trunk')]), ...TIER(5, [['big_trunk', 0], ['utility_trunk', 8, 2], ['hard_l', 13, 2]], [[['utility_trunk', 0], ['utility_trunk', 4], ['comms', 8], ['comms', 12]]])]
+    lesson:'Every case in this truck rides the way it\'s built, on its wheels. Large trunks carry utility trunks on their lids, and comms cases ride on utility trunks: same footprint, so the casters land in the caster cups.',
+    objectives:['Load all 13 cases', 'Like on like: matching footprints stack', 'Every row wall to wall'],
+    hint:'Big trunks with utility trunks on top across the nose. Then a big trunk and two utility trunks: utility trunks on the big trunk, comms cases on the two utility trunks.',
+    solution:[...NOSE(B2('big_trunk'), [A4('utility_trunk')]), ...TIER(5, [['big_trunk', 0], ['utility_trunk', 8], ['utility_trunk', 12]], [[['utility_trunk', 0], ['utility_trunk', 4], ['comms', 8], ['comms', 12]]])]
   }),
   EX({
-    title:'Only When It Helps', focus:'space', truck:STACK_TRUCK(192, 'Box truck · 16 ft · 96" tall inside'),
-    cases:[{type:'cable_trunk', count:2},{type:'utility_trunk', count:11},{type:'big_trunk', count:1},{type:'hard_l', count:1},{type:'comms', count:2},{type:'distro', count:4}],
+    title:'Matched Stacks', focus:'space', truck:STACK_TRUCK(192, 'Box truck · 16 ft · 96" tall inside'),
+    cases:[{type:'cable_trunk', count:2},{type:'utility_trunk', count:12},{type:'big_trunk', count:1},{type:'comms', count:2},{type:'distro', count:4}],
     availableStraps:5,
-    lesson:'Tipping is a <b>last resort</b>. Cases ride best the way they\'re built, on their wheels. Tip one only when it closes a row that would otherwise leave a gap. In this whole truck, exactly two cases need it.',
-    objectives:['Load all 21 cases', 'Tip only the two cases that need it', 'Every row wall to wall'],
-    hint:'Cable trunks + utility trunks. Then the odd row: big trunk, utility trunk on its side, hard case on its side, with utility trunks and comms on top. Distros + utility trunks at the doors.',
-    solution:[...NOSE(B2('cable_trunk'), [A4('utility_trunk')]), ...TIER(5, [['big_trunk', 0], ['utility_trunk', 8, 2], ['hard_l', 13, 2]], [[['utility_trunk', 0], ['utility_trunk', 4], ['comms', 8], ['comms', 12]]]), ...TIER(10, A4('distro'), [A4('utility_trunk')])]
+    lesson:'A 16-footer with five kinds of case. Stack like on like: utility trunks ride on large trunks and on distros, comms cases ride on utility trunks. Every row wall to wall, every tier tied in.',
+    objectives:['Load all 21 cases', 'Every row wall to wall', 'Every tier tied in'],
+    hint:'Cable trunks + utility trunks. Then a big trunk and two utility trunks, with utility trunks and comms on top. Distros + utility trunks at the doors.',
+    solution:[...NOSE(B2('cable_trunk'), [A4('utility_trunk')]), ...TIER(5, [['big_trunk', 0], ['utility_trunk', 8], ['utility_trunk', 12]], [[['utility_trunk', 0], ['utility_trunk', 4], ['comms', 8], ['comms', 12]]]), ...TIER(10, A4('distro'), [A4('utility_trunk')])]
   }),
   EX({
-    title:'Odd Row First', practice:true, focus:'space', truck:STACK_TRUCK(120, 'Box truck · 10 ft bay · 96" tall inside'),
-    cases:[{type:'big_trunk', count:1},{type:'utility_trunk', count:7},{type:'hard_l', count:1},{type:'comms', count:2},{type:'distro', count:4}],
+    title:'Mixed Nose', practice:true, focus:'space', truck:STACK_TRUCK(120, 'Box truck · 10 ft bay · 96" tall inside'),
+    cases:[{type:'big_trunk', count:1},{type:'utility_trunk', count:8},{type:'comms', count:2},{type:'distro', count:4}],
     availableStraps:3,
-    lesson:'The odd row goes in the nose this time. Two tips close it; everything else stands up.',
-    objectives:['Load all 15 cases', 'Tip only the two cases that need it', 'Every row wall to wall'],
-    hint:'Big trunk, utility trunk on its side, hard case on its side, with utility trunks and comms on top. Then distros with utility trunks.',
-    solution:[...NOSE([['big_trunk', 0], ['utility_trunk', 8, 2], ['hard_l', 13, 2]], [[['utility_trunk', 0], ['utility_trunk', 4], ['comms', 8], ['comms', 12]]]), ...TIER(5, A4('distro'), [A4('utility_trunk')])]
+    lesson:'The mixed row goes in the nose this time: a big trunk and two utility trunks, with utility trunks and comms cases on top.',
+    objectives:['Load all 15 cases', 'Every row wall to wall', 'Every tier tied in'],
+    hint:'Big trunk and two utility trunks, with utility trunks and comms on top. Then distros with utility trunks.',
+    solution:[...NOSE([['big_trunk', 0], ['utility_trunk', 8], ['utility_trunk', 12]], [[['utility_trunk', 0], ['utility_trunk', 4], ['comms', 8], ['comms', 12]]]), ...TIER(5, A4('distro'), [A4('utility_trunk')])]
   }),
   EX({
     title:'Pocket Change', focus:'pocket', truck:STACK_TRUCK(120, 'Box truck · 10 ft bay · 96" tall inside'),
@@ -2839,22 +2838,22 @@ const EXPERT_LEVELS = [
               ...TIER(20, A4('distro'), [A4('utility_trunk')]), ...TIER(25, A4('distro'), [A4('utility_trunk')])]
   }),
   EX({
-    title:'Tip Into the Pocket', focus:'pocket', truck:STACK_TRUCK(120, 'Box truck · 10 ft bay · 96" tall inside'),
-    cases:[{type:'big_trunk', count:1},{type:'utility_trunk', count:7},{type:'hard_l', count:3},{type:'distro', count:4}],
+    title:'Pocket Shelf', focus:'pocket', truck:STACK_TRUCK(120, 'Box truck · 10 ft bay · 96" tall inside'),
+    cases:[{type:'big_trunk', count:1},{type:'utility_trunk', count:8},{type:'hard_l', count:2},{type:'distro', count:4}],
     availableStraps:3,
-    lesson:'Two tipped cases close the odd row: a utility trunk on its side (30") and a hard case on its side (18"). Their tops make a flat 24" shelf, and two more hard cases ride on it, trapped by the trunk stack beside them and the distros behind.',
-    objectives:['Load all 15 cases', 'Tip only the two cases that need it', 'Hard cases trapped in the pocket'],
-    hint:'Big trunk, utility trunk on its side, hard case on its side. Utility trunks on the big trunk, two hard cases on the tipped pair. Distros with utility trunks close the pocket.',
-    solution:[...NOSE([['big_trunk', 0], ['utility_trunk', 8, 2], ['hard_l', 13, 2]], [[['utility_trunk', 0], ['utility_trunk', 4], ['hard_l', 8], ['hard_l', 12]]]), ...TIER(5, A4('distro'), [A4('utility_trunk')])]
+    lesson:'Two utility trunks beside a big trunk make a flat shelf, and two hard cases ride on it. The utility trunks stacked on the big trunk stand taller beside them, and the distros behind close the pocket.',
+    objectives:['Load all 15 cases', 'Hard cases trapped in the pocket', 'Every tier tied in'],
+    hint:'Big trunk and two utility trunks. Utility trunks on the big trunk, two hard cases on the two utility trunks. Distros with utility trunks close the pocket.',
+    solution:[...NOSE([['big_trunk', 0], ['utility_trunk', 8], ['utility_trunk', 12]], [[['utility_trunk', 0], ['utility_trunk', 4], ['hard_l', 8], ['hard_l', 12]]]), ...TIER(5, A4('distro'), [A4('utility_trunk')])]
   }),
   EX({
-    title:'Side Pocket', practice:true, focus:'pocket', truck:STACK_TRUCK(120, 'Box truck · 10 ft bay · 96" tall inside'),
-    cases:[{type:'hard_l', count:3},{type:'utility_trunk', count:7},{type:'big_trunk', count:1},{type:'distro', count:4}],
+    title:'Left Pocket', practice:true, focus:'pocket', truck:STACK_TRUCK(120, 'Box truck · 10 ft bay · 96" tall inside'),
+    cases:[{type:'hard_l', count:2},{type:'utility_trunk', count:8},{type:'big_trunk', count:1},{type:'distro', count:4}],
     availableStraps:3,
-    lesson:'Mirror it: the tipped pair and its pocket against the left wall.',
-    objectives:['Load all 15 cases', 'Tip only the two cases that need it', 'Hard cases trapped in the pocket'],
-    hint:'Hard case on its side against the left wall, utility trunk on its side, big trunk. Two hard cases on the tipped pair, utility trunks on the big trunk. Distros with utility trunks close it.',
-    solution:[...NOSE([['hard_l', 0, 2], ['utility_trunk', 3, 2], ['big_trunk', 8]], [[['hard_l', 0], ['hard_l', 4], ['utility_trunk', 8], ['utility_trunk', 12]]]), ...TIER(5, A4('distro'), [A4('utility_trunk')])]
+    lesson:'Mirror it: the pocket against the left wall, the big trunk on the right.',
+    objectives:['Load all 15 cases', 'Hard cases trapped in the pocket', 'Every tier tied in'],
+    hint:'Two utility trunks against the left wall, the big trunk beside them. Two hard cases on the utility trunks, utility trunks on the big trunk. Distros with utility trunks close it.',
+    solution:[...NOSE([['utility_trunk', 0], ['utility_trunk', 4], ['big_trunk', 8]], [[['hard_l', 0], ['hard_l', 4], ['utility_trunk', 8], ['utility_trunk', 12]]]), ...TIER(5, A4('distro'), [A4('utility_trunk')])]
   }),
   EX({
     title:'Pocket Load-In', focus:'unload', truck:STACK_TRUCK(192, 'Box truck · 16 ft · 96" tall inside'),
@@ -2875,23 +2874,23 @@ const EXPERT_LEVELS = [
     solution:[...NOSE(A4('switcher'), [A4('hard_l')], false), ...TIER(5, A4('distro'), [A4('distro')]), ...TIER(10, A4('motor'), [A4('motor')])]
   }),
   EX({
-    title:'Last Resort', focus:'space', truck:STACK_TRUCK(240, 'Box truck · 20 ft · 96" tall inside'),
-    cases:[{type:'cable_trunk', count:2},{type:'distro', count:4},{type:'utility_trunk', count:15},{type:'big_trunk', count:3},{type:'hard_l', count:1},{type:'comms', count:2}],
+    title:'Four Tiers', focus:'space', truck:STACK_TRUCK(240, 'Box truck · 20 ft · 96" tall inside'),
+    cases:[{type:'cable_trunk', count:2},{type:'distro', count:4},{type:'utility_trunk', count:16},{type:'big_trunk', count:3},{type:'comms', count:2}],
     availableStraps:7,
-    lesson:'Four tiers in a 20-footer. Three of them stand up the way they\'re built. Find the one row that needs two cases on their side.',
-    objectives:['Load all 27 cases', 'Tip only the two cases that need it', 'Every row wall to wall'],
-    hint:'Cable trunks + utility trunks. Distros + utility trunks. The odd row. Big trunks + utility trunks at the doors.',
-    solution:[...NOSE(B2('cable_trunk'), [A4('utility_trunk')]), ...TIER(5, A4('distro'), [A4('utility_trunk')]), ...TIER(10, [['big_trunk', 0], ['utility_trunk', 8, 2], ['hard_l', 13, 2]], [[['utility_trunk', 0], ['utility_trunk', 4], ['comms', 8], ['comms', 12]]]),
+    lesson:'Four tiers in a 20-footer, every case on its wheels. One row mixes a big trunk with two utility trunks, and comms cases ride on the utility trunks.',
+    objectives:['Load all 27 cases', 'Every row wall to wall', 'Every tier tied in'],
+    hint:'Cable trunks + utility trunks. Distros + utility trunks. A big trunk and two utility trunks, with utility trunks and comms on top. Big trunks + utility trunks at the doors.',
+    solution:[...NOSE(B2('cable_trunk'), [A4('utility_trunk')]), ...TIER(5, A4('distro'), [A4('utility_trunk')]), ...TIER(10, [['big_trunk', 0], ['utility_trunk', 8], ['utility_trunk', 12]], [[['utility_trunk', 0], ['utility_trunk', 4], ['comms', 8], ['comms', 12]]]),
               ...TIER(15, B2('big_trunk'), [A4('utility_trunk')])]
   }),
   EX({
-    title:'Mirror Row', practice:true, focus:'space', truck:STACK_TRUCK(192, 'Box truck · 16 ft · 96" tall inside'),
-    cases:[{type:'hard_l', count:1},{type:'utility_trunk', count:7},{type:'comms', count:2},{type:'big_trunk', count:3},{type:'distro', count:8}],
+    title:'Mirror Mix', practice:true, focus:'space', truck:STACK_TRUCK(192, 'Box truck · 16 ft · 96" tall inside'),
+    cases:[{type:'utility_trunk', count:8},{type:'comms', count:2},{type:'big_trunk', count:3},{type:'distro', count:8}],
     availableStraps:5,
-    lesson:'The odd row, mirrored: hard case on the left wall, tipped trunk beside it, the big trunk on the right.',
-    objectives:['Load all 21 cases', 'Tip only the two cases that need it', 'Every row wall to wall'],
-    hint:'Hard case on its side against the left wall, a utility trunk on its side, then a big trunk. Comms on the tipped pair, utility trunks on the big trunk. Big trunks + utility trunks. Distros two high.',
-    solution:[...NOSE([['hard_l', 0, 2], ['utility_trunk', 3, 2], ['big_trunk', 8]], [[['comms', 0], ['comms', 4], ['utility_trunk', 8], ['utility_trunk', 12]]]), ...TIER(5, B2('big_trunk'), [A4('utility_trunk')]), ...TIER(10, A4('distro'), [A4('distro')])]
+    lesson:'The mixed row, mirrored: two utility trunks on the left wall, the big trunk on the right.',
+    objectives:['Load all 21 cases', 'Every row wall to wall', 'Every tier tied in'],
+    hint:'Two utility trunks on the left wall, then a big trunk. Comms on the utility trunks, utility trunks on the big trunk. Big trunks + utility trunks. Distros two high.',
+    solution:[...NOSE([['utility_trunk', 0], ['utility_trunk', 4], ['big_trunk', 8]], [[['comms', 0], ['comms', 4], ['utility_trunk', 8], ['utility_trunk', 12]]]), ...TIER(5, B2('big_trunk'), [A4('utility_trunk')]), ...TIER(10, A4('distro'), [A4('distro')])]
   }),
   EX({
     title:'Pocket Show', focus:'all', truck:STACK_TRUCK(240, 'Box truck · 20 ft · 96" tall inside'),
@@ -2953,22 +2952,22 @@ const EXPERT_LEVELS = [
               ...TIER(15, B2('speaker_cart'), [A4('audio_rack')])]
   }),
   EX({
-    title:'Odd Row Show', focus:'all', truck:STACK_TRUCK(192, 'Box truck · 16 ft · 96" tall inside'),
-    cases:[{type:'big_trunk', count:1},{type:'utility_trunk', count:3},{type:'hard_l', count:3},{type:'distro', count:8},{type:'hardware_trunk', count:2},{type:'motor', count:4}],
+    title:'Pocket Show', focus:'all', truck:STACK_TRUCK(192, 'Box truck · 16 ft · 96" tall inside'),
+    cases:[{type:'big_trunk', count:1},{type:'utility_trunk', count:4},{type:'hard_l', count:2},{type:'distro', count:8},{type:'hardware_trunk', count:2},{type:'motor', count:4}],
     unloadSequence:['RIGGING','POWER','GENERAL'], availableStraps:5,
-    lesson:'The general gear is last off, so the odd row and its pocket ride in the nose. Two tips, one pocket, three departments in order.',
-    objectives:['Load all 21 cases', 'Rigging → Power → General', 'Tip only two cases, hard cases trapped'],
-    hint:'The odd row with two hard cases on the tipped pair. Distros two high close the pocket. Hardware trunks + motors at the doors.',
-    solution:[...NOSE([['big_trunk', 0], ['utility_trunk', 8, 2], ['hard_l', 13, 2]], [[['utility_trunk', 0], ['utility_trunk', 4], ['hard_l', 8], ['hard_l', 12]]]), ...TIER(5, A4('distro'), [A4('distro')]), ...TIER(10, B2('hardware_trunk'), [A4('motor')])]
+    lesson:'The general gear is last off, so the pocket row rides in the nose. One pocket, three departments in order.',
+    objectives:['Load all 21 cases', 'Rigging → Power → General', 'Hard cases trapped'],
+    hint:'A big trunk and two utility trunks, with two hard cases on the utility trunks. Distros two high close the pocket. Hardware trunks + motors at the doors.',
+    solution:[...NOSE([['big_trunk', 0], ['utility_trunk', 8], ['utility_trunk', 12]], [[['utility_trunk', 0], ['utility_trunk', 4], ['hard_l', 8], ['hard_l', 12]]]), ...TIER(5, A4('distro'), [A4('distro')]), ...TIER(10, B2('hardware_trunk'), [A4('motor')])]
   }),
   EX({
-    title:'Odd Row Rig', practice:true, focus:'all', truck:STACK_TRUCK(192, 'Box truck · 16 ft · 96" tall inside'),
-    cases:[{type:'feeder_trunk', count:2},{type:'distro', count:4},{type:'hard_l', count:3},{type:'utility_trunk', count:3},{type:'big_trunk', count:1},{type:'motor', count:8}],
+    title:'Pocket Rig', practice:true, focus:'all', truck:STACK_TRUCK(192, 'Box truck · 16 ft · 96" tall inside'),
+    cases:[{type:'feeder_trunk', count:2},{type:'distro', count:4},{type:'hard_l', count:2},{type:'utility_trunk', count:4},{type:'big_trunk', count:1},{type:'motor', count:8}],
     unloadSequence:['RIGGING','GENERAL','POWER'], availableStraps:5,
-    lesson:'The odd row in the middle this time: power in front of it, rigging closing its pocket.',
-    objectives:['Load all 21 cases', 'Rigging → General → Power', 'Tip only two cases, hard cases trapped'],
-    hint:'Feeder trunks + distros. The mirrored odd row with its pocket. Motors two high close it.',
-    solution:[...NOSE(B2('feeder_trunk'), [A4('distro')]), ...TIER(5, [['hard_l', 0, 2], ['utility_trunk', 3, 2], ['big_trunk', 8]], [[['hard_l', 0], ['hard_l', 4], ['utility_trunk', 8], ['utility_trunk', 12]]]), ...TIER(10, A4('motor'), [A4('motor')])]
+    lesson:'The pocket row in the middle this time: power in front of it, rigging closing it.',
+    objectives:['Load all 21 cases', 'Rigging → General → Power', 'Hard cases trapped'],
+    hint:'Feeder trunks + distros. The mirrored pocket row. Motors two high close it.',
+    solution:[...NOSE(B2('feeder_trunk'), [A4('distro')]), ...TIER(5, [['utility_trunk', 0], ['utility_trunk', 4], ['big_trunk', 8]], [[['hard_l', 0], ['hard_l', 4], ['utility_trunk', 8], ['utility_trunk', 12]]]), ...TIER(10, A4('motor'), [A4('motor')])]
   }),
   EX({
     title:'Expert Twenty-Four', focus:'all', truck:STACK_TRUCK(288, 'Box truck · 24 ft · 96" tall inside'),
@@ -2994,42 +2993,42 @@ const EXPERT_LEVELS = [
   }),
   EX({
     title:'Mixed Bag', focus:'all', truck:STACK_TRUCK(192, 'Box truck · 16 ft · 96" tall inside'),
-    cases:[{type:'cable_trunk', count:2},{type:'utility_trunk', count:11},{type:'big_trunk', count:1},{type:'hard_l', count:7},{type:'distro', count:12},{type:'comms', count:4}],
+    cases:[{type:'cable_trunk', count:2},{type:'utility_trunk', count:12},{type:'big_trunk', count:1},{type:'hard_l', count:6},{type:'distro', count:12},{type:'comms', count:4}],
     availableStraps:8,
-    lesson:'Two pockets in one truck: one on the tipped odd row, one on the comms cases. Each needs a taller row behind it.',
-    objectives:['Load all 37 cases', 'Tip only two cases', 'Every hard case trapped, every tier tied in'],
-    hint:'Cable trunks + utility trunks. The odd row with its pocket. Distros two high. Comms + hard cases. Distros + utility trunks.',
-    solution:[...NOSE(B2('cable_trunk'), [A4('utility_trunk')]), ...TIER(5, [['big_trunk', 0], ['utility_trunk', 8, 2], ['hard_l', 13, 2]], [[['utility_trunk', 0], ['utility_trunk', 4], ['hard_l', 8], ['hard_l', 12]]]), ...TIER(10, A4('distro'), [A4('distro')]),
+    lesson:'Two pockets in one truck: one on the utility trunks beside a big trunk, one on the comms cases. Each needs a taller row behind it.',
+    objectives:['Load all 37 cases', 'Every hard case trapped', 'Every tier tied in'],
+    hint:'Cable trunks + utility trunks. The pocket row. Distros two high. Comms + hard cases. Distros + utility trunks.',
+    solution:[...NOSE(B2('cable_trunk'), [A4('utility_trunk')]), ...TIER(5, [['big_trunk', 0], ['utility_trunk', 8], ['utility_trunk', 12]], [[['utility_trunk', 0], ['utility_trunk', 4], ['hard_l', 8], ['hard_l', 12]]]), ...TIER(10, A4('distro'), [A4('distro')]),
               ...TIER(15, A4('comms'), [A4('hard_l')], false), ...TIER(20, A4('distro'), [A4('utility_trunk')])]
   }),
   EX({
     title:'Bag Check', practice:true, focus:'all', truck:STACK_TRUCK(192, 'Box truck · 16 ft · 96" tall inside'),
-    cases:[{type:'hard_l', count:7},{type:'utility_trunk', count:3},{type:'big_trunk', count:1},{type:'video_rack', count:8},{type:'switcher', count:4},{type:'distro', count:8}],
+    cases:[{type:'hard_l', count:6},{type:'utility_trunk', count:4},{type:'big_trunk', count:1},{type:'video_rack', count:8},{type:'switcher', count:4},{type:'distro', count:8}],
     availableStraps:6,
-    lesson:'The mirrored odd row in the nose, closed by video racks, then a switcher pocket closed by distros.',
-    objectives:['Load all 31 cases', 'Tip only two cases', 'Every hard case trapped, every tier tied in'],
-    hint:'Mirrored odd row with its pocket. Video racks two high. Switchers + hard cases. Distros two high.',
-    solution:[...NOSE([['hard_l', 0, 2], ['utility_trunk', 3, 2], ['big_trunk', 8]], [[['hard_l', 0], ['hard_l', 4], ['utility_trunk', 8], ['utility_trunk', 12]]]), ...TIER(5, A4('video_rack'), [A4('video_rack')]), ...TIER(10, A4('switcher'), [A4('hard_l')], false), ...TIER(15, A4('distro'), [A4('distro')])]
+    lesson:'The mirrored pocket row in the nose, closed by video racks, then a switcher pocket closed by distros.',
+    objectives:['Load all 31 cases', 'Every hard case trapped', 'Every tier tied in'],
+    hint:'The mirrored pocket row. Video racks two high. Switchers + hard cases. Distros two high.',
+    solution:[...NOSE([['utility_trunk', 0], ['utility_trunk', 4], ['big_trunk', 8]], [[['hard_l', 0], ['hard_l', 4], ['utility_trunk', 8], ['utility_trunk', 12]]]), ...TIER(5, A4('video_rack'), [A4('video_rack')]), ...TIER(10, A4('switcher'), [A4('hard_l')], false), ...TIER(15, A4('distro'), [A4('distro')])]
   }),
   EX({
     title:'Expert Final', focus:'all', truck:STACK_TRUCK(288, 'Box truck · 24 ft · 96" tall inside'),
-    cases:[{type:'speaker_cart', count:2},{type:'audio_rack', count:4},{type:'video_rack', count:4},{type:'switcher', count:4},{type:'comms', count:8},{type:'big_trunk', count:1},{type:'utility_trunk', count:3},{type:'hard_l', count:3},
+    cases:[{type:'speaker_cart', count:2},{type:'audio_rack', count:4},{type:'video_rack', count:4},{type:'switcher', count:4},{type:'comms', count:8},{type:'big_trunk', count:1},{type:'utility_trunk', count:4},{type:'hard_l', count:2},
            {type:'mover', count:2},{type:'fixture', count:4},{type:'feeder_trunk', count:2},{type:'distro', count:4},{type:'hardware_trunk', count:2},{type:'motor', count:4}],
     unloadSequence:['RIGGING','POWER','LIGHTING','GENERAL','COMMS','VIDEO','AUDIO'], availableStraps:13,
-    lesson:'Everything from the Expert levels: one odd row with two tipped cases, a hard-case pocket, seven departments in order, and every tier tied in.',
-    objectives:['Load all 47 cases', 'Seven departments in order', 'Tip only two cases, every hard case trapped'],
-    hint:'Speaker carts + amp racks. Video racks + switchers. Comms two high. The odd row with its pocket. Movers + fixtures close it. Feeder trunks + distros. Hardware trunks + motors.',
+    lesson:'Everything from the Expert levels: a pocket row, seven departments in order, and every tier tied in.',
+    objectives:['Load all 47 cases', 'Seven departments in order', 'Every hard case trapped, every tier tied in'],
+    hint:'Speaker carts + amp racks. Video racks + switchers. Comms two high. The pocket row. Movers + fixtures close it. Feeder trunks + distros. Hardware trunks + motors.',
     solution:[...NOSE(B2('speaker_cart'), [A4('audio_rack')]), ...TIER(5, A4('video_rack'), [A4('switcher')]), ...TIER(10, A4('comms'), [A4('comms')]),
-              ...TIER(15, [['big_trunk', 0], ['utility_trunk', 8, 2], ['hard_l', 13, 2]], [[['utility_trunk', 0], ['utility_trunk', 4], ['hard_l', 8], ['hard_l', 12]]]), ...TIER(20, B2('mover'), [A4('fixture')]), ...TIER(25, B2('feeder_trunk'), [A4('distro')]), ...TIER(30, B2('hardware_trunk'), [A4('motor')])]
+              ...TIER(15, [['big_trunk', 0], ['utility_trunk', 8], ['utility_trunk', 12]], [[['utility_trunk', 0], ['utility_trunk', 4], ['hard_l', 8], ['hard_l', 12]]]), ...TIER(20, B2('mover'), [A4('fixture')]), ...TIER(25, B2('feeder_trunk'), [A4('distro')]), ...TIER(30, B2('hardware_trunk'), [A4('motor')])]
   }),
   EX({
     title:'Last Practice', practice:true, boss:true, focus:'all', truck:STACK_TRUCK(240, 'Box truck · 20 ft · 96" tall inside'),
-    cases:[{type:'big_trunk', count:5},{type:'utility_trunk', count:11},{type:'hard_l', count:11},{type:'comms', count:8},{type:'distro', count:16}],
+    cases:[{type:'big_trunk', count:5},{type:'utility_trunk', count:12},{type:'hard_l', count:10},{type:'comms', count:8},{type:'distro', count:16}],
     availableStraps:11,
-    lesson:'Boss load: last practice before Offloading. An odd row with two tips, three pockets, and every tier tied in, seven tiers deep.',
-    objectives:['Load all 51 cases', 'Tip only two cases', 'Every hard case trapped, every tier tied in'],
-    hint:'Big trunks + utility trunks. The odd row with its pocket. Big trunks + utility trunks close it. Comms + hard cases, distros two high. Then comms + hard cases and distros two high again.',
-    solution:[...NOSE(B2('big_trunk'), [A4('utility_trunk')]), ...TIER(5, [['big_trunk', 0], ['utility_trunk', 8, 2], ['hard_l', 13, 2]], [[['utility_trunk', 0], ['utility_trunk', 4], ['hard_l', 8], ['hard_l', 12]]]), ...TIER(10, B2('big_trunk'), [A4('utility_trunk')]),
+    lesson:'Boss load: last practice before Offloading. Three pockets and every tier tied in, seven tiers deep.',
+    objectives:['Load all 51 cases', 'Every hard case trapped', 'Every tier tied in'],
+    hint:'Big trunks + utility trunks. The pocket row. Big trunks + utility trunks close it. Comms + hard cases, distros two high. Then comms + hard cases and distros two high again.',
+    solution:[...NOSE(B2('big_trunk'), [A4('utility_trunk')]), ...TIER(5, [['big_trunk', 0], ['utility_trunk', 8], ['utility_trunk', 12]], [[['utility_trunk', 0], ['utility_trunk', 4], ['hard_l', 8], ['hard_l', 12]]]), ...TIER(10, B2('big_trunk'), [A4('utility_trunk')]),
               ...TIER(15, A4('comms'), [A4('hard_l')], false), ...TIER(20, A4('distro'), [A4('distro')]),
               ...TIER(25, A4('comms'), [A4('hard_l')], false), ...TIER(30, A4('distro'), [A4('distro')])]
   }),
@@ -3083,9 +3082,9 @@ const OFFLOAD_LEVELS = [
     objectives:['Empty the truck', 'Lighting → Audio → Rigging', 'Lighting first whenever you can reach it'],
     hint:'Fixtures before amp racks, movers before speaker carts, wherever both are in reach.'}),
   OFF(EXPERT_LEVELS[28], {title:'Offload Final',
-    lesson:'The Expert Final, arriving at the venue: seven departments, an odd row with a pocket, and every tier strapped at two heights. Empty it in order.',
+    lesson:'The Expert Final, arriving at the venue: seven departments, a pocket row, and every tier strapped at two heights. Empty it in order.',
     objectives:['Empty the truck', 'Seven departments in order', 'Straps out as you reach them'],
-    hint:'Work from the doors: rigging, power, lighting, the hard cases and the odd row, comms, video, then audio at the nose.'}),
+    hint:'Work from the doors: rigging, power, lighting, the hard cases and the pocket row, comms, video, then audio at the nose.'}),
   OFF({truck:STACK_TRUCK(288, 'Box truck · 24 ft · 96" tall inside'), availableLoadBars:1, availableStraps:14,
        unloadSequence:['RIGGING','POWER','LED','VIDEO','GENERAL','COMMS','AUDIO'],
        cases:[{type:'speaker_cart', count:2},{type:'audio_rack', count:12},{type:'comms', count:4},{type:'hard_l', count:4},{type:'video_rack', count:4},{type:'switcher', count:4},
@@ -3126,8 +3125,8 @@ const EXAM = [
   ['What closes a hard-case pocket on the door side?', ['A strap', 'The rear doors', 'The next row of taller cases', 'Nothing is needed'], 2, 'The next row, taller than the pocket floor, closes it in.'],
   ['You forgot the hard cases and loaded the next row. Can they still go in their pocket?', ['Never', 'Yes, lifted over one row, but not over two', 'Only from the side door', 'Yes, over any number of rows'], 1, 'One row is as far as you can lift them in.'],
   ['Can hard cases ride on top in the last tier?', ['Yes, with a strap', 'No. Nothing closes them in, and they\'re too small to strap', 'Only small ones', 'Only on short trucks'], 1, 'They always ride in a pocket inside the load.'],
-  ['When should you tip a case on its side?', ['Always, it saves space', 'Rarely, only when it gains space and the case is built to ride on its side', 'Racks travel best on their side', 'Whenever the truck is full'], 1, 'Cases ride best the way they\'re built. Tipping is an option, not the default, and never for DO NOT TIP or STAY ON WHEELS cases.'],
-  ['A 24" × 30" trunk that is 30" tall is laid on its side. How big is it now?', ['24" wide, 30" tall', '30" wide, 24" tall', '30" wide, 30" tall', '48" wide, 30" tall'], 1, 'Width and height swap.'],
+  ['A row is a few inches short. Should you lay a case on its side to make it fit?', ['Yes, whenever it saves space', 'No. Cases ride the way they\'re built, on their wheels. Turn one on the floor or choose a different mix', 'Only racks', 'Only in the last row'], 1, 'Cases are built to travel upright: casters down, caster cups on the lids. Turning on the floor or a different mix fixes the row.'],
+  ['A 24" × 30" trunk is turned 90° on the floor of a 90" truck. How much of the width does it take now?', ['24"', '30"', '48"', '54"'], 1, 'Turning swaps width and depth: the 30" side runs across, and three of them fill 90" wall to wall.'],
   ['Unloading: what comes off first?', ['The nose tier', 'Top cases, working front to back from the doors', 'The heaviest cases', 'Whatever is closest to the cab'], 1, 'Top first, tier by tier from the doors.'],
   ['Unloading: when can a strap come out?', ['Any time', 'When you can reach it: the tier in front of it is gone', 'Only at the end', 'Before you open the doors'], 1, 'A strap holds the cases behind it until that tier is ready to come off.'],
   ['The venue changed its load-in order after the truck was packed. What do you do?', ['Unload in the order it was packed', 'Grab what the venue needs first as soon as you can reach it, and only move other gear when it\'s in the way', 'Repack the truck first', 'Unload everything onto the dock at random'], 1, 'Dig only as far as you have to.'],
@@ -4243,11 +4242,6 @@ function showBriefing(){
       <kbd>DOCK STACK</kbd><span>Build a stack on the dock (base case + what fits on its lid), then PICK UP STACK and roll it in as one piece.</span>
       <kbd>OPEN TIER</kbd><span>In the truck you can only stack on the tier facing the doors. You can't reach over a finished tier.</span>
     </div>`;
-  if (lv.tipHowTo) h += `<div class="section-label">TIPPING A CASE</div><div class="howto">
-      <kbd>T</kbd><span>Lay the case you're holding on its side: width and height swap. Press T again to stand it back up.</span>
-      <kbd>ON SIDE</kbd><span>Trunks and small hard cases can ride on their side. Racks, consoles and anything marked DO NOT TIP or STAY ON WHEELS can't.</span>
-      <kbd>R</kbd><span>Still turns it 90° on the floor, tipped or not.</span>
-    </div>`;
   if (lv.offHowTo) h += `<div class="section-label">UNLOADING</div><div class="howto">
       <kbd>CLICK A CASE</kbd><span>Takes it off the truck, if nothing is on top of it and nothing is between it and the doors.</span>
       <kbd>CLICK A STRAP</kbd><span>Takes out a bar or strap once you can reach it: the tier in front of it has to be gone.</span>
@@ -4281,7 +4275,6 @@ function phoneHowTo(h){
     [/<kbd>3 · PICK UP<\/kbd><span>.*?<\/span>/, '<kbd>3 · PICK UP</kbd><span>Tap <b>PICK UP STACK</b>. The whole stack appears at the doors, and <b>ROTATE</b> (or a two-finger twist) turns it.</span>'],
     [/<kbd>4 · ROLL IN<\/kbd><span>.*?<\/span>/, '<kbd>4 · ROLL IN</kbd><span>Drag it to its spot and let go. One move loads two or three cases.</span>'],
     [/<kbd>V<\/kbd><span>Flip to the DOOR VIEW/, '<kbd>VIEW</kbd><span>Tap VIEW to flip to the DOOR VIEW'],
-    [/<kbd>T<\/kbd><span>.*?<\/span>/, '<kbd>HOLD + FLICK</kbd><span>Hold the case still for 1 second, then flick up: it lays on its side and width and height swap. Do it again to stand it back up.</span>'],
     [/<kbd>R<\/kbd><span>Still turns it/, '<kbd>TWIST</kbd><span>A two-finger twist (or <b>ROTATE</b>) still turns it'],
     [/<kbd>V<\/kbd><span>The door view works here too\./, '<kbd>VIEW</kbd><span>The door view works here too.'],
     [/<kbd>(?:CLICK|TAP)<\/kbd><span>Pick a case from the manifest.*?<\/span>/, '<kbd>DRAG</kbd><span>Drag a case down from the strip into the truck and let go to set it down.</span>'],
@@ -5448,8 +5441,10 @@ function rotateHand(){
   refresh();
 }
 // T: lay the case in hand on its side (or stand it back up). One case at a time, not a dock stack.
+// Tipping removed (Omar 2026-10-09): crews don't lay cases on their side to make a row fit, so the game doesn't teach it. T and hold+flick do nothing.
+const TIPPING = false;
 function tipHand(){
-  const h = G.hand; if (!h || G.mode !== 'play') return;
+  const h = G.hand; if (!TIPPING || !h || G.mode !== 'play') return;
   if (h.stack){ flashCoach('bad', 'Tip cases one at a time. Clear the dock stack first if you want to tip its base.'); return; }
   const def = itemOf(h.uid).def, nr = h.rot ^ 2, rc = Engine.canRotateCase(def, nr);
   if (!rc.ok){ flashCoach('bad', rc.reason); return; }
@@ -5691,7 +5686,7 @@ window.addEventListener('keydown', e => {
     if (k === 'Escape'){ G.tool = null; refresh(); return; }
   }
   if (k === 'r' || k === 'R'){ rotateHand(); return; }
-  if (k === 't' || k === 'T'){ tipHand(); return; }
+
   if (k === ' '){ e.preventDefault(); if (G.hand) pushIn(); return; }
   if (k === 'Enter'){ e.preventDefault(); if (G.hand){ if (!G.ghost){ G.keyMode = true; spawnGhostAtDoor(); refresh(); } else placeHand(); } else if (!$('btnTransit').disabled) startTransit(); return; }
   // Esc / Delete: a case picked up out of the truck comes off the truck (back to the dock); anything else is put back.
@@ -6336,7 +6331,7 @@ function showCertificate(name, score, date, certNo){
    ===================================================================== */
 // One row's worth of cases per tile: [label, [[type, count], ...], weight]
 // One row's worth of cases per tile: [label, [[type, count], ...], weight, first truck it can appear on]
-// The ramp: simple trunks/racks first, fragile video and lighting from truck 4, pockets and LED from 7, the tipped odd row from 10.
+// The ramp: simple trunks/racks first, fragile video and lighting from truck 4, pockets and LED from 7, the pocket row from 10.
 const LOOP_TILES = [
   ['Utility trunks, two high', [['utility_trunk', 8]], 3, 1],
   ['Big trunks + utility trunks', [['big_trunk', 2], ['utility_trunk', 4]], 3, 1],
@@ -6352,7 +6347,7 @@ const LOOP_TILES = [
   ['Monitor cases', [['monitor', 4]], 1, 4],
   ['Comms + hard cases (pocket)', [['comms', 4], ['hard_l', 4]], 2, 7],
   ['LED wall: carts + processors', [['led_cart', 4], ['led_proc', 8]], 1, 7],
-  ['The odd row (tip two)', [['big_trunk', 1], ['utility_trunk', 3], ['hard_l', 3]], 1, 10]
+  ['Pocket row: big trunk, utility trunks, hard cases', [['big_trunk', 1], ['utility_trunk', 4], ['hard_l', 2]], 1, 10]
 ];
 // Production changes: the client adds cases mid-pack. Load them on this truck for the bonus.
 const LOOP_ADDONS = [
@@ -6637,7 +6632,6 @@ function keyInfo(code, plat){
     ArrowUp:['↑ Up', 'Move the case one 6" square toward the nose. In the door view: lift it to the next height you can reach (stack it).'],
     ArrowDown:['↓ Down', 'Move the case one 6" square toward the doors. In the door view: drop it to the next lower height.'],
     KeyR:['R', 'Rotate the case (or dock stack) you\'re holding 90°. Right-click does the same.'],
-    KeyT:['T', 'Tip the case you\'re holding onto its side (or stand it back up). Only cases built to ride on their side can tip.'],
     Space:['Space', 'Push In: slide the case toward the nose until it touches something, then set it down. On the title screen: start.'],
     Enter:[plat === 'mac' ? 'Return' : 'Enter', 'Set the case down where the ghost is. With empty hands: READY FOR TRANSIT. It also presses the orange button on any card: START on a briefing, GOT IT on a how-to, SEE RESULTS on an achievement, NEXT LEVEL on a report.'],
     Escape:[plat === 'mac' ? 'esc' : 'Esc', 'Cancel: a case you picked up out of the truck goes back to the dock, if it can get out through the doors. A case from the manifest is put back. Also closes this help and any how-to card.'],
@@ -7307,12 +7301,12 @@ enterHome();
 /* =====================================================================
    PHONE CONTROLS (body.phone: touch-only devices and narrow screens)
    drag from the strip + let go = place · drag a placed case = move · double-tap = remove (counts as a rehandle; no undo) ·
-   hold 1 s + flick up = flip on its side · two-finger twist or ROTATE button = rotate · drag empty floor = scroll the truck ·
+   two-finger twist or ROTATE button = rotate · drag empty floor = scroll the truck ·
    holding a case blocks every other gesture · button row: VIEW · LOAD BAR · STRAP · ROTATE ·
    drag the bar/strap button onto a tier · tap or drag the bottom bar = level goal / case info sheet
    ===================================================================== */
 const PH = {pointers:new Map(), g:null, lastTap:null};
-function phoneHoldArm(g){ g.armed = true; G.coachOverride = null; flashCoach('tip', 'Flick up to flip it on its side.', 1500); if (navigator.vibrate) navigator.vibrate(20); }
+function phoneHoldArm(g){ if (!TIPPING) return; g.armed = true; G.coachOverride = null; flashCoach('tip', 'Flick up to flip it on its side.', 1500); if (navigator.vibrate) navigator.vibrate(20); }
 function phoneFlip(uid){
   if (!G.hand){ if (!uid) return; pickFromTruck(uid); if (!G.hand) return; }
   tipHand();
